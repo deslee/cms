@@ -26,17 +26,24 @@ export class MessageBus {
 
     request<TRequest, TResponse>(subject: string, message: TRequest, timeoutMillis: number): Promise<TResponse> {
         return new Promise((resolve, reject) => {
-            this.nats.requestOne(subject, JSON.stringify(message), {}, timeoutMillis, function (response) {
-                if (response instanceof NATS.NatsError && response.code === NATS.REQ_TIMEOUT) {
-                    reject('Request for help timed out.');
-                    return;
-                }
-                var dataResponse = JSON.parse(response)
-                if (dataResponse && dataResponse.messageBusError) {
-                    reject(dataResponse.messageBusError)
-                }
-                resolve(dataResponse)
-            })
+            console.log('nats request')
+            try {
+                this.nats.requestOne(subject, JSON.stringify(message), {}, timeoutMillis, function (response) {
+                    console.log('nats response', response)
+                    if (response instanceof NATS.NatsError && response.code === NATS.REQ_TIMEOUT) {
+                        reject('Request timed out.');
+                        return;
+                    }
+                    var dataResponse = JSON.parse(response)
+                    if (dataResponse && dataResponse.messageBusError) {
+                        reject(dataResponse.messageBusError)
+                    }
+                    resolve(dataResponse)
+                })
+            } catch(error) {
+                console.log('error', error)
+                reject(error)
+            }
         })
     }
 

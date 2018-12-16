@@ -7,12 +7,6 @@ export const typeDef = `
         name: String
         posts: [Post]
     }
-
-    type CategoryResponse implements Response {
-        category: Category
-        success: Boolean!
-        message: String
-    }
     `
 export const resolvers = {
     Post: {

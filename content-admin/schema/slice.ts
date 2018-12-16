@@ -39,12 +39,6 @@ export const typeDef = `
         text: String
         assetIds: [String]
     }
-
-    type SliceResponse implements Response {
-        slice: Slice
-        success: Boolean!
-        message: String
-    }
     `
 export const resolvers = {
     Slice: {

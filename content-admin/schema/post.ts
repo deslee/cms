@@ -20,12 +20,6 @@ export const typeDef = `
         categories: [String]
         slices: [SliceInput]
     }
-
-    type PostResponse implements Response {
-        post: Post
-        success: Boolean!
-        message: String
-    }
     `
 export const resolvers = {
     Query: {
@@ -43,18 +37,11 @@ export const resolvers = {
     Mutation: {
         upsertPost: async (_, args, { dataSources: { main } }) => {
             const data = main as DefaultDataSource
-            const upsertedPost = await data.upsertPost(args.post);
-            return {
-                success: true,
-                post: upsertedPost
-            }
+            return await data.upsertPost(args.post);
         },
         deletePost: async (_, args, { dataSources: { main } }) => {
             const data = main as DefaultDataSource
-            await data.deletePost(args.postId);
-            return {
-                success: true
-            }
+            return await data.deletePost(args.postId);
         }
     },
     Site: {

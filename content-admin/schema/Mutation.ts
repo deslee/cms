@@ -1,8 +1,8 @@
 export const typeDef = `
 type Mutation {
-    upsertSite(site: SiteInput!): SiteResponse!
+    upsertSite(site: SiteInput!): UpsertResponse!
     deleteSite(siteId: String!): GenericResponse!
-    upsertPost(post: PostInput!): PostResponse!
+    upsertPost(post: PostInput!): UpsertResponse!
     deletePost(postId: String!): GenericResponse!
 }
 `

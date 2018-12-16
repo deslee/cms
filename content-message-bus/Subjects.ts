@@ -1,8 +1,4 @@
-type Subjects = {
-    [key: string]: Subjects | string
-};
-
-export const subjects: Subjects = {
+export const Subjects = {
     Commands: {
         Post: {
             Upsert: '',
@@ -29,4 +25,4 @@ function applyNamespaces(subjects, namespace) {
     })
 }
 
-applyNamespaces(subjects, 'Content')
+applyNamespaces(Subjects, 'Content')

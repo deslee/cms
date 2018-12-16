@@ -5,12 +5,14 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "ts-node dev.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/sequelize": "^4.27.33",
+    "content-message-bus": "file:../content-message-bus",
     "sequelize": "^4.42.0",
     "sqlite3": "^4.0.4"
   },

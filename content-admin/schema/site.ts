@@ -12,12 +12,6 @@ export const typeDef = `
         id: String
         name: String
     }
-
-    type SiteResponse implements Response {
-        site: Site
-        success: Boolean!
-        message: String
-    }
     `
 export const resolvers = {
     Query: {
@@ -35,18 +29,11 @@ export const resolvers = {
     Mutation: {
         upsertSite: async (_, args, { dataSources: { main } }) => {
             const data = main as DefaultDataSource
-            const upsertedSite = await data.upsertSite(args.site)
-            return {
-                success: true,
-                site: upsertedSite
-            }
+            return await data.upsertSite(args.site)
         },
         deleteSite: async (_, args, { dataSources: { main } }) => {
             const data = main as DefaultDataSource
-            await data.deleteSite(args.siteId);
-            return {
-                success: true
-            }
+            return await data.deleteSite(args.siteId);
         },
     },
     Post: {

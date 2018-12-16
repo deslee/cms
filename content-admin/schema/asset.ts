@@ -10,12 +10,6 @@ type Asset {
     description: String
     url: String
 }
-
-type AssetResponse implements Response {
-    asset: Asset
-    success: Boolean!
-    message: String
-}
 `
 
 export const resolvers = () => { }
