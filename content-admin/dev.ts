@@ -4,6 +4,7 @@ import { DefaultDataSource } from './dataSources/DefaultDataSource';
 import { ContentRepository } from 'content-data';
 import { MessageBus } from '../content-message-bus/dist';
 import * as winston from 'winston'
+import * as _ from 'lodash'
 import 'winston-mongodb'
 
 // context to log
@@ -29,7 +30,7 @@ const errorStackTracerFormat = winston.format(info => {
 const logger = winston.createLogger({
     format: winston.format.combine(
         winston.format(info => { 
-            return Object.assign(info, serverContext) 
+            return _.merge(info, {meta: serverContext}) 
         })({}),
         winston.format.timestamp(),
         errorStackTracerFormat()
@@ -41,7 +42,7 @@ const logger = winston.createLogger({
                 winston.format.padLevels(),
                 winston.format(info => {
                     const padding = info.padding && info.padding[info.level] || '';
-                    info.message = `[${info.serviceName}-${info.environment}]${padding} ${info.message}`
+                    info.message = `[${info.meta.serviceName}-${info.meta.environment}]${padding} ${info.message}`
                     return info;
                 })(),
                 winston.format.simple()
@@ -55,7 +56,7 @@ const logger = winston.createLogger({
                 winston.format.padLevels(),
                 winston.format(info => {
                     const padding = info.padding && info.padding[info.level] || '';
-                    info.message = `[${info.serviceName}-${info.environment}]${padding} ${info.message}`
+                    info.message = `[${info.meta.serviceName}-${info.meta.environment}]${padding} ${info.message}`
                     return info;
                 })(),
                 winston.format.simple()

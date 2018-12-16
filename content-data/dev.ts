@@ -7,6 +7,7 @@ import {
     DeleteSiteCommandHandler
 } from './handlers'
 import { ContentRepository } from './data';
+import * as _ from 'lodash'
 import 'winston-mongodb'
 
 // context to log
@@ -16,13 +17,13 @@ const serverContext = {
 }
 
 const errorStackTracerFormat = winston.format(info => {
-    if (info && info.error && info.error instanceof Error) {
+    if (info.meta && info.meta.error && info.meta.error instanceof Error) {
         const error = {};
-        info.message = `${info.message} ${info.error.stack}`;
-        Object.getOwnPropertyNames(info.error).forEach(function (key) {
-            error[key] = info.error[key];
+        info.message = `${info.message} ${info.meta.error.stack}`;
+        Object.getOwnPropertyNames(info.meta.error).forEach(function (key) {
+            error[key] = info.meta.error[key];
         });
-        info.error = error
+        info.meta.error = error
     }
 
     return info;
@@ -32,7 +33,7 @@ const errorStackTracerFormat = winston.format(info => {
 const logger = winston.createLogger({
     format: winston.format.combine(
         winston.format(info => {
-            return Object.assign(info, serverContext) 
+            return _.merge(info, {meta: serverContext}) 
         })({}),
         winston.format.timestamp(),
         errorStackTracerFormat(),
@@ -44,7 +45,7 @@ const logger = winston.createLogger({
                 winston.format.padLevels(),
                 winston.format(info => {
                     const padding = info.padding && info.padding[info.level] || '';
-                    info.message = `[${info.serviceName}-${info.environment}]${padding} ${info.message}`
+                    info.message = `[${info.meta.serviceName}-${info.meta.environment}]${padding} ${info.message}`
                     return info;
                 })(),
                 winston.format.simple()
@@ -58,7 +59,7 @@ const logger = winston.createLogger({
                 winston.format.padLevels(),
                 winston.format(info => {
                     const padding = info.padding && info.padding[info.level] || '';
-                    info.message = `[${info.serviceName}-${info.environment}]${padding} ${info.message}`
+                    info.message = `[${info.meta.serviceName}-${info.meta.environment}]${padding} ${info.message}`
                     return info;
                 })(),
                 winston.format.simple()

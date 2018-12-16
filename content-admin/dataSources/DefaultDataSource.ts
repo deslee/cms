@@ -25,8 +25,10 @@ export class DefaultDataSource extends DataSource {
             }, 1000)
         } catch (error) {
             this.logger.error(`DefaultDataSource.deleteSite(): Caught error ${error}`, {
-                correlationId: correlation,
-                error: error instanceof Error ? error : new Error(error)
+                meta: {
+                    correlationId: correlation,
+                    error: error instanceof Error ? error : new Error(error)
+                }
             })
             return {
                 error: JSON.stringify(error),
@@ -44,8 +46,10 @@ export class DefaultDataSource extends DataSource {
             }, 1000)
         } catch (error) {
             this.logger.error(`DefaultDataSource.deletePost(): Caught error ${error}`, {
-                correlationId: correlation,
-                error: error instanceof Error ? error : new Error(error)
+                meta: {
+                    correlationId: correlation,
+                    error: error instanceof Error ? error : new Error(error)
+                }
             })
             return {
                 error: JSON.stringify(error),
@@ -63,8 +67,10 @@ export class DefaultDataSource extends DataSource {
             }, 1000)
         } catch (error) {
             this.logger.error(`DefaultDataSource.upsertPost(): Caught error ${error}`, {
-                correlationId: correlation,
-                error: error instanceof Error ? error : new Error(error)
+                meta: {
+                    correlationId: correlation,
+                    error: error instanceof Error ? error : new Error(error)
+                }
             })
             return {
                 error: JSON.stringify(error),
@@ -82,8 +88,10 @@ export class DefaultDataSource extends DataSource {
             }, 1000)
         } catch (error) {
             this.logger.error(`DefaultDataSource.upsertSite(): Caught error ${error}`, {
-                correlationId: correlation,
-                error: error instanceof Error ? error : new Error(error)
+                meta: {
+                    correlationId: correlation,
+                    error: error instanceof Error ? error : new Error(error)
+                }
             })
             return {
                 error: JSON.stringify(error),
