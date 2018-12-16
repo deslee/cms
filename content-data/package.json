@@ -1,0 +1,23 @@
+{
+  "name": "content-data",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --require ts-node/register test/**/*.ts",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/sequelize": "^4.27.33",
+    "sequelize": "^4.42.0",
+    "sqlite3": "^4.0.4"
+  },
+  "devDependencies": {
+    "@types/mocha": "^5.2.5",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  }
+}
