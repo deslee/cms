@@ -14,19 +14,33 @@ const serverContext = {
     environment: 'dev' // TODO set environment
 }
 
+const errorStackTracerFormat = winston.format(info => {
+    if (info && info.error && info.error instanceof Error) {
+        info.message = `${info.message} ${info.error.stack}`;
+    }
+
+    return info;
+});
+
 // create a logger
 const logger = winston.createLogger({
     format: winston.format.combine(
-        winston.format(info => { 
+        winston.format(info => {
             return Object.assign(info, serverContext) 
         })({}),
         winston.format.timestamp(),
+        errorStackTracerFormat(),
     ),
     transports: [
         new winston.transports.Console({
             format: winston.format.combine(
                 winston.format.colorize(), 
                 winston.format.padLevels(),
+                winston.format(info => {
+                    const padding = info.padding && info.padding[info.level] || '';
+                    info.message = `[${info.serviceName}-${info.environment}]${padding} ${info.message}`
+                    return info;
+                })(),
                 winston.format.simple()
             ),
             handleExceptions: true
@@ -36,6 +50,11 @@ const logger = winston.createLogger({
             format: winston.format.combine(
                 winston.format.colorize(), 
                 winston.format.padLevels(),
+                winston.format(info => {
+                    const padding = info.padding && info.padding[info.level] || '';
+                    info.message = `[${info.serviceName}-${info.environment}]${padding} ${info.message}`
+                    return info;
+                })(),
                 winston.format.simple()
             ),
             handleExceptions: true

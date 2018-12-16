@@ -33,6 +33,11 @@ const logger = winston.createLogger({
             format: winston.format.combine(
                 winston.format.colorize(), 
                 winston.format.padLevels(),
+                winston.format(info => {
+                    const padding = info.padding && info.padding[info.level] || '';
+                    info.message = `[${info.serviceName}-${info.environment}]${padding} ${info.message}`
+                    return info;
+                })(),
                 winston.format.simple()
             ),
             handleExceptions: true
@@ -42,6 +47,11 @@ const logger = winston.createLogger({
             format: winston.format.combine(
                 winston.format.colorize(), 
                 winston.format.padLevels(),
+                winston.format(info => {
+                    const padding = info.padding && info.padding[info.level] || '';
+                    info.message = `[${info.serviceName}-${info.environment}]${padding} ${info.message}`
+                    return info;
+                })(),
                 winston.format.simple()
             ),
             handleExceptions: true
