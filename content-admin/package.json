@@ -1,0 +1,25 @@
+{
+  "name": "content-admin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node dev.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/lodash": "^4.14.119",
+    "apollo-datasource": "^0.2.1",
+    "apollo-server": "^2.3.1",
+    "content-data": "file:../content-data",
+    "graphql": "^14.0.2",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  }
+}
