@@ -8,12 +8,40 @@ import {
 } from './handlers'
 import { ContentRepository } from './data';
 
+// context to log
+const serverContext = {
+    serviceName: 'content-data',
+    environment: 'dev' // TODO set environment
+}
+
 // create a logger
 const logger = winston.createLogger({
+    format: winston.format.combine(
+        winston.format(info => { 
+            return Object.assign(info, serverContext) 
+        })({}),
+        winston.format.timestamp(),
+    ),
     transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({ filename: '../dev.log' })
-    ]
+        new winston.transports.Console({
+            format: winston.format.combine(
+                winston.format.colorize(), 
+                winston.format.padLevels(),
+                winston.format.simple()
+            ),
+            handleExceptions: true
+        }),
+        new winston.transports.File({ 
+            filename: '../dev.log',
+            format: winston.format.combine(
+                winston.format.colorize(), 
+                winston.format.padLevels(),
+                winston.format.simple()
+            ),
+            handleExceptions: true
+        })
+    ],
+    exitOnError: false
 })
 
 // create a data repository

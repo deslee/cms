@@ -26,7 +26,7 @@ export class DefaultDataSource extends DataSource {
         } catch (error) {
             this.logger.error(`DefaultDataSource.deleteSite(): Caught error ${error}`, {
                 correlationId: correlation,
-                error: error
+                error: error instanceof Error ? error : new Error(error)
             })
             return {
                 error: JSON.stringify(error),
@@ -45,7 +45,7 @@ export class DefaultDataSource extends DataSource {
         } catch (error) {
             this.logger.error(`DefaultDataSource.deletePost(): Caught error ${error}`, {
                 correlationId: correlation,
-                error: error
+                error: error instanceof Error ? error : new Error(error)
             })
             return {
                 error: JSON.stringify(error),
@@ -64,7 +64,7 @@ export class DefaultDataSource extends DataSource {
         } catch (error) {
             this.logger.error(`DefaultDataSource.upsertPost(): Caught error ${error}`, {
                 correlationId: correlation,
-                error: error
+                error: error instanceof Error ? error : new Error(error)
             })
             return {
                 error: JSON.stringify(error),
@@ -83,7 +83,7 @@ export class DefaultDataSource extends DataSource {
         } catch (error) {
             this.logger.error(`DefaultDataSource.upsertSite(): Caught error ${error}`, {
                 correlationId: correlation,
-                error: error
+                error: error instanceof Error ? error : new Error(error)
             })
             return {
                 error: JSON.stringify(error),

@@ -14,7 +14,7 @@ class DataCommandHandler {
 
 export class UpsertSiteCommandHandler extends DataCommandHandler {
     async handle(command: Command<SiteInput>): Promise<UpsertCommandResponse> {
-        this.logger.log('info', `called UpsertSiteCommandHandler.handle`, command)
+        this.logger.log('info', `called UpsertSiteCommandHandler.handle`, Object.assign({method: 'UpsertSiteCommandHandler.handle'}, command))
         const profiler = this.logger.startTimer();
         try {
             var id = await this.repository.upsertSite(command.payload);
@@ -23,20 +23,20 @@ export class UpsertSiteCommandHandler extends DataCommandHandler {
                 created: id
             }
         } catch (err) {
-            this.logger.error(`caught in UpsertSiteCommandHandler.handle`, { command, err })
+            this.logger.error(`caught in UpsertSiteCommandHandler.handle`, Object.assign({method: 'DeleteSiteCommandHandler.handle'}, command, {error: err}))
             return {
                 success: false,
                 error: err
             }
         } finally {
-            profiler.done({ message: 'Done calling UpsertSiteCommandHandler.handle', correlationId: command.correlationId })
+            profiler.done({ message: 'Done calling UpsertSiteCommandHandler.handle', correlationId: command.correlationId, method: 'DeleteSiteCommandHandler.handle' })
         }
     }
 }
 
 export class UpsertPostCommandHandler extends DataCommandHandler {
     async handle(command: Command<PostInput>): Promise<UpsertCommandResponse> {
-        this.logger.log('info', `called UpsertPostCommandHandler.handle`, command)
+        this.logger.log('info', `called UpsertPostCommandHandler.handle`, Object.assign({method: 'UpsertPostCommandHandler.handle'}, command))
         const profiler = this.logger.startTimer();
         try {
             var id = await this.repository.upsertPost(command.payload)
@@ -45,20 +45,20 @@ export class UpsertPostCommandHandler extends DataCommandHandler {
                 created: id
             }
         } catch (err) {
-            this.logger.error(`caught in UpsertPostCommandHandler.handle`, { command, err })
+            this.logger.error(`caught in UpsertPostCommandHandler.handle`, Object.assign({method: 'DeleteSiteCommandHandler.handle'}, command, {error: err}))
             return {
                 success: false,
                 error: err
             }
         } finally {
-            profiler.done({ message: 'Done calling UpsertPostCommandHandler.handle', correlationId: command.correlationId })
+            profiler.done({ message: 'Done calling UpsertPostCommandHandler.handle', correlationId: command.correlationId, method: 'DeleteSiteCommandHandler.handle' })
         }
     }
 }
 
 export class DeleteSiteCommandHandler extends DataCommandHandler {
     async handle(command: Command<string>): Promise<CommandResponse> {
-        this.logger.log('info', `called DeleteSiteCommandHandler.handle`, command)
+        this.logger.log('info', `called DeleteSiteCommandHandler.handle`, Object.assign({method: 'DeleteSiteCommandHandler.handle'}, command))
         const profiler = this.logger.startTimer();
         try {
             await this.repository.deleteSite(command.payload)
@@ -66,20 +66,20 @@ export class DeleteSiteCommandHandler extends DataCommandHandler {
                 success: true
             }
         } catch (err) {
-            this.logger.error(`caught in DeleteSiteCommandHandler.handle`, { command, err })
+            this.logger.error(`caught in DeleteSiteCommandHandler.handle`, Object.assign({method: 'DeleteSiteCommandHandler.handle'}, command, {error: err}))
             return {
                 success: false,
                 error: err
             }
         } finally {
-            profiler.done({ message: 'Done calling DeleteSiteCommandHandler.handle', correlationId: command.correlationId })
+            profiler.done({ message: 'Done calling DeleteSiteCommandHandler.handle', correlationId: command.correlationId, method: 'DeleteSiteCommandHandler.handle' })
         }
     }
 }
 
 export class DeletePostCommandHandler extends DataCommandHandler {
     async handle(command: Command<string>): Promise<CommandResponse> {
-        this.logger.log('info', `called DeletePostCommandHandler.handle`, command)
+        this.logger.log('info', `called DeletePostCommandHandler.handle`, Object.assign({method: 'DeletePostCommandHandler.handle'}, command))
         const profiler = this.logger.startTimer();
         try {
             await this.repository.deletePost(command.payload)
@@ -87,13 +87,13 @@ export class DeletePostCommandHandler extends DataCommandHandler {
                 success: true
             }
         } catch (err) {
-            this.logger.error(`caught in DeletePostCommandHandler.handle`, { command, err })
+            this.logger.error(`caught in DeletePostCommandHandler.handle`, Object.assign({method: 'DeleteSiteCommandHandler.handle'}, command, {error: err}))
             return {
                 success: false,
                 error: err
             }
         } finally {
-            profiler.done({ message: 'Done calling DeletePostCommandHandler.handle', correlationId: command.correlationId })
+            profiler.done({ message: 'Done calling DeletePostCommandHandler.handle', correlationId: command.correlationId, method: 'DeleteSiteCommandHandler.handle' })
         }
     }
 }
