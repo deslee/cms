@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
     "build": "tsc",
+    "watch": "tsc-watch",
     "dev": "ts-node dev.ts"
   },
   "author": "",
@@ -15,6 +16,7 @@
     "content-message-bus": "file:../content-message-bus",
     "sequelize": "^4.42.0",
     "sqlite3": "^4.0.4",
+    "tsc-watch": "^1.0.31",
     "winston": "^3.1.0"
   },
   "devDependencies": {
