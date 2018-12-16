@@ -14,7 +14,6 @@ to run:
 
 todo:
 * script dev environment
-* replace `console.log`s with logging library
 * add compile-on-save and livereload on services
 * make services more robust (auto restart if crash)
 * make logging better, write a shared library that merges levels of context. log service name, method names, exception trace, etc
