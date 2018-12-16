@@ -6,8 +6,8 @@ Components:
 
 to run:
 1. run `run.sh` in `content-message-bus`
-2. run `npm run build` in `content-message-bus`
-3. run `npm run build` in `content-data`
+2. run `npm run watch` in `content-message-bus`
+3. run `npm run watch` in `content-data`
 4. run `npm run dev` in `content-data`
 5. run `npm run dev` in `content-admin`
 
