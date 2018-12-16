@@ -13,7 +13,12 @@ const serverContext = {
 
 const errorStackTracerFormat = winston.format(info => {
     if (info && info.error && info.error instanceof Error) {
+        const error = {};
         info.message = `${info.message} ${info.error.stack}`;
+        Object.getOwnPropertyNames(info.error).forEach(function (key) {
+            error[key] = info.error[key];
+        });
+        info.error = error
     }
 
     return info;
