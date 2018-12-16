@@ -13,12 +13,15 @@
   "dependencies": {
     "@types/lodash": "^4.14.119",
     "@types/node": "^10.12.15",
+    "@types/uuid": "^3.4.4",
     "apollo-datasource": "^0.2.1",
     "apollo-server": "^2.3.1",
     "content-data": "file:../content-data",
     "content-message-bus": "file:../content-message-bus",
     "graphql": "^14.0.2",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "uuid": "^3.3.2",
+    "winston": "^3.1.0"
   },
   "devDependencies": {
     "ts-node": "^7.0.1",

@@ -1,5 +1,5 @@
 import 'mocha'
-import * as fs from 'fs';
+import * as winston from 'winston'
 import { ContentRepository, SiteInput, PostInput, Slice } from '../data'
 import { UpsertSiteCommandHandler, UpsertPostCommandHandler, DeleteSiteCommandHandler, DeletePostCommandHandler } from '../handlers/commandHandler';
 import assert = require('assert');
@@ -11,14 +11,19 @@ describe('Command Handler Tests', function () {
         storage: 'test.database.sqlite',
         logging: false
     })
+    const logger = winston.createLogger({
+        transports: [
+            new winston.transports.File({ filename: 'test.dev.log' })
+        ]
+    })
 
-    const upsertSiteHandler = new UpsertSiteCommandHandler(repository);
-    const upsertPostHandler = new UpsertPostCommandHandler(repository);
-    const deleteSiteHandler = new DeleteSiteCommandHandler(repository);
-    const deletePostHandler = new DeletePostCommandHandler(repository);
+    const upsertSiteHandler = new UpsertSiteCommandHandler(repository, logger);
+    const upsertPostHandler = new UpsertPostCommandHandler(repository, logger);
+    const deleteSiteHandler = new DeleteSiteCommandHandler(repository, logger);
+    const deletePostHandler = new DeletePostCommandHandler(repository, logger);
 
     let siteId;
-    let postId, otherPostId, visualCategoryId, animationCategoryId, blogCategoryId;
+    let postId: string, otherPostId: string, visualCategoryId: string, animationCategoryId: string, blogCategoryId: string;
     const visualCategoryName = 'Visual', animationCategoryName = 'Animation', blogCategoryName = 'Blog'
 
     this.beforeAll(async function () {
@@ -29,7 +34,10 @@ describe('Command Handler Tests', function () {
         const input: SiteInput = {
             name: "Desmond's test site"
         }
-        const response = await upsertSiteHandler.handle(input);
+        const response = await upsertSiteHandler.handle({
+            correlationId: '',
+            payload: input
+        });
         assert(response.success)
         assert(siteId = response.created)
 
@@ -43,7 +51,10 @@ describe('Command Handler Tests', function () {
             id: siteId,
             name: 'Updated name'
         }
-        const response = await upsertSiteHandler.handle(input);
+        const response = await upsertSiteHandler.handle({
+            correlationId: '',
+            payload: input
+        });
         assert(response.success)
         assert.strictEqual(response.created, undefined)
 
@@ -57,7 +68,10 @@ describe('Command Handler Tests', function () {
             siteId: siteId,
             title: 'Hello world! This is just a post'
         }
-        const response = await upsertPostHandler.handle(input);
+        const response = await upsertPostHandler.handle({
+            correlationId: '',
+            payload: input
+        });
         assert(response.success)
         assert(postId = response.created)
 
@@ -72,7 +86,10 @@ describe('Command Handler Tests', function () {
             siteId: siteId,
             title: 'This is a brand new title to a post'
         }
-        const response = await upsertPostHandler.handle(input);
+        const response = await upsertPostHandler.handle({
+            correlationId: '',
+            payload: input
+        });
         assert(response.success)
         assert.strictEqual(response.created, undefined)
 
@@ -88,7 +105,10 @@ describe('Command Handler Tests', function () {
             title: 'Hello world! This is an empty post that I just edited',
             categories: [visualCategoryName, animationCategoryName]
         }
-        const response = await upsertPostHandler.handle(input);
+        const response = await upsertPostHandler.handle({
+            correlationId: '',
+            payload: input
+        });
         assert(response.success)
 
         const categories = await repository.getCategoriesForPost(postId)
@@ -105,7 +125,10 @@ describe('Command Handler Tests', function () {
             title: 'Hello world! This is an empty post that I just edited',
             categories: [visualCategoryName]
         }
-        const response = await upsertPostHandler.handle(input);
+        const response = await upsertPostHandler.handle({
+            correlationId: '',
+            payload: input
+        });
         assert(response.success)
 
         const categories = await repository.getCategoriesForPost(postId)
@@ -119,7 +142,10 @@ describe('Command Handler Tests', function () {
             title: 'Hello world! This is my special new other post',
             categories: [visualCategoryName, blogCategoryName]
         }
-        const response = await upsertPostHandler.handle(input);
+        const response = await upsertPostHandler.handle({
+            correlationId: '',
+            payload: input
+        });
         assert(response.success)
         assert(otherPostId = response.created)
 
@@ -151,7 +177,10 @@ describe('Command Handler Tests', function () {
                 }
             ]
         }
-        const response = await upsertPostHandler.handle(input)
+        const response = await upsertPostHandler.handle({
+            correlationId: '',
+            payload: input
+        })
         assert(response.success)
 
         const post = await repository.getPost(postId);
@@ -165,7 +194,10 @@ describe('Command Handler Tests', function () {
     })
 
     it('should be able to delete a post', async function () {
-        const response = await deletePostHandler.handle(postId)
+        const response = await deletePostHandler.handle({
+            correlationId: '',
+            payload: postId
+        })
         assert(response.success)
 
         const post = await repository.getPost(postId);
@@ -176,8 +208,14 @@ describe('Command Handler Tests', function () {
     })
 
     it('Should let me delete a site', async function () {
-        const response = await deleteSiteHandler.handle(siteId)
+        const response = await deleteSiteHandler.handle({
+            correlationId: '',
+            payload: siteId
+        })
         assert(response.success)
+
+        let site = await repository.getSite(siteId)
+        assert.strictEqual(site, null);
 
         let posts = await repository.getPostsForSite(siteId);
         assert.strictEqual(posts.length, 0)

@@ -1,6 +1,7 @@
 import 'mocha'
 import { MessageBus } from '../MessageBus';
 import assert = require('assert');
+import * as winston from 'winston'
 
 type WaitEchoRequest = {
     waitMs: number,
@@ -25,11 +26,18 @@ class Echoer {
     }
 }
 
+const logger = winston.createLogger({
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({ filename: 'test.dev.log' })
+    ]
+})
+
 describe('Message Bus', function() {
     const subject = 'foo'
     const messageBus = new MessageBus({
         nats: {}
-    })
+    }, logger)
     const echoer = new Echoer()
     
     this.beforeAll(function() {

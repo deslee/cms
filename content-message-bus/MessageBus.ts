@@ -1,4 +1,5 @@
 import * as NATS from 'nats'
+import * as winston from 'winston'
 
 export interface MessageBusOptions {
     nats: NATS.ClientOpts
@@ -7,8 +8,10 @@ export interface MessageBusOptions {
 export class MessageBus {
     nats: NATS.Client;
     options: MessageBusOptions;
-    constructor(options: MessageBusOptions) {
+    logger: winston.Logger;
+    constructor(options: MessageBusOptions, logger: winston.Logger) {
         this.options = options;
+        this.logger = logger;
     }
 
     connect() {
@@ -26,10 +29,10 @@ export class MessageBus {
 
     request<TRequest, TResponse>(subject: string, message: TRequest, timeoutMillis: number): Promise<TResponse> {
         return new Promise((resolve, reject) => {
-            console.log('nats request')
+            this.logger.info('NATS request')
             try {
-                this.nats.requestOne(subject, JSON.stringify(message), {}, timeoutMillis, function (response) {
-                    console.log('nats response', response)
+                this.nats.requestOne(subject, JSON.stringify(message), {}, timeoutMillis, (response) => {
+                    this.logger.info('NATS response', response)
                     if (response instanceof NATS.NatsError && response.code === NATS.REQ_TIMEOUT) {
                         reject('Request timed out.');
                         return;
@@ -41,7 +44,7 @@ export class MessageBus {
                     resolve(dataResponse)
                 })
             } catch(error) {
-                console.log('error', error)
+                this.logger.error(`NATS error while calling requestOne: ${error}`, { error: error })
                 reject(error)
             }
         })

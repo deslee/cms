@@ -1,21 +1,33 @@
 import { Site, Slice, Post, Category, SiteInput, PostInput, ContentRepository, CommandResponse, UpsertCommandResponse } from 'content-data'
 import { MessageBus, Subjects } from 'content-message-bus'
 import { DataSource } from "apollo-datasource";
+import { Command } from 'content-data/dist/data/commands';
+import * as winston from 'winston'
+import * as uuid from 'uuid'
 
 export class DefaultDataSource extends DataSource {
     repository: ContentRepository;
     messageBus: MessageBus;
-    constructor(repository: ContentRepository, messageBus: MessageBus) {
+    logger: winston.Logger;
+    constructor(repository: ContentRepository, messageBus: MessageBus, logger: winston.Logger) {
         super()
         this.repository = repository;
         this.messageBus = messageBus;
+        this.logger = logger;
     }
 
     async deleteSite(siteId: string): Promise<CommandResponse> {
+        const correlation = uuid.v1()
         try {
-            return await this.messageBus.request<string, CommandResponse>(Subjects.Commands.Site.Delete, siteId, 1000)
+            return await this.messageBus.request<Command<string>, CommandResponse>(Subjects.Commands.Site.Delete, {
+                correlationId: correlation,
+                payload: siteId
+            }, 1000)
         } catch (error) {
-            console.log("data source error", error)
+            this.logger.error(`DefaultDataSource.deleteSite(): Caught error ${error}`, {
+                correlationId: correlation,
+                error: error
+            })
             return {
                 error: JSON.stringify(error),
                 success: false
@@ -24,10 +36,17 @@ export class DefaultDataSource extends DataSource {
     }
 
     async deletePost(postId: string): Promise<CommandResponse> {
+        const correlation = uuid.v1()
         try {
-            return await this.messageBus.request<string, CommandResponse>(Subjects.Commands.Post.Delete, postId, 1000)
+            return await this.messageBus.request<Command<string>, CommandResponse>(Subjects.Commands.Post.Delete, {
+                correlationId: correlation,
+                payload: postId
+            }, 1000)
         } catch (error) {
-            console.log("data source error", error)
+            this.logger.error(`DefaultDataSource.deletePost(): Caught error ${error}`, {
+                correlationId: correlation,
+                error: error
+            })
             return {
                 error: JSON.stringify(error),
                 success: false
@@ -36,10 +55,17 @@ export class DefaultDataSource extends DataSource {
     }
 
     async upsertPost(post: PostInput): Promise<UpsertCommandResponse> {
+        const correlation = uuid.v1()
         try {
-            return await this.messageBus.request<PostInput, UpsertCommandResponse>(Subjects.Commands.Post.Upsert, post, 1000)
+            return await this.messageBus.request<Command<PostInput>, UpsertCommandResponse>(Subjects.Commands.Post.Upsert, {
+                correlationId: correlation,
+                payload: post
+            }, 1000)
         } catch (error) {
-            console.log("data source error", error)
+            this.logger.error(`DefaultDataSource.upsertPost(): Caught error ${error}`, {
+                correlationId: correlation,
+                error: error
+            })
             return {
                 error: JSON.stringify(error),
                 success: false
@@ -48,10 +74,17 @@ export class DefaultDataSource extends DataSource {
     }
 
     async upsertSite(site: SiteInput): Promise<UpsertCommandResponse> {
+        const correlation = uuid.v1()
         try {
-            return await this.messageBus.request<SiteInput, UpsertCommandResponse>(Subjects.Commands.Site.Upsert, site, 1000)
+            return await this.messageBus.request<Command<SiteInput>, UpsertCommandResponse>(Subjects.Commands.Site.Upsert, {
+                correlationId: correlation,
+                payload: site
+            }, 1000)
         } catch (error) {
-            console.log("data source error", error)
+            this.logger.error(`DefaultDataSource.upsertSite(): Caught error ${error}`, {
+                correlationId: correlation,
+                error: error
+            })
             return {
                 error: JSON.stringify(error),
                 success: false
