@@ -4,6 +4,7 @@ import { DefaultDataSource } from './dataSources/DefaultDataSource';
 import { ContentRepository } from 'content-data';
 import { MessageBus } from '../content-message-bus/dist';
 import * as winston from 'winston'
+import 'winston-mongodb'
 
 // context to log
 const serverContext = {
@@ -60,6 +61,12 @@ const logger = winston.createLogger({
                 winston.format.simple()
             ),
             handleExceptions: true
+        }),
+        new winston.transports['MongoDB']({
+            db: 'mongodb://localhost:27017/winston', // TODO: make configurable,
+            format: winston.format.combine(
+                winston.format.simple()
+            )
         })
     ],
     exitOnError: false

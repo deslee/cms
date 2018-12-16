@@ -7,6 +7,7 @@ import {
     DeleteSiteCommandHandler
 } from './handlers'
 import { ContentRepository } from './data';
+import 'winston-mongodb'
 
 // context to log
 const serverContext = {
@@ -63,6 +64,12 @@ const logger = winston.createLogger({
                 winston.format.simple()
             ),
             handleExceptions: true
+        }),
+        new winston.transports['MongoDB']({
+            db: 'mongodb://localhost:27017/winston', // TODO: make configurable,
+            format: winston.format.combine(
+                winston.format.simple()
+            )
         })
     ],
     exitOnError: false
