@@ -1,5 +1,5 @@
 import * as NATS from 'nats'
-import * as winston from 'winston'
+import { ApplicationLogger } from 'content-logs'
 
 export interface MessageBusOptions {
     nats: NATS.ClientOpts
@@ -8,8 +8,8 @@ export interface MessageBusOptions {
 export class MessageBus {
     nats: NATS.Client;
     options: MessageBusOptions;
-    logger: winston.Logger;
-    constructor(options: MessageBusOptions, logger: winston.Logger) {
+    logger: ApplicationLogger;
+    constructor(options: MessageBusOptions, logger: ApplicationLogger) {
         this.options = options;
         this.logger = logger;
     }
@@ -29,10 +29,10 @@ export class MessageBus {
 
     request<TRequest, TResponse>(subject: string, message: TRequest, timeoutMillis: number): Promise<TResponse> {
         return new Promise((resolve, reject) => {
-            this.logger.info('NATS request')
+            this.logger.info('NATS request', { methodName: 'Messagebus.request' })
             try {
                 this.nats.requestOne(subject, JSON.stringify(message), {}, timeoutMillis, (response) => {
-                    this.logger.info('NATS response', response)
+                    this.logger.info('NATS response', { methodName: 'Messagebus.request' })
                     if (response instanceof NATS.NatsError && response.code === NATS.REQ_TIMEOUT) {
                         reject('Request timed out.');
                         return;
@@ -43,8 +43,8 @@ export class MessageBus {
                     }
                     resolve(dataResponse)
                 })
-            } catch(error) {
-                this.logger.error(`NATS error while calling requestOne: ${error}`, { error: error })
+            } catch (error) {
+                this.logger.error(`NATS error while calling requestOne: ${error}`, { methodName: 'Messagebus.request', error: error })
                 reject(error)
             }
         })
@@ -74,7 +74,7 @@ export class MessageBus {
                         }
                     }
                 }
-            } catch(error) {
+            } catch (error) {
                 if (replyTo) {
                     this.nats.publish(replyTo, JSON.stringify({
                         messageBusError: error

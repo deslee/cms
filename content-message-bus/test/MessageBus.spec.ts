@@ -2,6 +2,7 @@ import 'mocha'
 import { MessageBus } from '../MessageBus';
 import assert = require('assert');
 import * as winston from 'winston'
+import { createLogger, ApplicationLogger } from 'content-logs';
 
 type WaitEchoRequest = {
     waitMs: number,
@@ -26,12 +27,14 @@ class Echoer {
     }
 }
 
-const logger = winston.createLogger({
-    transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({ filename: 'test.dev.log' })
-    ]
-})
+const logger = createLogger({
+    logFile: 'test.dev.log',
+    mongoUrl: null,
+    context: {
+        serviceName: 'MessageBusTests',
+        environment: 'unittest'
+    }
+});
 
 describe('Message Bus', function() {
     const subject = 'foo'

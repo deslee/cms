@@ -1,9 +1,10 @@
 {
-  "name": "content-admin",
+  "name": "content-logs",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "dist/index.js",
   "scripts": {
+    "watch": "tsc-watch",
     "build": "tsc",
     "dev": "ts-node dev.ts"
   },
@@ -13,18 +14,13 @@
   "dependencies": {
     "@types/lodash": "^4.14.119",
     "@types/node": "^10.12.15",
-    "@types/uuid": "^3.4.4",
-    "apollo-datasource": "^0.2.1",
-    "apollo-server": "^2.3.1",
-    "content-data": "file:../content-data",
-    "content-message-bus": "file:../content-message-bus",
-    "graphql": "^14.0.2",
     "lodash": "^4.17.11",
-    "uuid": "^3.3.2",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "winston-mongodb": "^4.0.3"
   },
   "devDependencies": {
     "ts-node": "^7.0.1",
+    "tsc-watch": "^1.0.31",
     "typescript": "^3.2.2"
   }
 }

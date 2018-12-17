@@ -2,14 +2,14 @@ import { Site, Slice, Post, Category, SiteInput, PostInput, ContentRepository, C
 import { MessageBus, Subjects } from 'content-message-bus'
 import { DataSource } from "apollo-datasource";
 import { Command } from 'content-data/dist/data/commands';
-import * as winston from 'winston'
 import * as uuid from 'uuid'
+import { ApplicationLogger } from 'content-message-bus/node_modules/content-logs';
 
 export class DefaultDataSource extends DataSource {
     repository: ContentRepository;
     messageBus: MessageBus;
-    logger: winston.Logger;
-    constructor(repository: ContentRepository, messageBus: MessageBus, logger: winston.Logger) {
+    logger: ApplicationLogger;
+    constructor(repository: ContentRepository, messageBus: MessageBus, logger: ApplicationLogger) {
         super()
         this.repository = repository;
         this.messageBus = messageBus;
@@ -25,10 +25,8 @@ export class DefaultDataSource extends DataSource {
             }, 1000)
         } catch (error) {
             this.logger.error(`DefaultDataSource.deleteSite(): Caught error ${error}`, {
-                meta: {
-                    correlationId: correlation,
-                    error: error instanceof Error ? error : new Error(error)
-                }
+                correlationId: correlation,
+                error: error instanceof Error ? error : new Error(error)
             })
             return {
                 error: JSON.stringify(error),
@@ -46,10 +44,8 @@ export class DefaultDataSource extends DataSource {
             }, 1000)
         } catch (error) {
             this.logger.error(`DefaultDataSource.deletePost(): Caught error ${error}`, {
-                meta: {
-                    correlationId: correlation,
-                    error: error instanceof Error ? error : new Error(error)
-                }
+                correlationId: correlation,
+                error: error instanceof Error ? error : new Error(error)
             })
             return {
                 error: JSON.stringify(error),
@@ -67,10 +63,8 @@ export class DefaultDataSource extends DataSource {
             }, 1000)
         } catch (error) {
             this.logger.error(`DefaultDataSource.upsertPost(): Caught error ${error}`, {
-                meta: {
-                    correlationId: correlation,
-                    error: error instanceof Error ? error : new Error(error)
-                }
+                correlationId: correlation,
+                error: error instanceof Error ? error : new Error(error)
             })
             return {
                 error: JSON.stringify(error),
@@ -88,10 +82,8 @@ export class DefaultDataSource extends DataSource {
             }, 1000)
         } catch (error) {
             this.logger.error(`DefaultDataSource.upsertSite(): Caught error ${error}`, {
-                meta: {
-                    correlationId: correlation,
-                    error: error instanceof Error ? error : new Error(error)
-                }
+                correlationId: correlation,
+                error: error instanceof Error ? error : new Error(error)
             })
             return {
                 error: JSON.stringify(error),

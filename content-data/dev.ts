@@ -8,79 +8,22 @@ import {
 } from './handlers'
 import { ContentRepository } from './data';
 import * as _ from 'lodash'
-import 'winston-mongodb'
+import { createLogger } from 'content-logs'
 
-// context to log
-const serverContext = {
-    serviceName: 'content-data',
-    environment: 'dev' // TODO set environment
-}
-
-const errorStackTracerFormat = winston.format(info => {
-    if (info.meta && info.meta.error && info.meta.error instanceof Error) {
-        const error = {};
-        info.message = `${info.message} ${info.meta.error.stack}`;
-        Object.getOwnPropertyNames(info.meta.error).forEach(function (key) {
-            error[key] = info.meta.error[key];
-        });
-        info.meta.error = error
+const logger = createLogger({
+    mongoUrl:  'mongodb://localhost:27017/winston', // TODO: configure
+    logFile: '../dev.log', // TODO: configure
+    context: {
+        serviceName: 'content-data',
+        environment: 'dev' // TODO set environment
     }
-
-    return info;
-});
-
-// create a logger
-const logger = winston.createLogger({
-    format: winston.format.combine(
-        winston.format(info => {
-            return _.merge(info, {meta: serverContext}) 
-        })({}),
-        winston.format.timestamp(),
-        errorStackTracerFormat(),
-    ),
-    transports: [
-        new winston.transports.Console({
-            format: winston.format.combine(
-                winston.format.colorize(), 
-                winston.format.padLevels(),
-                winston.format(info => {
-                    const padding = info.padding && info.padding[info.level] || '';
-                    info.message = `[${info.meta.serviceName}-${info.meta.environment}]${padding} ${info.message}`
-                    return info;
-                })(),
-                winston.format.simple()
-            ),
-            handleExceptions: true
-        }),
-        new winston.transports.File({ 
-            filename: '../dev.log',
-            format: winston.format.combine(
-                winston.format.colorize(), 
-                winston.format.padLevels(),
-                winston.format(info => {
-                    const padding = info.padding && info.padding[info.level] || '';
-                    info.message = `[${info.meta.serviceName}-${info.meta.environment}]${padding} ${info.message}`
-                    return info;
-                })(),
-                winston.format.simple()
-            ),
-            handleExceptions: true
-        }),
-        new winston.transports['MongoDB']({
-            db: 'mongodb://localhost:27017/winston', // TODO: make configurable,
-            format: winston.format.combine(
-                winston.format.simple()
-            )
-        })
-    ],
-    exitOnError: false
 })
 
 // create a data repository
 var repository = new ContentRepository({
     dialect: 'sqlite',
     storage: '../dev.database.sqlite',
-    logging: (str) => { logger.info(str) }
+    logging: (str) => { logger.info(str, { methodName: 'SQL repossitory' }) }
 })
 
 // create a message bus service
@@ -102,7 +45,7 @@ export function startService() {
     const deleteSiteCommandHandler = new DeleteSiteCommandHandler(repository, logger);
     messageBus.subscribe(Subjects.Commands.Site.Delete, deleteSiteCommandHandler.handle.bind(deleteSiteCommandHandler))
 
-    logger.info('content-data connected to message bus')
+    logger.info('content-data connected to message bus', {})
 }
 
 export function stopService() {

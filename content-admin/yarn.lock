@@ -892,7 +892,8 @@ console-control-strings@^1.0.0, console-control-strings@^1.1.0, console-control-
   version "1.0.0"
   dependencies:
     "@types/sequelize" "^4.27.33"
-    content-message-bus "file:../../../AppData/Local/Yarn/Cache/v4/npm-content-data-1.0.0-0ef5fbb4-ef8f-4fea-ba2e-96752ff254d1-1544986971464/node_modules/content-message-bus"
+    content-logs "../content-logs/"
+    content-message-bus "file:../../../AppData/Local/Yarn/Cache/v4/npm-content-data-1.0.0-7a0b4dda-c229-47b4-a372-ecaf37c27ef2-1545007221008/node_modules/content-message-bus"
     sequelize "^4.42.0"
     sqlite3 "^4.0.4"
     tsc-watch "^1.0.31"
@@ -903,11 +904,21 @@ content-disposition@0.5.2:
   resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.2.tgz#0cf68bb9ddf5f2be7961c3a85178cb85dba78cb4"
   integrity sha1-DPaLud318r55YcOoUXjLhdunjLQ=
 
+content-logs@../content-logs/, "content-logs@file:../content-logs":
+  version "1.0.0"
+  dependencies:
+    "@types/lodash" "^4.14.119"
+    "@types/node" "^10.12.15"
+    lodash "^4.17.11"
+    winston "^3.1.0"
+    winston-mongodb "^4.0.3"
+
 "content-message-bus@file:../content-message-bus":
   version "1.0.0"
   dependencies:
     "@types/node" "^10.12.15"
     "@types/winston" "^2.4.4"
+    content-logs "file:../../../AppData/Local/Yarn/Cache/v4/npm-content-message-bus-1.0.0-893d632d-4ef5-4f66-a6f8-067ee92decd6-1545007221065/node_modules/content-logs"
     nats "^1.2.2"
     winston "^3.1.0"
 

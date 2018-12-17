@@ -1,8 +1,8 @@
 import 'mocha'
-import * as winston from 'winston'
 import { ContentRepository, SiteInput, PostInput, Slice } from '../data'
 import { UpsertSiteCommandHandler, UpsertPostCommandHandler, DeleteSiteCommandHandler, DeletePostCommandHandler } from '../handlers/commandHandler';
 import assert = require('assert');
+import { createLogger } from 'content-logs'
 
 describe('Command Handler Tests', function () {
 
@@ -11,10 +11,11 @@ describe('Command Handler Tests', function () {
         storage: 'test.database.sqlite',
         logging: false
     })
-    const logger = winston.createLogger({
-        transports: [
-            new winston.transports.File({ filename: 'test.dev.log' })
-        ]
+    const logger = createLogger({
+        logFile: 'test.dev.log',
+        context: {
+            serviceName: 'Command Handlers Unit Test',
+        }
     })
 
     const upsertSiteHandler = new UpsertSiteCommandHandler(repository, logger);
