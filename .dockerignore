@@ -1,6 +1,5 @@
-.next/
-node_modules/
-out/
-compiled-server
-npm-debug.log
-deploy/
+**/node_modules
+node_modules
+**/dist
+dist
+.git*

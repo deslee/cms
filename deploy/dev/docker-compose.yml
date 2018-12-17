@@ -1,0 +1,10 @@
+version: '3'
+services:
+  nats:
+    image: "nats:1.3.0"
+  mongo:
+    image: "mongo:4"
+  content-admin:
+    build: 
+      context: ../../
+      dockerfile: content-admin/Dockerfile
