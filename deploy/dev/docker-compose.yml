@@ -4,6 +4,10 @@ services:
     image: "nats:1.3.0"
   mongo:
     image: "mongo:4"
+  content-data:
+    build:
+      context: ../../
+      dockerfile: content-data/Dockerfile
   content-admin:
     build: 
       context: ../../

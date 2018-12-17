@@ -2,7 +2,7 @@ const { ApolloServer } = require('apollo-server')
 import { typeDefs, resolvers } from './schema'
 import { DefaultDataSource } from './dataSources/DefaultDataSource';
 import { ContentRepository } from 'content-data';
-import { MessageBus } from '../content-message-bus/dist';
+import { MessageBus } from 'content-message-bus';
 import * as _ from 'lodash'
 import { createLogger } from 'content-logs';
 

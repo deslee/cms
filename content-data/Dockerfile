@@ -20,11 +20,4 @@ COPY ./content-data/package*.json ./
 RUN yarn
 COPY ./content-data/ ./
 RUN yarn run build
-
-# copy content-admin
-WORKDIR /usr/src/content-admin
-COPY ./content-admin/package*.json ./
-RUN yarn
-COPY ./content-admin/ ./
-RUN yarn run build
 CMD ["node", "dist/dev.js"]
