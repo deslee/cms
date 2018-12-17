@@ -4,7 +4,7 @@ import { DefaultDataSource } from './dataSources/DefaultDataSource';
 import { ContentRepository } from 'content-data';
 import { MessageBus } from '../content-message-bus/dist';
 import * as _ from 'lodash'
-import { createLogger } from '../content-logs';
+import { createLogger } from 'content-logs';
 
 // context to log
 const logger = createLogger({

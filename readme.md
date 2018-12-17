@@ -5,13 +5,17 @@ Components:
 3. content-admin - graphql frontend
 
 to run:
-2. run `npm run watch` in `content-message-bus` 
+1. run `npm install` in `content-message-bus` 
+1. run `npm run build` in `content-message-bus` 
 1. run `run.sh` in `content-message-bus` to run the NATS server
-2. run `npm run watch` in `content-logs` 
-2. run `run.sh` in `content-logs` 
-3. run `npm run watch` in `content-data`
-4. run `npm run dev` in `content-data` to run the command handlers
-5. run `npm run dev` in `content-admin` to run the graphql server
+1. run `npm install` in `content-logs` 
+1. run `npm run build` in `content-logs` 
+1. run `run.sh` in `content-logs` 
+1. run `npm install` in `content-data` 
+1. run `npm run build` in `content-data`
+1. run `npm run dev` in `content-data` to run the command handlers
+1. run `npm install` in `content-admin` 
+1. run `npm run dev` in `content-admin` to run the graphql server
 
 
 todo:

@@ -1,0 +1,6 @@
+.next/
+node_modules/
+out/
+compiled-server
+npm-debug.log
+deploy/
