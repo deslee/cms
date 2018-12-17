@@ -9,26 +9,35 @@ import {
 import { ContentRepository } from './data';
 import * as _ from 'lodash'
 import { createLogger } from 'content-logs'
+import { config } from './config';
 
 const logger = createLogger({
-    mongoUrl:  'mongodb://localhost:27017/winston', // TODO: configure
-    logFile: '../dev.log', // TODO: configure
+    mongoUrl:  config.get('logHost'), 
+    logFile: config.get('logFile'), 
     context: {
         serviceName: 'content-data',
-        environment: 'dev' // TODO set environment
+        environment: config.get('env')
     }
 })
 
+logger.info("Configuration loaded", { config: config.getProperties() })
+
 // create a data repository
 var repository = new ContentRepository({
-    dialect: 'sqlite',
-    storage: '../dev.database.sqlite',
+    dialect: 'postgres',
+    database: 'content-data',
+    username: config.get('postgresUsername'),
+    password: config.get('postgresPassword'),
+    host: config.get('postgresHost'),
+    port: config.get('postgresPort'),
     logging: (str) => { logger.info(str, { methodName: 'SQL repossitory' }) }
 })
 
 // create a message bus service
 var messageBus = new MessageBus({
-    nats: {}
+    nats: {
+        url: config.get('natsUrl')
+    }
 }, logger)
 
 export function startService() {

@@ -5,31 +5,40 @@ import { ContentRepository } from 'content-data';
 import { MessageBus } from 'content-message-bus';
 import * as _ from 'lodash'
 import { createLogger } from 'content-logs';
+import { config } from './config';
 
 // context to log
 const logger = createLogger({
-    mongoUrl:  'mongodb://localhost:27017/winston', // TODO: configure
-    logFile: '../dev.log', // TODO: configure
+    mongoUrl: config.get('logHost'),
+    logFile: config.get('logFile'),
     context: {
         serviceName: 'content-admin',
-        environment: 'dev' // TODO set environment
+        environment: config.get('env')
     }
 })
 
+logger.info("Configuration loaded", { config: config.getProperties() })
+
 const contentRepository = new ContentRepository({
-    dialect: 'sqlite',
-    storage: '../dev.database.sqlite',
+    dialect: 'postgres',
+    database: 'content-data',
+    username: config.get('postgresUsername'),
+    password: config.get('postgresPassword'),
+    host: config.get('postgresHost'),
+    port: config.get('postgresPort'),
     logging: (str) => { logger.info(str, { methodName: 'SQL repossitory' }) }
 })
 const messageBus = new MessageBus({
-    nats: {}
+    nats: {
+        url: config.get('natsUrl')
+    }
 }, logger)
 
 messageBus.connect();
 
-const config = { 
-    typeDefs, 
-    resolvers, 
+const apolloConfig = {
+    typeDefs,
+    resolvers,
     dataSources: () => {
         return {
             main: new DefaultDataSource(
@@ -39,7 +48,7 @@ const config = {
     }
 };
 
-const server = new ApolloServer(config);
+const server = new ApolloServer(apolloConfig);
 
 server.listen().then(({ url }) => {
     logger.info(`🚀  Server ready at ${url}`, {});

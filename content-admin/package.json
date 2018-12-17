@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/convict": "^4.2.1",
     "@types/lodash": "^4.14.119",
     "@types/node": "^10.12.15",
     "@types/uuid": "^3.4.4",
@@ -20,6 +21,7 @@
     "content-data": "file:../content-data",
     "content-logs": "file:../content-logs",
     "content-message-bus": "file:../content-message-bus",
+    "convict": "^4.4.0",
     "graphql": "^14.0.2",
     "lodash": "^4.17.11",
     "uuid": "^3.3.2",
