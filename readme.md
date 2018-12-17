@@ -23,6 +23,12 @@ todo:
 * add compile-on-save and livereload on services
 * make services more robust (auto restart if crash)
 * make logging better, write a shared library that merges levels of context. log service name, method names, exception trace, etc
+* implement some retry logic for database connections
+* service health / auto restarting
+
+to deploy:
+1. `docker-compose -f deploy/dev/docker-compose.yml build`
+1. `docker-compose -f deploy/dev/docker-compose.yml up -d`
 
 bugs:
 * merge logic in logging utility class is causing weird issues
