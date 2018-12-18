@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
 using GraphQL;
 using GraphQL.Server;
-using GraphQL.Server.Ui.GraphiQL;
+using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,7 +22,6 @@ namespace Content.GraphQL
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<DbContextOptions<DataContext>>(new DbContextOptionsBuilder<DataContext>().UseSqlite("Data Source=content.db").Options);
             services.AddSingleton<ContentSchema>(s => new ContentSchema(new FuncDependencyResolver(s.GetRequiredService)));
 
             services.AddSingleton<ContentQuery>();
@@ -46,7 +44,7 @@ namespace Content.GraphQL
             {
                 app.UseDeveloperExceptionPage();
                 app.UseGraphQL<ContentSchema>("/graphql");
-                app.UseGraphiQLServer(new GraphiQLOptions());
+                app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
             }
 
             app.Run(async (context) =>

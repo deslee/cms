@@ -1,7 +1,7 @@
 using System;
-using Content.Data;
+using System.Threading.Tasks;
 using Content.GraphQL.Definitions.Types;
-using Content.Model;
+using Content.Core.Models;
 using GraphQL;
 using GraphQL.Types;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +10,8 @@ namespace Content.GraphQL.Definitions
 {
     public class ContentMutation : ObjectGraphType
     {
-        private readonly DbContextOptions<DataContext> _dbContextOptions;
-
-        public ContentMutation(DbContextOptions<DataContext> dbContextOptions)
+        public ContentMutation()
         {
-            _dbContextOptions = dbContextOptions;
             Name = "Mutation";
             Field<SiteType>(
                 "upsertSite",
@@ -29,23 +26,8 @@ namespace Content.GraphQL.Definitions
             );
         }
 
-        private Site UpsertSite(Site site)
+        private async Task<Site> UpsertSite(Site site)
         {
-            using (var db = new DataContext(_dbContextOptions))
-            {
-                var dbSite = new Content.Data.Models.Site
-                {
-                    Id = site.Id,
-                    Name = site.Name
-                };
-                db.Sites.Add(dbSite);
-                db.SaveChanges();
-                return new Site
-                {
-                    Id = dbSite.Id,
-                    Name = dbSite.Name
-                };
-            }
         }
     }
 }

@@ -2,17 +2,11 @@ using System;
 using Content.Data.Models;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 
 namespace Content.Data
 {
     public class DataContext : DbContext
     {
-        public static readonly LoggerFactory MyLoggerFactory
-            = new LoggerFactory(new[] { new ConsoleLoggerProvider((_, __) => true, true) });
-        private readonly string _connectionString;
-
         public DataContext(DbContextOptions options) : base(options)
         {
         }

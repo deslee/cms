@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Content.Data
+namespace Content.Data.Console
 {
     public class DataContextFactory : IDesignTimeDbContextFactory<DataContext>
     {

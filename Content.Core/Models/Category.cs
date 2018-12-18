@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Content.Model
+namespace Content.Core.Models
 {
     public class Category
     {
