@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using Content.Data.Converters;
+using Newtonsoft.Json;
 
 namespace Content.Data.Models
 {
+    [JsonConverter(typeof(SliceConverter))]
     public abstract class Slice
     {
         public string Id { get; set; }

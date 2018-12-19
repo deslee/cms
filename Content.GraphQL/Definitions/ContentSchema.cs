@@ -11,6 +11,10 @@ namespace Content.GraphQL.Definitions
         {
             Query = resolver.Resolve<ContentQuery>();
             Mutation = resolver.Resolve<ContentMutation>();
+
+            RegisterType<ParagraphSliceType>();
+            RegisterType<VideoSliceType>();
+            RegisterType<ImagesSliceType>();
         }
     }
 }
