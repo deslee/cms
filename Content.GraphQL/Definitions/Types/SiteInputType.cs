@@ -1,4 +1,4 @@
-using Content.Core.Models;
+using Content.Data.Models;
 using GraphQL;
 using GraphQL.Types;
 

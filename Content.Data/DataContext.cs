@@ -28,9 +28,6 @@ namespace Content.Data
                 slice => slice.HasDiscriminator(t => t.Type)
                     .HasValue<ImageAsset>("image")
             );
-
-            // alternate keys
-            modelBuilder.Entity<Site>().HasAlternateKey(s => s.Name);
         }
 
         public DbSet<Site> Sites { get; set; }

@@ -112,8 +112,6 @@ namespace Content.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("Name");
-
                     b.ToTable("Sites");
                 });
 

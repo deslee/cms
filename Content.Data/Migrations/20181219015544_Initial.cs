@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Content.Data.Migrations
 {
@@ -16,7 +17,6 @@ namespace Content.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Sites", x => x.Id);
-                    table.UniqueConstraint("AK_Sites_Name", x => x.Name);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,7 +66,8 @@ namespace Content.Data.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     SiteId = table.Column<string>(nullable: false),
-                    Title = table.Column<string>(nullable: false)
+                    Title = table.Column<string>(nullable: false),
+                    Date = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
