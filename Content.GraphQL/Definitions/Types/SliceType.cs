@@ -1,4 +1,5 @@
 using Content.Data.Models;
+using Content.GraphQL.Definitions.Types.Input;
 using GraphQL;
 using GraphQL.Types;
 

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
+using Content.GraphQL.MapperProfiles;
 using GraphQL;
 using GraphQL.Server;
 using GraphQL.Server.Ui.Playground;
@@ -45,6 +47,8 @@ namespace Content.GraphQL
                 }
             }
 
+            AddMapper(services);
+
             services.AddDbContext<DataContext>(optionsAction: ConfigureDatabase);
             MigrateDatabase();
 
@@ -54,6 +58,13 @@ namespace Content.GraphQL
                 options.EnableMetrics = true;
                 options.ExposeExceptions = true;
             });
+        }
+
+        private void AddMapper(IServiceCollection services)
+        {
+            var config = new MapperConfiguration(cfg => cfg.AddProfile<ContentMapperProfile>());
+            var mapper = config.CreateMapper();
+            services.AddSingleton<IMapper>(mapper);
         }
 
         private void MigrateDatabase()

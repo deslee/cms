@@ -1,12 +1,21 @@
-using System.Collections.Generic;
 using Content.Data.Models;
-using Content.GraphQL.Models;
+using Content.GraphQL.Models.Input;
 using GraphQL;
 using GraphQL.Types;
 
-namespace Content.GraphQL.Definitions.Types
+namespace Content.GraphQL.Definitions.Types.Input
 {
-
+    public class PostInputType: InputObjectGraphType<PostInput>
+    {
+        public PostInputType() {
+            Name = "PostInput";
+            Field(p => p.Id, nullable: true);
+            Field(p => p.Categories, nullable: true);
+            Field(p => p.Title);
+            Field<ListGraphType<SliceInputType>>("slices", resolve: context => context.Source.Slices);
+        }
+    }
+    
     public class SliceInputType : InputObjectGraphType<SliceInput>
     {
         public SliceInputType()

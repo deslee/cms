@@ -1,10 +1,11 @@
 using Content.Data.Models;
+using Content.GraphQL.Models.Input;
 using GraphQL;
 using GraphQL.Types;
 
-namespace Content.GraphQL.Definitions.Types
+namespace Content.GraphQL.Definitions.Types.Input
 {
-    public class SiteInputType: InputObjectGraphType<Site>
+    public class SiteInputType: InputObjectGraphType<SiteInput>
     {
         public SiteInputType() {
             Name = "SiteInput";
