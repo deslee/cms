@@ -68,7 +68,7 @@ namespace Content.GraphQL.Tests
 
 
         [Fact]
-        public void GetSites_ReturnsSite()
+        public void InsertSite_Succeeds()
         {
             var command = Execute(@"
                 mutation createSite($site: SiteInput!) {
@@ -95,6 +95,10 @@ namespace Content.GraphQL.Tests
                 _.Inputs = inputs != null ? new Inputs(inputs) : null;
             });
             var response = JsonConvert.DeserializeObject<JObject>(json);
+            var hasErrors = response.TryGetValue("errors", out var errors);
+            if (hasErrors == true) {
+                Assert.False(hasErrors, $"Errors found: {errors.ToString()}");
+            }
             Assert.True(response.TryGetValue("data", out JToken data));
             Assert.Equal(JTokenType.Object, response.Type);
             return data;
