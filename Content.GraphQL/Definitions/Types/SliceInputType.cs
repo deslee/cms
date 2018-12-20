@@ -1,23 +1,24 @@
 using System.Collections.Generic;
 using Content.Data.Models;
+using Content.GraphQL.Models;
 using GraphQL;
 using GraphQL.Types;
 
 namespace Content.GraphQL.Definitions.Types
 {
 
-    public class SliceInputType : InputObjectGraphType
+    public class SliceInputType : InputObjectGraphType<SliceInput>
     {
         public SliceInputType()
         {
             Name = "SliceInput";
-            Field<StringGraphType>("id");
-            Field<SliceTypeEnum>("type");
-            Field<StringGraphType>("text");
-            Field<BooleanGraphType>("autoplay");
-            Field<BooleanGraphType>("loop");
-            Field<StringGraphType>("url");
-            Field<ListGraphType<StringGraphType>>("assets");
+            Field(s => s.Id, nullable: true);
+            Field(s => s.Type, type: typeof(SliceTypeEnum));
+            Field(s => s.Text, nullable: true);
+            Field(s => s.Autoplay, nullable: true);
+            Field(s => s.Loop, nullable: true);
+            Field(s => s.Url, nullable: true);
+            Field(s => s.Assets, nullable: true);
         }
     }
     public class SliceTypeEnum: EnumerationGraphType {

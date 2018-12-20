@@ -40,7 +40,7 @@ namespace Content.GraphQL
             services.AddTransient<ContentMutation>();
             var types = typeof(ContentSchema).Assembly.GetTypes();
             foreach(Type type in types) {
-                if (type.Namespace == typeof(SiteType).Namespace) {
+                if (type.Namespace.StartsWith(typeof(SiteType).Namespace)) {
                     services.AddTransient(type);
                 }
             }
