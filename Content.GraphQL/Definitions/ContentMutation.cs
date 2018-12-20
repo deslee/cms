@@ -63,7 +63,6 @@ namespace Content.GraphQL.Definitions
                         foundCategoriesInPost.Where(fc => post.PostCategories.FirstOrDefault(x => x.CategoryId == fc.CategoryId) == null).ToList();
                     dataContext.PostCategories.RemoveRange(categoriesToDeleteFromPost);
                     
-
                     // assign category ids to categories with the same names
                     var allCategoriesInSite = await dataContext.Categories.Where(c => EF.Property<string>(c, "SiteId") == siteId).ToListAsync();
                     foreach(PostCategory pc in post.PostCategories) {
