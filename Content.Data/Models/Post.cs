@@ -12,6 +12,7 @@ namespace Content.Data.Models
         [Required]
         public string Title { get; set; }
         public DateTime Date { get; set; }
+        public string Data { get; set; }
         public ICollection<Slice> Slices { get; set; }
         public ICollection<PostCategory> PostCategories { get; set; }
     }

@@ -6,6 +6,7 @@ namespace Content.Data.Models
     {
         public string Id { get; set; }
         public string Type { get; set; }
+        public string Data { get; set; }
         public Post Post { get; set; }
         public ICollection<AssetSlice> AssetSlices { get; set; }
     }

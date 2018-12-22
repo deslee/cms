@@ -11,6 +11,7 @@ namespace Content.Data.Models
         public ICollection<AssetSlice> AssetSlices { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public string Data { get; set; }
     }
     public class ImageAsset : Asset
     {

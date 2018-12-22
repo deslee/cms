@@ -17,6 +17,7 @@ namespace Content.GraphQL.Definitions.Types
             Name = "Site";
             Field(x => x.Id).Description("The Id of the Site");
             Field(x => x.Name).Description("The Name of the Site");
+            Field(x => x.Data);
             Field<ListGraphType<PostType>>("posts", resolve: context => GetPosts(context.Source));
         }
 

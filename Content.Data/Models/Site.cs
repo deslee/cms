@@ -11,5 +11,6 @@ namespace Content.Data.Models
         public ICollection<Category> Categories { get; set; }
         public ICollection<Post> Posts { get; set; }
         public ICollection<Asset> Assets { get; set; }
+        public string Data { get; set; }
     }
 }

@@ -11,6 +11,7 @@ namespace Content.GraphQL.Definitions.Types.Input
             Name = "PostInput";
             Field(p => p.Id, nullable: true);
             Field(p => p.Categories, nullable: true);
+            Field(s => s.Data, nullable: true);
             Field(p => p.Title);
             Field<ListGraphType<SliceInputType>>("slices", resolve: context => context.Source.Slices);
         }
@@ -28,6 +29,7 @@ namespace Content.GraphQL.Definitions.Types.Input
             Field(s => s.Loop, nullable: true);
             Field(s => s.Url, nullable: true);
             Field(s => s.Assets, nullable: true);
+            Field(s => s.Data, nullable: true);
         }
     }
     public class SliceTypeEnum: EnumerationGraphType {

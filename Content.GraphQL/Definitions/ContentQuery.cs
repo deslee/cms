@@ -27,13 +27,27 @@ namespace Content.GraphQL.Definitions
             Field<SiteType>(
                 "site",
                 arguments: new QueryArguments(
-                    new QueryArgument<StringGraphType> { Name = "siteId" }
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
                 resolve: context =>
                 {
                     var id = context.GetArgument<string>("siteId");
                     return this.GetSite(id);
                 }
+            );
+            Field<ListGraphType<PostType>>(
+                "posts",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
+                ),
+                resolve: context => this.GetPosts(context.GetArgument<string>("siteId"))
+            );
+            Field<ListGraphType<PostType>>(
+                "post",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "postId" }
+                ),
+                resolve: context => this.GetPost(context.GetArgument<string>("postId"))
             );
         }
 
@@ -49,9 +63,26 @@ namespace Content.GraphQL.Definitions
                 .Select(s => new Site
                 {
                     Id = s.Id,
-                    Name = s.Name
+                    Name = s.Name,
+                    Data = s.Data
                 })
                 .ToListAsync();
+        }
+
+        private async Task<IList<Post>> GetPosts(string siteId) {
+            return await dataContext.Posts
+                .Where(p => EF.Property<string>(p, "SiteId") == siteId)
+                .Select(p => new Post {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Date = p.Date
+                }).ToListAsync();
+        }
+
+        private async Task<Post> GetPost(string id)
+        {
+            return await dataContext.Posts
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
     }
 }
