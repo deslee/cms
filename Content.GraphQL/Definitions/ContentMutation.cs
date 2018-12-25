@@ -62,8 +62,9 @@ namespace Content.GraphQL.Definitions
                         foundGroupsInPost.Where(fc => post.PostGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
                     dataContext.PostGroups.RemoveRange(groupsToDeleteFromPost);
                     
-                    // assign group ids to groups with the same names
                     var allGroupsInSite = await dataContext.Groups.Where(c => EF.Property<string>(c, "SiteId") == siteId).ToListAsync();
+
+                    // assign group ids to groups with the same names
                     foreach(PostGroup pg in post.PostGroups) {
                         var foundGroupInSite = allGroupsInSite.FirstOrDefault(g => g.Name == pg.Group.Name);
                         if (foundGroupInSite != null) {
@@ -71,6 +72,14 @@ namespace Content.GraphQL.Definitions
                             pg.Group.Id = foundGroupInSite.Id;
                         }
                         dataContext.Entry(pg.Group).Property("SiteId").CurrentValue = siteId;
+                    }
+
+                    // remove groups from site that no longer have posts
+                    foreach (var group in allGroupsInSite) {
+                        var count = await dataContext.PostGroups.Where(pg => pg.GroupId == group.Id).CountAsync();
+                        if (count == 0) {
+                            dataContext.Groups.Remove(group);
+                        }
                     }
 
                     dataContext.Update(post);

@@ -8,6 +8,7 @@ using Content.Data.Models;
 using Content.GraphQL.Models;
 using GraphQL;
 using GraphQL.Types;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 
 namespace Content.GraphQL.Definitions.Types
@@ -28,23 +29,19 @@ namespace Content.GraphQL.Definitions.Types
                 description: "The title of the Post",
                 resolve: context => context.Source.Data["Title"].ToObject<string>()
             );
-            FieldAsync<ListGraphType<StringGraphType>>(
+            FieldAsync<ListGraphType<CategoryType>>(
                 name: "categories",
                 description: "The categories of the Post",
                 resolve: async context =>
                 {
-                    if (context.Source.PostGroups == null)
-                    {
-                        await dataContext.Entry(context.Source).Collection(p => p.PostGroups).LoadAsync();
-                    }
-                    foreach (var postGroup in context.Source.PostGroups)
-                    {
-                        if (postGroup.Group == null)
-                        {
-                            await dataContext.Entry(postGroup).Reference(e => e.Group).LoadAsync();
-                        }
-                    }
-                    return context.Source.PostGroups?.Select(pg => pg.Group.Name);
+                    dataContext.Attach(context.Source);
+
+                    return await dataContext.Entry(context.Source)
+                        .Collection(p => p.PostGroups)
+                        .Query()
+                        .Include(pg => pg.Group)
+                        .Select(pg => pg.Group)
+                        .ToListAsync();
                 }
             );
             Field<ListGraphType<SliceType>>(

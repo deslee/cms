@@ -25,6 +25,11 @@ namespace Content.GraphQL.Definitions.Types
                 description: "The name of the Site",
                 resolve: context => context.Source.Name.ToString()
             );
+            Field<ListGraphType<CategoryType>>(
+                name: "categories", 
+                description: "The categories of the Site",
+                resolve: context => GetCategories(context.Source)
+            );
             Field<ListGraphType<PostType>>(
                 name: "posts", 
                 description: "The posts of the Site",
@@ -34,11 +39,16 @@ namespace Content.GraphQL.Definitions.Types
 
         private async Task<ICollection<Post>> GetPosts(Site site)
         {
-            if (site.Posts == null) {
-                dataContext.Sites.Attach(site);
-                await dataContext.Entry(site).Collection(s => s.Posts).LoadAsync();
-            }
+            dataContext.Sites.Attach(site);
+            await dataContext.Entry(site).Collection(s => s.Posts).LoadAsync();
             return site.Posts;
+        }
+
+        private async Task<ICollection<Group>> GetCategories(Site site)
+        {
+            dataContext.Sites.Attach(site);
+            await dataContext.Entry(site).Collection(s => s.Groups).LoadAsync();
+            return site.Groups;
         }
     }
 }
