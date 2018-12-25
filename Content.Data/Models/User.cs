@@ -6,13 +6,15 @@ using Newtonsoft.Json.Linq;
 
 namespace Content.Data.Models
 {
-    public class Post
+    public class User
     {
         public string Id { get; set; }
-        [Required]
-        public Site Site { get; set; }
+        [EmailAddress]
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string Salt { get; set; }
         [JsonString]
         public JObject Data { get; set; }
-        public virtual ICollection<PostGroup> PostGroups { get; set; }
+        public virtual ICollection<SiteUser> SiteUsers { get; set; }
     }
 }

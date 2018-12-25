@@ -1,7 +1,9 @@
 using Content.Data.Models;
 using Content.GraphQL.Definitions.Types.Input;
+using Content.GraphQL.Models;
 using GraphQL;
 using GraphQL.Types;
+using Newtonsoft.Json.Linq;
 
 namespace Content.GraphQL.Definitions.Types
 {
@@ -10,8 +12,10 @@ namespace Content.GraphQL.Definitions.Types
         public SliceType()
         {
             Name = "Slice";
-            Field(s => s.Id);
-            Field<SliceTypeEnum>("type", resolve: context => context.Source.Type.ToUpper());
+            Field<SliceTypeEnum>(
+                name: "type", 
+                resolve: context => context.Source.Type.ToUpper()
+            );
         }
     }
 
@@ -20,10 +24,16 @@ namespace Content.GraphQL.Definitions.Types
         public ParagraphSliceType()
         {
             Name = "ParagraphSlice";
-            Field(s => s.Id);
-            Field<SliceTypeEnum>("type", resolve: context => context.Source.Type.ToUpper());
-            Field(p => p.Text);
             Interface<SliceType>();
+
+            Field<SliceTypeEnum>(
+                name: "type", 
+                resolve: context => context.Source.Type.ToUpper()
+            );
+            Field<StringGraphType>(
+                name: "content",
+                resolve: context => context.Source.Content
+            );
         }
     }
 
@@ -32,12 +42,15 @@ namespace Content.GraphQL.Definitions.Types
         public VideoSliceType()
         {
             Name = "VideoSlice";
-            Field(s => s.Id);
-            Field<SliceTypeEnum>("type", resolve: context => context.Source.Type.ToUpper());
+            Interface<SliceType>();
+
+            Field<SliceTypeEnum>(
+                name: "type", 
+                resolve: context => context.Source.Type.ToUpper()
+            );
             Field(p => p.Url);
             Field(p => p.Autoplay);
             Field(p => p.Loop);
-            Interface<SliceType>();
         }
     }
 
@@ -45,9 +58,16 @@ namespace Content.GraphQL.Definitions.Types
     {
         public ImagesSliceType() {
             Name = "ImagesSlice";
-            Field(s => s.Id);
-            Field<SliceTypeEnum>("type", resolve: context => context.Source.Type.ToUpper());
             Interface<SliceType>();
+
+            Field<SliceTypeEnum>(
+                name: "type", 
+                resolve: context => context.Source.Type.ToUpper()
+            );
+            Field<ListGraphType<StringGraphType>>(
+                name: "images",
+                resolve: context => context.Source.Images
+            );
         }
     }
 }

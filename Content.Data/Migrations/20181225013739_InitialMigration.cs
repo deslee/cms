@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Content.Data.Migrations
 {
-    public partial class Initial : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,7 +11,8 @@ namespace Content.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: true),
+                    Data = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -20,15 +20,27 @@ namespace Content.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    Email = table.Column<string>(nullable: true),
+                    Password = table.Column<string>(nullable: true),
+                    Salt = table.Column<string>(nullable: true),
+                    Data = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Assets",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    Type = table.Column<string>(nullable: false),
-                    SiteId = table.Column<string>(nullable: true),
-                    Title = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    Url = table.Column<string>(nullable: true)
+                    SiteId = table.Column<string>(nullable: false),
+                    Data = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -38,26 +50,27 @@ namespace Content.Data.Migrations
                         column: x => x.SiteId,
                         principalTable: "Sites",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Categories",
+                name: "Groups",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    SiteId = table.Column<string>(nullable: true),
+                    SiteId = table.Column<string>(nullable: false),
+                    Data = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.PrimaryKey("PK_Groups", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Categories_Sites_SiteId",
+                        name: "FK_Groups_Sites_SiteId",
                         column: x => x.SiteId,
                         principalTable: "Sites",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,8 +79,7 @@ namespace Content.Data.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     SiteId = table.Column<string>(nullable: false),
-                    Title = table.Column<string>(nullable: false),
-                    Date = table.Column<DateTime>(nullable: false)
+                    Data = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -81,72 +93,51 @@ namespace Content.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PostCategories",
+                name: "SiteUsers",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(nullable: false),
+                    SiteId = table.Column<string>(nullable: false),
+                    Order = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SiteUsers", x => new { x.UserId, x.SiteId });
+                    table.ForeignKey(
+                        name: "FK_SiteUsers_Sites_SiteId",
+                        column: x => x.SiteId,
+                        principalTable: "Sites",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SiteUsers_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PostGroups",
                 columns: table => new
                 {
                     PostId = table.Column<string>(nullable: false),
-                    CategoryId = table.Column<string>(nullable: false)
+                    GroupId = table.Column<string>(nullable: false),
+                    Order = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PostCategories", x => new { x.PostId, x.CategoryId });
+                    table.PrimaryKey("PK_PostGroups", x => new { x.PostId, x.GroupId });
                     table.ForeignKey(
-                        name: "FK_PostCategories_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
+                        name: "FK_PostGroups_Groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "Groups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PostCategories_Posts_PostId",
+                        name: "FK_PostGroups_Posts_PostId",
                         column: x => x.PostId,
                         principalTable: "Posts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Slices",
-                columns: table => new
-                {
-                    Id = table.Column<string>(nullable: false),
-                    Type = table.Column<string>(nullable: false),
-                    PostId = table.Column<string>(nullable: true),
-                    Text = table.Column<string>(nullable: true),
-                    Autoplay = table.Column<bool>(nullable: true),
-                    Loop = table.Column<bool>(nullable: true),
-                    Url = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Slices", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Slices_Posts_PostId",
-                        column: x => x.PostId,
-                        principalTable: "Posts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AssetSlices",
-                columns: table => new
-                {
-                    AssetId = table.Column<string>(nullable: false),
-                    SliceId = table.Column<string>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AssetSlices", x => new { x.AssetId, x.SliceId });
-                    table.ForeignKey(
-                        name: "FK_AssetSlices_Assets_AssetId",
-                        column: x => x.AssetId,
-                        principalTable: "Assets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AssetSlices_Slices_SliceId",
-                        column: x => x.SliceId,
-                        principalTable: "Slices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -157,19 +148,19 @@ namespace Content.Data.Migrations
                 column: "SiteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AssetSlices_SliceId",
-                table: "AssetSlices",
-                column: "SliceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Categories_SiteId",
-                table: "Categories",
+                name: "IX_Groups_SiteId",
+                table: "Groups",
                 column: "SiteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PostCategories_CategoryId",
-                table: "PostCategories",
-                column: "CategoryId");
+                name: "IX_PostGroups_GroupId",
+                table: "PostGroups",
+                column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PostGroups_PostId",
+                table: "PostGroups",
+                column: "PostId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Posts_SiteId",
@@ -177,30 +168,35 @@ namespace Content.Data.Migrations
                 column: "SiteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Slices_PostId",
-                table: "Slices",
-                column: "PostId");
+                name: "IX_SiteUsers_SiteId",
+                table: "SiteUsers",
+                column: "SiteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SiteUsers_UserId",
+                table: "SiteUsers",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AssetSlices");
-
-            migrationBuilder.DropTable(
-                name: "PostCategories");
-
-            migrationBuilder.DropTable(
                 name: "Assets");
 
             migrationBuilder.DropTable(
-                name: "Slices");
+                name: "PostGroups");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "SiteUsers");
+
+            migrationBuilder.DropTable(
+                name: "Groups");
 
             migrationBuilder.DropTable(
                 name: "Posts");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Sites");

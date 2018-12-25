@@ -15,15 +15,27 @@ namespace Content.GraphQL.Definitions.Types
         public SiteType(DataContext dataContext) {
             this.dataContext = dataContext;
             Name = "Site";
-            Field(x => x.Id).Description("The Id of the Site");
-            Field(x => x.Name).Description("The Name of the Site");
-            Field(x => x.Data);
-            Field<ListGraphType<PostType>>("posts", resolve: context => GetPosts(context.Source));
+            Field<StringGraphType>(
+                name: "id",
+                description: "The id of the Site",
+                resolve: context => context.Source.Id.ToString()
+            );
+            Field<StringGraphType>(
+                name: "name",
+                description: "The name of the Site",
+                resolve: context => context.Source.Name.ToString()
+            );
+            Field<ListGraphType<PostType>>(
+                name: "posts", 
+                description: "The posts of the Site",
+                resolve: context => GetPosts(context.Source)
+            );
         }
 
         private async Task<ICollection<Post>> GetPosts(Site site)
         {
             if (site.Posts == null) {
+                dataContext.Sites.Attach(site);
                 await dataContext.Entry(site).Collection(s => s.Posts).LoadAsync();
             }
             return site.Posts;

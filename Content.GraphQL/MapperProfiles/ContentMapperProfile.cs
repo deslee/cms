@@ -2,7 +2,10 @@ using System;
 using System.Linq;
 using AutoMapper;
 using Content.Data.Models;
+using Content.GraphQL.Models;
 using Content.GraphQL.Models.Input;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Content.GraphQL.MapperProfiles
 {
@@ -12,40 +15,22 @@ namespace Content.GraphQL.MapperProfiles
         {
             CreateMap<SiteInput, Site>();
             CreateMap<PostInput, Post>()
-                .ForMember(d => d.PostCategories, o => o.MapFrom((src, dest, res, ctx) => src.Categories.Select(cat => new PostCategory {
+                .ForMember(d => d.PostGroups, o => o.MapFrom((src, dest, res, ctx) => src.Categories.Select(groupName => new PostGroup {
                     Post = dest,
                     PostId = dest.Id,
-                    Category = new Category {
-                        Name = cat
+                    Group = new Group {
+                        Name = groupName
                     }
                 })))
-                .ForMember(p => p.Slices, opt => opt.MapFrom((src, dest, res, ctx) => src.Slices.Select<SliceInput, Slice>(s =>
-                {
-                    if (s.Type == "paragraph")
-                    {
-                        return ctx.Mapper.Map<ParagraphSlice>(s);
-                    }
-                    else if (s.Type == "images")
-                    {
-                        return ctx.Mapper.Map<ImagesSlice>(s);
-                    }
-                    else if (s.Type == "video")
-                    {
-                        return ctx.Mapper.Map<VideoSlice>(s);
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }).ToList()));
+                .ForMember(p => p.Data, opt => opt.MapFrom((src, dest, res, ctx) => {
+                    return JObject.FromObject(new {
+                        Title = src.Title,
+                        Slices = src.Slices
+                    });
+                }));
 
             CreateMap<SliceInput, ParagraphSlice>();
-            CreateMap<SliceInput, ImagesSlice>()
-                .ForMember(d => d.AssetSlices, o => o.MapFrom(s => s.Assets.Select(assetId => new AssetSlice
-                {
-                    AssetId = assetId,
-                    SliceId = s.Id
-                })));
+            CreateMap<SliceInput, ImagesSlice>();
             CreateMap<SliceInput, VideoSlice>();
         }
     }

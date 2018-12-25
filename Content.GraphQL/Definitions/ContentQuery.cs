@@ -72,11 +72,7 @@ namespace Content.GraphQL.Definitions
         private async Task<IList<Post>> GetPosts(string siteId) {
             return await dataContext.Posts
                 .Where(p => EF.Property<string>(p, "SiteId") == siteId)
-                .Select(p => new Post {
-                    Id = p.Id,
-                    Title = p.Title,
-                    Date = p.Date
-                }).ToListAsync();
+                .ToListAsync();
         }
 
         private async Task<Post> GetPost(string id)
