@@ -101,12 +101,6 @@ namespace Content.GraphQL
             app.UseGraphQL<ContentSchema>("/graphql");
             // use graphql-playground middleware at default url /ui/playground
             app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
-
-            app.Run(async (context) =>
-            {
-                context.Response.StatusCode = 404;
-                await context.Response.WriteAsync("Hello World!");
-            });
         }
     }
 }
