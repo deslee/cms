@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using AutoMapper;
 using Content.Data.Models;
+using Content.GraphQL.Mapping.Resolvers;
 using Content.GraphQL.Models;
 using Content.GraphQL.Models.Input;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Content.GraphQL.MapperProfiles
+namespace Content.GraphQL.Mapping.Profiles
 {
     public class ContentMapperProfile : Profile
     {
@@ -22,12 +23,7 @@ namespace Content.GraphQL.MapperProfiles
                         Name = groupName
                     }
                 })))
-                .ForMember(p => p.Data, opt => opt.MapFrom((src, dest, res, ctx) => {
-                    return JObject.FromObject(new {
-                        Title = src.Title,
-                        Slices = src.Slices
-                    });
-                }));
+                .ForMember(p => p.Data, o => o.MapFrom<JsonDataResolver>());
 
             CreateMap<SliceInput, ParagraphSlice>();
             CreateMap<SliceInput, ImagesSlice>();

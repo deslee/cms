@@ -6,7 +6,7 @@ using AutoMapper;
 using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
-using Content.GraphQL.MapperProfiles;
+using Content.GraphQL.Mapping.Profiles;
 using CorrelationId;
 using GraphQL;
 using GraphQL.Server;

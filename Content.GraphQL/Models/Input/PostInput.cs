@@ -1,12 +1,15 @@
 using System.Collections.Generic;
+using Content.GraphQL.Annotations;
 
 namespace Content.GraphQL.Models.Input
 {
     public class PostInput
     {
         public string Id { get; set; }
+        [MapsToData]
         public string Title { get; set; }
         public IList<string> Categories { get; set; }
+        [MapsToData]
         public IList<SliceInput> Slices { get; set; }
     }
 
