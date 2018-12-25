@@ -20,6 +20,7 @@ namespace Content.GraphQL
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
+                .WriteTo.Seq(serverUrl: Environment.GetEnvironmentVariable("SEQ_URL"), apiKey: Environment.GetEnvironmentVariable("SEQ_API_KEY"))
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {XCorrelationID} {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 

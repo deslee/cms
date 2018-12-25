@@ -81,7 +81,7 @@ namespace Content.GraphQL
         {
             app.UseCorrelationId(new CorrelationIdOptions
             {
-                Header = "X-Correlation-ID",
+                Header = "X-Generated-Correlation-ID",
                 UseGuidForCorrelationId = true,
                 UpdateTraceIdentifier = false
             });
@@ -93,7 +93,7 @@ namespace Content.GraphQL
             app.Use(async (context, next) =>
             {
                 var correlationContext = context.RequestServices.GetService<ICorrelationContextAccessor>();
-                using (LogContext.PushProperty("XCorrelationID", correlationContext.CorrelationContext.CorrelationId)) {
+                using (LogContext.PushProperty("GeneratedCorrelationID", correlationContext.CorrelationContext.CorrelationId)) {
                     await next.Invoke();
                 }
             });
