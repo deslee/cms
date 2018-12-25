@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Content.GraphQL.Definitions.Types;
 using GraphQL;
 using GraphQL.Types;

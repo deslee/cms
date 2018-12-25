@@ -1,19 +1,9 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using AutoMapper;
-using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
-using Content.GraphQL.MapperProfiles;
-using Content.GraphQL.Models.Input;
-using GraphQL;
-using GraphQL.Types;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Ninject;
 using Xunit;
+using Content.GraphQL.Tests.Extensions;
 
 namespace Content.GraphQL.Tests
 {
@@ -23,35 +13,13 @@ namespace Content.GraphQL.Tests
 
         public BasicTest()
         {
-            IKernel kernel = new StandardKernel();
-
-            var dataContext = new DataContext(new DbContextOptionsBuilder<DataContext>()
-                .UseSqlite("Data Source=content.tests.db").Options);
-
-            dataContext.Database.EnsureDeleted();
-            dataContext.Database.Migrate();
-
-            kernel.Bind<IMapper>().ToConstant(new MapperConfiguration(cfg => cfg.AddProfile<ContentMapperProfile>()).CreateMapper());
-            kernel.Bind<DataContext>().ToConstant(dataContext);
-            kernel.Bind<ContentQuery>().ToSelf();
-            kernel.Bind<ContentMutation>().ToSelf();
-            kernel.Bind<ContentSchema>().ToConstant(new ContentSchema(new FuncDependencyResolver(resolver: type => kernel.Get(type))));
-
-            foreach (Type type in typeof(ContentSchema).Assembly.GetTypes())
-            {
-                if (type.Namespace.StartsWith(typeof(SiteType).Namespace))
-                {
-                    kernel.Bind(type).ToSelf();
-                }
-            }
-
-            contentSchema = kernel.Get<ContentSchema>();
+            contentSchema = ContentSchemaFactory.CreateContentSchema();
         }
 
         [Fact]
         public void GetSites_ReturnsEmptySite()
         {
-            var data = Execute(@"
+            var data = contentSchema.ExecuteQueryAndAssert(@"
                     query getSites {
                         sites {
                             id,
@@ -59,8 +27,7 @@ namespace Content.GraphQL.Tests
                         }
                     }
                 ");
-            Assert.Equal(JTokenType.Object, data.Type);
-            Assert.True(((JObject)data).TryGetValue("sites", out JToken jSites));
+            Assert.True(data.TryGetValue("sites", out JToken jSites));
             Assert.Equal(JTokenType.Array, jSites.Type);
             var sites = jSites.ToObject<IList<SiteType>>();
             Assert.Equal(0, sites.Count);
@@ -70,7 +37,7 @@ namespace Content.GraphQL.Tests
         [Fact]
         public void InsertSite_Succeeds()
         {
-            var command = Execute(@"
+            var data = contentSchema.ExecuteQueryAndAssert(@"
                 mutation createSite($site: SiteInput!) {
                     upsertSite(site: $site) {
                         id
@@ -79,29 +46,35 @@ namespace Content.GraphQL.Tests
             ",
             new Dictionary<string, object>
             {
-                { "site", 
+                { "site",
                     new Dictionary<string, object> {
                         { "name", "Desmond's Website" }
                     }
                 }
             });
-        }
+            Assert.True(data.TryGetValue("upsertSite", out JToken jSite));
+            Assert.Equal(JTokenType.Object, jSite.Type);
+            Assert.True(((JObject)jSite).TryGetValue("id", out JToken jId));
+            Assert.Equal(JTokenType.String, jId.Type);
+            var siteId = jId.ToObject<string>();
+            Assert.NotEmpty(siteId);
 
-        private JToken Execute(string query, Dictionary<string, object> inputs = null)
-        {
-            var json = contentSchema.Execute(_ =>
-            {
-                _.Query = query;
-                _.Inputs = inputs != null ? new Inputs(inputs) : null;
-            });
-            var response = JsonConvert.DeserializeObject<JObject>(json);
-            var hasErrors = response.TryGetValue("errors", out var errors);
-            if (hasErrors == true) {
-                Assert.False(hasErrors, $"Errors found: {errors.ToString()}");
-            }
-            Assert.True(response.TryGetValue("data", out JToken data));
-            Assert.Equal(JTokenType.Object, response.Type);
-            return data;
+            data = contentSchema.ExecuteQueryAndAssert(@"
+                query getSites {
+                    sites {
+                        id,
+                        name
+                    }
+                }
+            ");
+            Assert.True(data.TryGetValue("sites", out JToken jSites));
+            Assert.Equal(JTokenType.Array, jSites.Type);
+            var sites = jSites.ToObject<IList<SiteType>>();
+            Assert.Equal(1, sites.Count);
+            var returnedJSite = jSites.First;
+            Assert.True(((JObject)jSite).TryGetValue("id", out JToken returnedJId));
+            Assert.Equal(JTokenType.String, returnedJId.Type);
+            Assert.Equal(siteId, returnedJId.ToObject<string>());
         }
     }
 }
