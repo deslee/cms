@@ -33,7 +33,6 @@ namespace Content.GraphQL.Definitions.Types
                     return await dataContext.Entry(context.Source)
                         .Collection(p => p.PostGroups)
                         .Query()
-                        .Include(pg => pg.Post)
                         .Select(pg => pg.Post)
                         .ToListAsync();
                 }

@@ -8,16 +8,20 @@ using GraphQL;
 using GraphQL.Types;
 using Microsoft.EntityFrameworkCore;
 using Content.Data;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace Content.GraphQL.Definitions
 {
     public class ContentQuery : ObjectGraphType
     {
         private readonly DataContext dataContext;
+        private readonly ILogger<ContentQuery> logger;
 
-        public ContentQuery(DataContext dataContext)
+        public ContentQuery(DataContext dataContext, ILogger<ContentQuery> logger)
         {
             this.dataContext = dataContext;
+            this.logger = logger;
             Name = "Query";
 
             Field<ListGraphType<SiteType>>(
@@ -53,6 +57,7 @@ namespace Content.GraphQL.Definitions
 
         private async Task<Site> GetSite(string id)
         {
+            logger.LogDebug("Get site called ");
             return await dataContext.Sites
                 .FirstOrDefaultAsync(s => s.Id == id);
         }

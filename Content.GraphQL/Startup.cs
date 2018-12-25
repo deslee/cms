@@ -7,6 +7,7 @@ using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
 using Content.GraphQL.MapperProfiles;
+using CorrelationId;
 using GraphQL;
 using GraphQL.Server;
 using GraphQL.Server.Ui.Playground;
@@ -18,31 +19,26 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Context;
+using Serilog.Events;
 
 namespace Content.GraphQL
 {
     public class Startup
     {
-        public Startup()
-        {
-            Log.Logger = new LoggerConfiguration()
-              .Enrich.FromLogContext()
-              .WriteTo.Console()
-              .CreateLogger();
-        }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
-            
+            services.AddCorrelationId();
             services.AddTransient<ContentSchema>(s => new ContentSchema(new FuncDependencyResolver(s.GetRequiredService)));
             services.AddTransient<ContentQuery>();
             services.AddTransient<ContentMutation>();
             var types = typeof(ContentSchema).Assembly.GetTypes();
-            foreach(Type type in types) {
-                if (type.Namespace != null && type.Namespace.StartsWith(typeof(SiteType).Namespace)) {
+            foreach (Type type in types)
+            {
+                if (type.Namespace != null && type.Namespace.StartsWith(typeof(SiteType).Namespace))
+                {
                     services.AddTransient(type);
                 }
             }
@@ -83,10 +79,24 @@ namespace Content.GraphQL
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCorrelationId(new CorrelationIdOptions
+            {
+                Header = "X-Correlation-ID",
+                UseGuidForCorrelationId = true,
+                UpdateTraceIdentifier = false
+            });
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.Use(async (context, next) =>
+            {
+                var correlationContext = context.RequestServices.GetService<ICorrelationContextAccessor>();
+                using (LogContext.PushProperty("XCorrelationID", correlationContext.CorrelationContext.CorrelationId)) {
+                    await next.Invoke();
+                }
+            });
 
             app.UseGraphQL<ContentSchema>("/graphql");
             // use graphql-playground middleware at default url /ui/playground
@@ -94,6 +104,7 @@ namespace Content.GraphQL
 
             app.Run(async (context) =>
             {
+                context.Response.StatusCode = 404;
                 await context.Response.WriteAsync("Hello World!");
             });
         }
