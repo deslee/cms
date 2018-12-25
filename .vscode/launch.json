@@ -5,6 +5,29 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Frontend: Chrome",
+            "url": "http://localhost:3001",
+            "webRoot": "${workspaceFolder}/admin-panel",
+            "cwd": "${workspaceFolder}/admin-panel"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Frontend: Server",
+            "args": [
+                "--inspect",
+                "${workspaceFolder}/admin-panel/debug.js"
+            ],
+            "console": "integratedTerminal",
+            "env": {
+                "PORT": "3001"
+            },
+            "protocol": "inspector",
+            "cwd": "${workspaceFolder}/admin-panel"
+        },
+        {
             "name": ".NET Core Launch (GraphQL)",
             "type": "coreclr",
             "request": "launch",
@@ -12,9 +35,7 @@
             "program": "${workspaceFolder}/Content.GraphQL/bin/Debug/netcoreapp2.2/Content.GraphQL.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
             "stopAtEntry": false,
-            "internalConsoleOptions": "openOnSessionStart",
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ASPNETCORE_URLS": "http://localhost:3000/",
@@ -27,6 +48,12 @@
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:pickProcess}"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Frontend",
+            "configurations": ["Frontend: Server", "Frontend: Chrome"]
         }
     ]
 }

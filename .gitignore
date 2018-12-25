@@ -1,5 +1,8 @@
 content.db
 content.tests.db
+.next
+
+node_modules
 
 *.swp
 *.*~
