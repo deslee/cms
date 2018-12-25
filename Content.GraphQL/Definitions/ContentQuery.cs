@@ -42,7 +42,7 @@ namespace Content.GraphQL.Definitions
                 ),
                 resolve: context => this.GetPosts(context.GetArgument<string>("siteId"))
             );
-            Field<ListGraphType<PostType>>(
+            Field<PostType>(
                 "post",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "postId" }

@@ -44,14 +44,11 @@ namespace Content.GraphQL.Tests
                     }
                 }
             ",
-            new Dictionary<string, object>
-            {
-                { "site",
-                    new Dictionary<string, object> {
-                        { "name", "Desmond's Website" }
-                    }
+            @"{
+                ""site"": {
+                    ""name"": ""Desmond's Website""
                 }
-            });
+            }");
             Assert.True(data.TryGetValue("upsertSite", out JToken jSite));
             Assert.Equal(JTokenType.Object, jSite.Type);
             Assert.True(((JObject)jSite).TryGetValue("id", out JToken jId));
