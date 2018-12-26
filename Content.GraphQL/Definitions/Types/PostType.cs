@@ -18,6 +18,7 @@ namespace Content.GraphQL.Definitions.Types
         private readonly DataContext dataContext;
         public PostType(DataContext dataContext)
         {
+            this.dataContext = dataContext;
             Name = "Post";
             Field<StringGraphType>(
                 name: "id",
@@ -61,7 +62,6 @@ namespace Content.GraphQL.Definitions.Types
                     });
                 }
             );
-            this.dataContext = dataContext;
         }
     }
 }

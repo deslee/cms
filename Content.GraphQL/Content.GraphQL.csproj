@@ -12,6 +12,7 @@
     <PackageReference Include="GraphQL.Server.Transports.AspNetCore" Version="3.2.0" />
     <PackageReference Include="GraphQL.Server.Ui.Playground" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.0" />
     <PackageReference Include="Serilog" Version="2.7.1" />

@@ -24,6 +24,9 @@ namespace Content.GraphQL.Mapping.Profiles
                     }
                 })))
                 .ForMember(p => p.Data, o => o.MapFrom<JsonDataResolver>());
+                
+            CreateMap<RegisterInput, User>()
+                .ForMember(d => d.Data, o => o.MapFrom<JsonDataResolver>());
 
             CreateMap<SliceInput, ParagraphSlice>();
             CreateMap<SliceInput, ImagesSlice>();

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Text;
 using AutoMapper;
 using Content.Data;
 using Content.GraphQL.Definitions;
@@ -11,13 +8,13 @@ using CorrelationId;
 using GraphQL;
 using GraphQL.Server;
 using GraphQL.Server.Ui.Playground;
-using GraphQL.Types;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
@@ -26,41 +23,65 @@ namespace Content.GraphQL
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCorrelationId();
-            services.AddTransient<ContentSchema>(s => new ContentSchema(new FuncDependencyResolver(s.GetRequiredService)));
-            services.AddTransient<ContentQuery>();
-            services.AddTransient<ContentMutation>();
-            var types = typeof(ContentSchema).Assembly.GetTypes();
-            foreach (Type type in types)
-            {
-                if (type.Namespace != null && type.Namespace.StartsWith(typeof(SiteType).Namespace))
-                {
-                    services.AddTransient(type);
-                }
-            }
-
-            AddMapper(services);
-
-            services.AddDbContext<DataContext>(optionsAction: ConfigureDatabase);
             MigrateDatabase();
 
-            // Add GraphQL services and configure options
-            services.AddGraphQL(options =>
-            {
-                options.EnableMetrics = true;
-                options.ExposeExceptions = true;
-            });
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            services.AddSingleton(appSettings);
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Seq(serverUrl: appSettings.SeqUrl, apiKey: appSettings.SeqApiKey)
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {XCorrelationID} {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
+            services.AddCustomAuthentication(appSettings);
+
+            services.AddCorrelationId();
+            services.AddCustomMapper();
+
+            services.AddDbContext<DataContext>(optionsAction: ConfigureDatabase);
+            services.AddCustomGraphQL<SiteType>();
+            services.AddCustomServices();
         }
 
-        private void AddMapper(IServiceCollection services)
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<ContentMapperProfile>());
-            var mapper = config.CreateMapper();
-            services.AddSingleton<IMapper>(mapper);
+            app.UseAuthentication();
+            app.UseCorrelationId(new CorrelationIdOptions
+            {
+                Header = "X-Generated-Correlation-ID",
+                UseGuidForCorrelationId = true,
+                UpdateTraceIdentifier = false
+            });
+
+            app.Use(async (context, next) =>
+            {
+                var correlationContext = context.RequestServices.GetService<ICorrelationContextAccessor>();
+                using (LogContext.PushProperty("GeneratedCorrelationID", correlationContext.CorrelationContext.CorrelationId))
+                {
+                    await next.Invoke();
+                }
+            });
+
+            app.UseGraphQL<ContentSchema>("/graphql");
+            // use graphql-playground middleware at default url /ui/playground
+            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
         }
 
         private void MigrateDatabase()
@@ -74,33 +95,6 @@ namespace Content.GraphQL
         private void ConfigureDatabase(DbContextOptionsBuilder builder)
         {
             builder.UseSqlite("Data Source=content.db");
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-            app.UseCorrelationId(new CorrelationIdOptions
-            {
-                Header = "X-Generated-Correlation-ID",
-                UseGuidForCorrelationId = true,
-                UpdateTraceIdentifier = false
-            });
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.Use(async (context, next) =>
-            {
-                var correlationContext = context.RequestServices.GetService<ICorrelationContextAccessor>();
-                using (LogContext.PushProperty("GeneratedCorrelationID", correlationContext.CorrelationContext.CorrelationId)) {
-                    await next.Invoke();
-                }
-            });
-
-            app.UseGraphQL<ContentSchema>("/graphql");
-            // use graphql-playground middleware at default url /ui/playground
-            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
         }
     }
 }

@@ -10,23 +10,26 @@ using Microsoft.EntityFrameworkCore;
 using Content.Data;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using Content.GraphQL.Services;
 
 namespace Content.GraphQL.Definitions
 {
     public class ContentQuery : ObjectGraphType
     {
+        private readonly IAuthenticationService authenticationService;
         private readonly DataContext dataContext;
         private readonly ILogger<ContentQuery> logger;
 
-        public ContentQuery(DataContext dataContext, ILogger<ContentQuery> logger)
+        public ContentQuery(IAuthenticationService authenticationService, DataContext dataContext, ILogger<ContentQuery> logger)
         {
+            this.authenticationService = authenticationService;
             this.dataContext = dataContext;
             this.logger = logger;
             Name = "Query";
 
             Field<ListGraphType<SiteType>>(
                 "sites",
-                resolve: context => this.GetSites()
+                resolve: context => this.GetSites(context)
             );
             Field<SiteType>(
                 "site",
@@ -53,6 +56,10 @@ namespace Content.GraphQL.Definitions
                 ),
                 resolve: context => this.GetPost(context.GetArgument<string>("postId"))
             );
+            Field<UserType>(
+                "me",
+                resolve: context => context.UserContext as User
+            );
         }
 
         private async Task<Site> GetSite(string id)
@@ -62,7 +69,7 @@ namespace Content.GraphQL.Definitions
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 
-        private async Task<IList<Site>> GetSites()
+        private async Task<IList<Site>> GetSites(ResolveFieldContext<object> context)
         {
             return await dataContext.Sites
                 .Select(s => new Site

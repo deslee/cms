@@ -34,13 +34,11 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Content.GraphQL/bin/Debug/netcoreapp2.2/Content.GraphQL.dll",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/Content.GraphQL",
             "stopAtEntry": false,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "ASPNETCORE_URLS": "http://localhost:3000/",
-                "SEQ_API_KEY": "ZuBSanv2TgTaomuer4E8",
-                "SEQ_URL": "http://localhost:5341"
+                "ASPNETCORE_URLS": "http://localhost:3000/"
             }
         },
         {

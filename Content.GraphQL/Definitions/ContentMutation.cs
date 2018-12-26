@@ -12,18 +12,26 @@ using Newtonsoft.Json.Linq;
 using Content.GraphQL.Definitions.Types.Input;
 using Content.GraphQL.Models.Input;
 using AutoMapper;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.Extensions.Configuration;
+using Content.GraphQL.Services;
 
 namespace Content.GraphQL.Definitions
 {
     public class ContentMutation : ObjectGraphType
     {
+        private readonly IAuthenticationService authenticationService;
         private readonly DataContext dataContext;
         private readonly IMapper mapper;
+        private readonly IConfiguration configuration;
 
-        public ContentMutation(DataContext dataContext, IMapper mapper)
+        public ContentMutation(IAuthenticationService authenticationService, DataContext dataContext, IMapper mapper, IConfiguration configuration)
         {
+            this.authenticationService = authenticationService;
             this.dataContext = dataContext;
             this.mapper = mapper;
+            this.configuration = configuration;
             Name = "Mutation";
 
             FieldAsync<SiteType>(
@@ -48,7 +56,8 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<PostInputType>> { Name = "post" },
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: async context => {
+                resolve: async context =>
+                {
                     var postInput = context.GetArgument<PostInput>("post");
                     var post = mapper.Map<Post>(postInput);
                     var siteId = context.GetArgument<string>("siteId");
@@ -58,16 +67,18 @@ namespace Content.GraphQL.Definitions
 
                     // remove groups in post that are not in payload
                     var foundGroupsInPost = await dataContext.PostGroups.Where(pg => pg.PostId == post.Id).ToListAsync();
-                    var groupsToDeleteFromPost = 
+                    var groupsToDeleteFromPost =
                         foundGroupsInPost.Where(fc => post.PostGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
                     dataContext.PostGroups.RemoveRange(groupsToDeleteFromPost);
-                    
+
                     var allGroupsInSite = await dataContext.Groups.Where(c => EF.Property<string>(c, "SiteId") == siteId).ToListAsync();
 
                     // assign group ids to groups with the same names
-                    foreach(PostGroup pg in post.PostGroups) {
+                    foreach (PostGroup pg in post.PostGroups)
+                    {
                         var foundGroupInSite = allGroupsInSite.FirstOrDefault(g => g.Name == pg.Group.Name);
-                        if (foundGroupInSite != null) {
+                        if (foundGroupInSite != null)
+                        {
                             pg.GroupId = foundGroupInSite.Id;
                             pg.Group.Id = foundGroupInSite.Id;
                         }
@@ -75,9 +86,11 @@ namespace Content.GraphQL.Definitions
                     }
 
                     // remove groups from site that no longer have posts
-                    foreach (var group in allGroupsInSite) {
+                    foreach (var group in allGroupsInSite)
+                    {
                         var count = await dataContext.PostGroups.Where(pg => pg.GroupId == group.Id).CountAsync();
-                        if (count == 0) {
+                        if (count == 0)
+                        {
                             dataContext.Groups.Remove(group);
                         }
                     }
@@ -85,6 +98,30 @@ namespace Content.GraphQL.Definitions
                     dataContext.Update(post);
                     await dataContext.SaveChangesAsync();
                     return post;
+                }
+            );
+
+            FieldAsync<UserType>(
+                "register",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<RegisterInputType>> { Name = "registration" }
+                ),
+                resolve: async context =>
+                {
+                    var registerInput = context.GetArgument<RegisterInput>("registration");
+                    return await authenticationService.RegisterUser(registerInput);
+                }
+            );
+
+            FieldAsync<UserType>(
+                "login",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<LoginInputType>> { Name = "login" }
+                ),
+                resolve: async context =>
+                {
+                    var loginInput = context.GetArgument<LoginInput>("login");
+                    return await authenticationService.Login(loginInput);
                 }
             );
         }

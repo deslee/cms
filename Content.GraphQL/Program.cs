@@ -16,14 +16,6 @@ namespace Content.GraphQL
     {
         public static void Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .Enrich.FromLogContext()
-                .WriteTo.Seq(serverUrl: Environment.GetEnvironmentVariable("SEQ_URL"), apiKey: Environment.GetEnvironmentVariable("SEQ_API_KEY"))
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {XCorrelationID} {Message:lj}{NewLine}{Exception}")
-                .CreateLogger();
-
             try
             {
                 Log.Information("Starting web host");
