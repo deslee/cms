@@ -16,13 +16,13 @@ namespace Content.GraphQL.Definitions
 {
     public class ContentQuery : ObjectGraphType
     {
-        private readonly IAuthenticationService authenticationService;
+        private readonly IUserService userService;
         private readonly DataContext dataContext;
         private readonly ILogger<ContentQuery> logger;
 
-        public ContentQuery(IAuthenticationService authenticationService, DataContext dataContext, ILogger<ContentQuery> logger)
+        public ContentQuery(IUserService userService, DataContext dataContext, ILogger<ContentQuery> logger)
         {
-            this.authenticationService = authenticationService;
+            this.userService = userService;
             this.dataContext = dataContext;
             this.logger = logger;
             Name = "Query";

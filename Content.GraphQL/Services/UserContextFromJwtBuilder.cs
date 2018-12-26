@@ -13,7 +13,7 @@ namespace Content.GraphQL.Services
     {
         public async Task<object> BuildUserContext(HttpContext httpContext)
         {
-            return await httpContext.RequestServices.GetRequiredService<IAuthenticationService>().GetUser(httpContext);
+            return await httpContext.RequestServices.GetRequiredService<IUserService>().GetUser(httpContext);
         }
     }
 }
