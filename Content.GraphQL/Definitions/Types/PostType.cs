@@ -15,10 +15,8 @@ namespace Content.GraphQL.Definitions.Types
 {
     public class PostType : ObjectGraphType<Post>
     {
-        private readonly DataContext dataContext;
         public PostType(DataContext dataContext)
         {
-            this.dataContext = dataContext;
             Name = "Post";
             Field<StringGraphType>(
                 name: "id",

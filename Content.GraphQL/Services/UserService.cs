@@ -1,7 +1,9 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Content.Data;
@@ -10,6 +12,7 @@ using Content.GraphQL.Models.Input;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Content.GraphQL.Services
 {
@@ -20,17 +23,20 @@ namespace Content.GraphQL.Services
         Task<User> GetUser(HttpContext httpContext);
         Task<User> Login(LoginInput loginInput);
         Task<User> RegisterUser(RegisterInput registerInput);
+        Task<string> CreateJwtToken(User source);
     }
 
     public class UserService : IUserService
     {
         private readonly DataContext dataContext;
         private readonly IMapper mapper;
+        private readonly AppSettings appSettings;
 
-        public UserService(DataContext dataContext, IMapper mapper)
+        public UserService(DataContext dataContext, IMapper mapper, AppSettings appSettings)
         {
             this.dataContext = dataContext;
             this.mapper = mapper;
+            this.appSettings = appSettings;
         }
 
         public async Task<User> AddUserAsync(User user)
@@ -103,6 +109,26 @@ namespace Content.GraphQL.Services
                         iterationCount: 10000,
                         numBytesRequested: 256 / 8
                     )));
+        }
+
+        public async Task<string> CreateJwtToken(User user)
+        {
+            var token = await Task.Run(() =>
+                    {
+                        var tokenHandler = new JwtSecurityTokenHandler();
+                        var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+                        var tokenDescriptor = new SecurityTokenDescriptor
+                        {
+                            Subject = new ClaimsIdentity(new[] {
+                            new Claim(ClaimTypes.Email, user.Email.ToString())
+                        }),
+                            Expires = DateTime.UtcNow.AddDays(7),
+                            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                        };
+                        var jwtToken = tokenHandler.CreateToken(tokenDescriptor);
+                        return tokenHandler.WriteToken(jwtToken);
+                    });
+            return token;
         }
     }
 }

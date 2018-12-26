@@ -16,81 +16,46 @@ namespace Content.GraphQL.Definitions
 {
     public class ContentQuery : ObjectGraphType
     {
+        private readonly ISiteService siteService;
+        private readonly IPostService postService;
         private readonly IUserService userService;
-        private readonly DataContext dataContext;
-        private readonly ILogger<ContentQuery> logger;
 
-        public ContentQuery(IUserService userService, DataContext dataContext, ILogger<ContentQuery> logger)
+        public ContentQuery(ISiteService siteService, IPostService postService, IUserService userService)
         {
-            this.userService = userService;
-            this.dataContext = dataContext;
-            this.logger = logger;
             Name = "Query";
+            this.siteService = siteService;
+            this.postService = postService;
+            this.userService = userService;
 
             Field<ListGraphType<SiteType>>(
                 "sites",
-                resolve: context => this.GetSites(context)
+                resolve: context => siteService.GetSites(context.UserContext as User)
             );
             Field<SiteType>(
                 "site",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: context =>
-                {
-                    var id = context.GetArgument<string>("siteId");
-                    return this.GetSite(id);
-                }
+                resolve: context => siteService.GetSite(context.GetArgument<string>("siteId"))
             );
             Field<ListGraphType<PostType>>(
                 "posts",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: context => this.GetPosts(context.GetArgument<string>("siteId"))
+                resolve: context => postService.GetPosts(context.GetArgument<string>("siteId"))
             );
             Field<PostType>(
                 "post",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "postId" }
                 ),
-                resolve: context => this.GetPost(context.GetArgument<string>("postId"))
+                resolve: context => postService.GetPostAsync(context.GetArgument<string>("postId"))
             );
             Field<UserType>(
                 "me",
                 resolve: context => context.UserContext as User
             );
-        }
-
-        private async Task<Site> GetSite(string id)
-        {
-            logger.LogDebug("Get site called ");
-            return await dataContext.Sites
-                .FirstOrDefaultAsync(s => s.Id == id);
-        }
-
-        private async Task<IList<Site>> GetSites(ResolveFieldContext<object> context)
-        {
-            return await dataContext.Sites
-                .Select(s => new Site
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Data = s.Data
-                })
-                .ToListAsync();
-        }
-
-        private async Task<IList<Post>> GetPosts(string siteId) {
-            return await dataContext.Posts
-                .Where(p => EF.Property<string>(p, "SiteId") == siteId)
-                .ToListAsync();
-        }
-
-        private async Task<Post> GetPost(string id)
-        {
-            return await dataContext.Posts
-                .FirstOrDefaultAsync(s => s.Id == id);
         }
     }
 }

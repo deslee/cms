@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -16,6 +17,8 @@ namespace Content.GraphQL.Services
     public interface IPostService
     {
         Task<Post> UpsertPost(PostInput postInput, string siteId);
+        Task<IList<Post>> GetPosts(string siteId);
+        Task<Post> GetPostAsync(string postId);
     }
 
     public class PostService : IPostService
@@ -27,6 +30,19 @@ namespace Content.GraphQL.Services
         {
             this.dataContext = dataContext;
             this.mapper = mapper;
+        }
+
+        public async Task<Post> GetPostAsync(string postId)
+        {
+            return await dataContext.Posts
+                .FirstOrDefaultAsync(s => s.Id == postId);
+        }
+
+        public async Task<IList<Post>> GetPosts(string siteId)
+        {
+            return await dataContext.Posts
+                .Where(p => EF.Property<string>(p, "SiteId") == siteId)
+                .ToListAsync();
         }
 
         public async Task<Post> UpsertPost(PostInput postInput, string siteId)

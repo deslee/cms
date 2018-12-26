@@ -8,6 +8,7 @@ using Content.Data;
 using Content.Data.Models;
 using Content.GraphQL.Definitions.Types.Input;
 using Content.GraphQL.Models;
+using Content.GraphQL.Services;
 using GraphQL;
 using GraphQL.Types;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +20,8 @@ namespace Content.GraphQL.Definitions.Types
 {
     public class UserType : ObjectGraphType<User>
     {
-        private readonly DataContext dataContext;
-        private readonly AppSettings appSettings;
-        public UserType(DataContext dataContext, AppSettings appSettings)
+        public UserType(IUserService userService, DataContext dataContext)
         {
-            this.dataContext = dataContext;
-            this.appSettings = appSettings;
             Name = "User";
             Field<StringGraphType>(
                 name: "id",
@@ -52,27 +49,9 @@ namespace Content.GraphQL.Definitions.Types
                         .ToListAsync();
                 }
             );
-            FieldAsync<StringGraphType>(
+            Field<StringGraphType>(
                 name: "token",
-                resolve: async context =>
-                {
-                    var token = await Task.Run(() =>
-                    {
-                        var tokenHandler = new JwtSecurityTokenHandler();
-                        var key = Encoding.ASCII.GetBytes(appSettings.Secret);
-                        var tokenDescriptor = new SecurityTokenDescriptor
-                        {
-                            Subject = new ClaimsIdentity(new[] {
-                            new Claim(ClaimTypes.Email, context.Source.Email.ToString())
-                        }),
-                            Expires = DateTime.UtcNow.AddDays(7),
-                            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                        };
-                        var jwtToken = tokenHandler.CreateToken(tokenDescriptor);
-                        return tokenHandler.WriteToken(jwtToken);
-                    });
-                    return token;
-                }
+                resolve: context => userService.CreateJwtToken(context.Source)
             );
         }
     }

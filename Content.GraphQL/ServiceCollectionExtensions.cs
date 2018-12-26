@@ -60,7 +60,8 @@ namespace Content.GraphQL {
             {
                 options.EnableMetrics = true;
                 options.ExposeExceptions = true;
-            }).AddUserContextBuilder<UserContextFromJwtBuilder>();
+            })
+            .AddUserContextBuilder<UserContextFromJwtBuilder>();
         }
 
         public static void AddCustomServices(this IServiceCollection services) {
