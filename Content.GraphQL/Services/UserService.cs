@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Content.Data;
 using Content.Data.Models;
+using Content.GraphQL.Constants;
 using Content.GraphQL.Models.Input;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
@@ -20,10 +22,10 @@ namespace Content.GraphQL.Services
     {
         Task<User> GetUserByEmail(string email);
         Task<User> AddUserAsync(User user);
-        Task<User> GetUser(HttpContext httpContext);
         Task<User> Login(LoginInput loginInput);
         Task<User> RegisterUser(RegisterInput registerInput);
         Task<string> CreateJwtToken(User source);
+        Task<IEnumerable<Claim>> GetClaimsForUser(User user);
     }
 
     public class UserService : IUserService
@@ -51,16 +53,6 @@ namespace Content.GraphQL.Services
             return await dataContext.Users.FirstOrDefaultAsync(u => u.Email == email.ToLower());
         }
 
-        public async Task<User> GetUser(HttpContext httpContext)
-        {
-            var email = httpContext.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            if (email != null)
-            {
-                return await GetUserByEmail(email);
-            }
-            return null;
-        }
-
         public async Task<User> Login(LoginInput loginInput)
         {
             var user = await GetUserByEmail(loginInput.Email.ToLower());
@@ -80,6 +72,11 @@ namespace Content.GraphQL.Services
         public async Task<User> RegisterUser(RegisterInput registerInput)
         {
             registerInput.Email = registerInput.Email.Trim().ToLower();
+
+            var existsAlready = await dataContext.Users.AnyAsync(u => u.Email == registerInput.Email);
+            if (existsAlready) {
+                throw new Exception("User already exists");
+            }
 
             // generate a 128-bit salt using a secure PRNG
             byte[] salt = new byte[128 / 8];
@@ -129,6 +126,15 @@ namespace Content.GraphQL.Services
                         return tokenHandler.WriteToken(jwtToken);
                     });
             return token;
+        }
+
+        public Task<IEnumerable<Claim>> GetClaimsForUser(User user)
+        {
+            var claims = new List<Claim>();
+            if (user.Email == "desmondclee@gmail.com") {
+                claims.Add(new Claim(ClaimTypes.Role, Roles.Admin));
+            }
+            return Task.FromResult(claims.AsEnumerable());
         }
     }
 }

@@ -11,6 +11,9 @@ using Content.Data;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using Content.GraphQL.Services;
+using GraphQL.Authorization;
+using Content.GraphQL.Models;
+using Content.GraphQL.Constants;
 
 namespace Content.GraphQL.Definitions
 {
@@ -29,8 +32,8 @@ namespace Content.GraphQL.Definitions
 
             Field<ListGraphType<SiteType>>(
                 "sites",
-                resolve: context => siteService.GetSites(context.UserContext as User)
-            );
+                resolve: context => siteService.GetSites((context.UserContext as UserContext))
+            ).AuthorizeWith(Policies.AdminPolicy);
             Field<SiteType>(
                 "site",
                 arguments: new QueryArguments(
@@ -54,7 +57,7 @@ namespace Content.GraphQL.Definitions
             );
             Field<UserType>(
                 "me",
-                resolve: context => context.UserContext as User
+                resolve: context => (context.UserContext as UserContext).AuthenticatedUser
             );
         }
     }

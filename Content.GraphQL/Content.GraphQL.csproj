@@ -9,7 +9,7 @@
     <PackageReference Include="Automapper" Version="8.0.0" />
     <PackageReference Include="CorrelationId" Version="2.1.0" />
     <PackageReference Include="GraphQL" Version="2.4.0" />
-    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="GraphQL.Authorization" Version="2.0.27" />
     <PackageReference Include="GraphQL.Server.Ui.Playground" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="2.2.0" />
@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Content.Data\Content.Data.csproj" />
+    <ProjectReference Include="..\Dependencies\GraphQL.Server\src\Transports.AspNetCore\Transports.AspNetCore.csproj" />
   </ItemGroup>
 
 </Project>

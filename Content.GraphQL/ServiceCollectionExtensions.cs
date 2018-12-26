@@ -1,11 +1,15 @@
 using System;
+using System.Security.Claims;
 using System.Text;
 using AutoMapper;
 using Content.GraphQL.Definitions;
+using Content.GraphQL.Definitions.Middleware;
 using Content.GraphQL.Mapping.Profiles;
 using Content.GraphQL.Services;
 using GraphQL;
+using GraphQL.Authorization;
 using GraphQL.Server;
+using GraphQL.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -55,13 +59,19 @@ namespace Content.GraphQL {
                 }
             }
 
+            // add auth rules
+            services.AddSingleton<IAuthorizationEvaluator, AuthorizationEvaluator>();
+            services.AddTransient<IValidationRule, AuthorizationValidationRule>();
+            services.AddSingleton<AuthorizationSettings, ContentAuthorizationSettings>();
+
             // Add GraphQL services and configure options
             services.AddGraphQL(options =>
             {
                 options.EnableMetrics = true;
                 options.ExposeExceptions = true;
             })
-            .AddUserContextBuilder<UserContextFromJwtBuilder>();
+            .AddUserContextBuilder<UserContextFromJwtBuilder>()
+            .AddFieldMiddleware<LoggingMiddleware>();
         }
 
         public static void AddCustomServices(this IServiceCollection services) {

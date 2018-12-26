@@ -25,6 +25,8 @@ namespace Content.Data
             modelBuilder.Entity<SiteUser>().HasIndex(e => e.UserId);
             modelBuilder.Entity<SiteUser>().HasIndex(e => e.SiteId);
 
+            modelBuilder.Entity<User>().HasIndex(e => e.Email).IsUnique();
+
             var jsonStringConverter = new ValueConverter<JObject, string>(
                 data => JsonConvert.SerializeObject(data),
                 data => JsonConvert.DeserializeObject<JObject>(data)
