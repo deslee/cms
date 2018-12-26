@@ -81,8 +81,6 @@ namespace Content.Data.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.HasIndex("PostId");
-
                     b.ToTable("PostGroups");
                 });
 
@@ -111,8 +109,6 @@ namespace Content.Data.Migrations
                     b.HasKey("UserId", "SiteId");
 
                     b.HasIndex("SiteId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("SiteUsers");
                 });

@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Content.GraphQL.Services;
+using GraphQL.Authorization;
 
 namespace Content.GraphQL.Definitions
 {
@@ -47,7 +48,7 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
                 resolve: context => postService.UpsertPost(context.GetArgument<PostInput>("post"), context.GetArgument<string>("siteId"))
-            );
+            ).AuthorizeWith(Content.GraphQL.Constants.Policies.BelongsToSite);
 
             Field<UserType>(
                 "register",

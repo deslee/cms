@@ -11,7 +11,7 @@ namespace Content.GraphQL.Definitions.Types
 {
     public class SiteType: ObjectGraphType<Site>
     {
-        public SiteType() {
+        public SiteType(DataContext dataContext) {
             Name = "Site";
             Field<StringGraphType>(
                 name: "id",
@@ -23,10 +23,13 @@ namespace Content.GraphQL.Definitions.Types
                 description: "The name of the Site",
                 resolve: context => context.Source.Name.ToString()
             );
-            Field<ListGraphType<CategoryType>>(
+            FieldAsync<ListGraphType<CategoryType>>(
                 name: "categories", 
                 description: "The categories of the Site",
-                resolve: context => context.Source.Groups
+                resolve: async context => {
+                    await dataContext.Entry(context.Source).Collection(s => s.Groups).LoadAsync();
+                    return context.Source.Groups;
+                }
             );
             Field<ListGraphType<PostType>>(
                 name: "posts", 

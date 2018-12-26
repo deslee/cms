@@ -2,7 +2,7 @@
 
 namespace Content.Data.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -158,11 +158,6 @@ namespace Content.Data.Migrations
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PostGroups_PostId",
-                table: "PostGroups",
-                column: "PostId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Posts_SiteId",
                 table: "Posts",
                 column: "SiteId");
@@ -173,9 +168,10 @@ namespace Content.Data.Migrations
                 column: "SiteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SiteUsers_UserId",
-                table: "SiteUsers",
-                column: "UserId");
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

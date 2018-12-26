@@ -19,11 +19,7 @@ namespace Content.Data
         {
             // composite keys
             modelBuilder.Entity<PostGroup>().HasKey(e => new { e.PostId, e.GroupId });
-            modelBuilder.Entity<PostGroup>().HasIndex(e => e.PostId);
-            modelBuilder.Entity<PostGroup>().HasIndex(e => e.GroupId);
             modelBuilder.Entity<SiteUser>().HasKey(e => new { e.UserId, e.SiteId });
-            modelBuilder.Entity<SiteUser>().HasIndex(e => e.UserId);
-            modelBuilder.Entity<SiteUser>().HasIndex(e => e.SiteId);
 
             modelBuilder.Entity<User>().HasIndex(e => e.Email).IsUnique();
 

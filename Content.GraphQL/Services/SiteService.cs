@@ -47,7 +47,7 @@ namespace Content.GraphQL.Services
         {
             return await dataContext.Sites
                 .Include(s => s.SiteUsers)
-                .Where(s => s.SiteUsers != null && s.SiteUsers.Any(su => su.UserId == userContext.AuthenticatedUser.Id))
+                .Where(s => userContext.AuthenticatedUser != null && s.SiteUsers.Any(su => su.UserId == userContext.AuthenticatedUser.Id))
                 .ToListAsync();
         }
 
@@ -59,10 +59,16 @@ namespace Content.GraphQL.Services
             var userIds = await dataContext.Users.Where(u => emails.Contains(u.Email)).Select(u => u.Id).ToListAsync();
 
             dataContext.Sites.Update(site);
-            dataContext.SiteUsers.AddRange(userIds.Select(userId => new SiteUser {
+            var siteUsers = userIds.Select(userId => new SiteUser {
                 UserId = userId,
                 SiteId = site.Id
-            }));
+            }).ToList();
+
+            foreach(var siteUser in siteUsers) {
+                if (!(await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteUser.SiteId && su.UserId == siteUser.UserId))) {
+                    dataContext.SiteUsers.Add(siteUser);
+                }
+            }
 
             await dataContext.SaveChangesAsync();
             return site;

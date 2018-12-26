@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Content.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20181226043326_AddUserEmailIndex")]
-    partial class AddUserEmailIndex
+    [Migration("20181226051750_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -83,8 +83,6 @@ namespace Content.Data.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.HasIndex("PostId");
-
                     b.ToTable("PostGroups");
                 });
 
@@ -113,8 +111,6 @@ namespace Content.Data.Migrations
                     b.HasKey("UserId", "SiteId");
 
                     b.HasIndex("SiteId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("SiteUsers");
                 });

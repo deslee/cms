@@ -33,7 +33,7 @@ namespace Content.GraphQL.Definitions
             Field<ListGraphType<SiteType>>(
                 "sites",
                 resolve: context => siteService.GetSites((context.UserContext as UserContext))
-            ).AuthorizeWith(Policies.AdminPolicy);
+            );
             Field<SiteType>(
                 "site",
                 arguments: new QueryArguments(

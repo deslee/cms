@@ -4,6 +4,7 @@ using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
 using Content.GraphQL.Mapping.Profiles;
+using Content.GraphQL.Services;
 using CorrelationId;
 using GraphQL;
 using GraphQL.Server;
@@ -34,7 +35,11 @@ namespace Content.GraphQL
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            MigrateDatabase();
+            var builder = new DbContextOptionsBuilder<DataContext>();
+            ConfigureDatabase(builder);
+            var options = builder.Options;
+            services.AddSingleton<IDataContextProvider>(new DataContextProvider(options));
+            MigrateDatabase(options);
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
@@ -84,15 +89,13 @@ namespace Content.GraphQL
             app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
         }
 
-        private void MigrateDatabase()
+        private void MigrateDatabase(DbContextOptions options)
         {
-            var builder = new DbContextOptionsBuilder<DataContext>();
-            ConfigureDatabase(builder);
-            var dataContext = new DataContext(builder.Options);
+            var dataContext = new DataContext(options);
             dataContext.Database.Migrate();
         }
 
-        private void ConfigureDatabase(DbContextOptionsBuilder builder)
+        protected static internal void ConfigureDatabase(DbContextOptionsBuilder builder)
         {
             builder.UseSqlite("Data Source=content.db");
         }
