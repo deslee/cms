@@ -46,7 +46,7 @@ namespace Content.GraphQL.Definitions.Types
                 name: "slices",
                 description: "The slices of the Post",
                 resolve: context => {
-                    return context.Source.Data["Slices"].Select<JToken, Slice>(slice => {
+                    var slices = context.Source.Data["Slices"].Select<JToken, Slice>(slice => {
                         if (slice["Type"].ToObject<string>() == "paragraph") {
                             return slice.ToObject<ParagraphSlice>();
                         }
@@ -57,7 +57,8 @@ namespace Content.GraphQL.Definitions.Types
                             return slice.ToObject<VideoSlice>();
                         }
                         return null;
-                    });
+                    }).ToList();
+                    return slices;
                 }
             );
         }

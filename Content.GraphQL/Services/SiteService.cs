@@ -10,6 +10,7 @@ using Content.Data.Models;
 using Content.GraphQL.Constants;
 using Content.GraphQL.Models;
 using Content.GraphQL.Models.Input;
+using Content.GraphQL.Models.Result;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ namespace Content.GraphQL.Services
 {
     public interface ISiteService
     {
-        Task<Site> upsertSite(SiteInput siteInput);
+        Task<MutationResult<Site>> upsertSite(SiteInput siteInput);
         Task<Site> GetSite(string id);
         Task<IList<Site>> GetSites(UserContext user);
     }
@@ -51,7 +52,7 @@ namespace Content.GraphQL.Services
                 .ToListAsync();
         }
 
-        public async Task<Site> upsertSite(SiteInput siteInput)
+        public async Task<MutationResult<Site>> upsertSite(SiteInput siteInput)
         {
             var site = mapper.Map<Site>(siteInput);
             var emails = siteInput.Users.Select(e => e.ToLower());
@@ -71,7 +72,9 @@ namespace Content.GraphQL.Services
             }
 
             await dataContext.SaveChangesAsync();
-            return site;
+            return new MutationResult<Site> {
+                Data = site
+            };
         }
     }
 }

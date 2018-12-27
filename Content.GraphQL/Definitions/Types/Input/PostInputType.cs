@@ -10,7 +10,7 @@ namespace Content.GraphQL.Definitions.Types.Input
         public PostInputType() {
             Name = "PostInput";
             Field(p => p.Id, nullable: true);
-            Field(p => p.Categories, nullable: true);
+            Field(p => p.Categories);
             Field(p => p.Title);
             Field<ListGraphType<SliceInputType>>("slices", resolve: context => context.Source.Slices);
         }

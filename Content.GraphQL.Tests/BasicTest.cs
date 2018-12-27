@@ -13,7 +13,7 @@ namespace Content.GraphQL.Tests
 
         public BasicTest()
         {
-            contentSchema = ContentSchemaFactory.CreateContentSchema();
+            contentSchema = ContentSchemaFactory.CreateContentSchema("Data Source=basic-test.db");
         }
 
         [Fact]

@@ -13,6 +13,7 @@ namespace Content.GraphQL.Services
         {
             AddPolicy(Content.GraphQL.Constants.Policies.AdminPolicy, _ => _.RequireClaim(ClaimTypes.Role, Roles.Admin));
             AddPolicy(Content.GraphQL.Constants.Policies.BelongsToSite, _ => _.AddRequirement(new BelongsToSiteAuthorizationRequirement(dataContext)));
+            AddPolicy(Content.GraphQL.Constants.Policies.Authenticated, _ => _.RequireClaim(ClaimTypes.Email));
         }
     }
 }

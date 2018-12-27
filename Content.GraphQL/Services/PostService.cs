@@ -8,6 +8,7 @@ using AutoMapper;
 using Content.Data;
 using Content.Data.Models;
 using Content.GraphQL.Models.Input;
+using Content.GraphQL.Models.Result;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ namespace Content.GraphQL.Services
 {
     public interface IPostService
     {
-        Task<Post> UpsertPost(PostInput postInput, string siteId);
+        Task<MutationResult<Post>> UpsertPost(PostInput postInput, string siteId);
         Task<IList<Post>> GetPosts(string siteId);
         Task<Post> GetPostAsync(string postId);
     }
@@ -45,7 +46,7 @@ namespace Content.GraphQL.Services
                 .ToListAsync();
         }
 
-        public async Task<Post> UpsertPost(PostInput postInput, string siteId)
+        public async Task<MutationResult<Post>> UpsertPost(PostInput postInput, string siteId)
         {
             var post = mapper.Map<Post>(postInput);
 
@@ -84,7 +85,9 @@ namespace Content.GraphQL.Services
 
             dataContext.Update(post);
             await dataContext.SaveChangesAsync();
-            return post;
+            return new MutationResult<Post> {
+                Data = post
+            };
         }
     }
 }

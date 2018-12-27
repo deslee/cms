@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Content.GraphQL.Services;
 using GraphQL.Authorization;
+using Content.GraphQL.Definitions.Types.Result;
 
 namespace Content.GraphQL.Definitions
 {
@@ -33,15 +34,15 @@ namespace Content.GraphQL.Definitions
             this.userService = userService;
             Name = "Mutation";
 
-            Field<SiteType>(
+            Field<MutationResultType<Site, SiteType>>(
                 "upsertSite",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<SiteInputType>> { Name = "site" }
                 ),
                 resolve: context => siteService.upsertSite(context.GetArgument<SiteInput>("site"))
-            );
+            ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
-            Field<PostType>(
+            Field<MutationResultType<Post, PostType>>(
                 "upsertPost",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<PostInputType>> { Name = "post" },
@@ -50,7 +51,7 @@ namespace Content.GraphQL.Definitions
                 resolve: context => postService.UpsertPost(context.GetArgument<PostInput>("post"), context.GetArgument<string>("siteId"))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.BelongsToSite);
 
-            Field<UserType>(
+            Field<MutationResultType<User, UserType>>(
                 "register",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<RegisterInputType>> { Name = "registration" }
@@ -58,7 +59,7 @@ namespace Content.GraphQL.Definitions
                 resolve: context => userService.RegisterUser(context.GetArgument<RegisterInput>("registration"))
             );
 
-            Field<UserType>(
+            Field<MutationResultType<User, UserType>>(
                 "login",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<LoginInputType>> { Name = "login" }

@@ -71,7 +71,7 @@ namespace Content.GraphQL {
             services.AddGraphQL(options =>
             {
                 options.EnableMetrics = true;
-                options.ExposeExceptions = true;
+                options.ExposeExceptions = false;
             })
             .AddUserContextBuilder<UserContextFromJwtBuilder>();
         }

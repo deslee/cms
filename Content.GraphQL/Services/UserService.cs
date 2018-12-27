@@ -11,6 +11,7 @@ using Content.Data;
 using Content.Data.Models;
 using Content.GraphQL.Constants;
 using Content.GraphQL.Models.Input;
+using Content.GraphQL.Models.Result;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +23,8 @@ namespace Content.GraphQL.Services
     {
         Task<User> GetUserByEmail(string email);
         Task<User> AddUserAsync(User user);
-        Task<User> Login(LoginInput loginInput);
-        Task<User> RegisterUser(RegisterInput registerInput);
+        Task<MutationResult<User>> Login(LoginInput loginInput);
+        Task<MutationResult<User>> RegisterUser(RegisterInput registerInput);
         Task<string> CreateJwtToken(User source);
         Task<IEnumerable<Claim>> GetClaimsForUser(User user);
     }
@@ -53,7 +54,7 @@ namespace Content.GraphQL.Services
             return await dataContext.Users.FirstOrDefaultAsync(u => u.Email == email.ToLower());
         }
 
-        public async Task<User> Login(LoginInput loginInput)
+        public async Task<MutationResult<User>> Login(LoginInput loginInput)
         {
             var user = await GetUserByEmail(loginInput.Email.ToLower());
 
@@ -61,21 +62,31 @@ namespace Content.GraphQL.Services
 
             if (validPassword)
             {
-                return user;
+                return new MutationResult<User>
+                {
+                    Data = user
+                };
             }
             else
             {
-                return null;
+                return new MutationResult<User>
+                {
+                    ErrorMessage = "Invalid login"
+                };
             }
         }
 
-        public async Task<User> RegisterUser(RegisterInput registerInput)
+        public async Task<MutationResult<User>> RegisterUser(RegisterInput registerInput)
         {
             registerInput.Email = registerInput.Email.Trim().ToLower();
 
             var existsAlready = await dataContext.Users.AnyAsync(u => u.Email == registerInput.Email);
-            if (existsAlready) {
-                throw new Exception("User already exists");
+            if (existsAlready)
+            {
+                return new MutationResult<User>
+                {
+                    ErrorMessage = "User already exists"
+                };
             }
 
             // generate a 128-bit salt using a secure PRNG
@@ -89,7 +100,11 @@ namespace Content.GraphQL.Services
             var user = mapper.Map<User>(registerInput);
             user.Salt = Convert.ToBase64String(salt);
 
-            return await AddUserAsync(user);
+            var addedUser = await AddUserAsync(user);
+            return new MutationResult<User>
+            {
+                Data = addedUser
+            };
         }
 
         private async Task<bool> ValidatePassword(string password, string hashedPassword, string salt)
@@ -131,7 +146,8 @@ namespace Content.GraphQL.Services
         public Task<IEnumerable<Claim>> GetClaimsForUser(User user)
         {
             var claims = new List<Claim>();
-            if (user.Email == "desmondclee@gmail.com") {
+            if (user.Email == "desmondclee@gmail.com")
+            {
                 claims.Add(new Claim(ClaimTypes.Role, Roles.Admin));
             }
             return Task.FromResult(claims.AsEnumerable());

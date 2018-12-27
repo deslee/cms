@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using GraphQL.Instrumentation;
 using GraphQL.Server;
@@ -10,15 +11,21 @@ namespace Content.GraphQL.Definitions.Middleware
     {
         private readonly ILogger<LoggingMiddleware> logger;
 
-        public LoggingMiddleware(ILogger<LoggingMiddleware> logger) {
+        public LoggingMiddleware(ILogger<LoggingMiddleware> logger)
+        {
             this.logger = logger;
         }
 
         public async Task<object> Resolve(ResolveFieldContext context, FieldMiddlewareDelegate next)
         {
-            logger.LogInformation("Resolving {field}", context.FieldName);
-            var res = await next(context);
-            return res;
+            try
+            {
+                var res = await next(context);
+                return res;
+            } catch (Exception ex) {
+                logger.LogError(ex, "Caught by logging middleware");
+                throw;
+            }
         }
     }
 }

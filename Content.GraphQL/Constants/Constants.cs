@@ -6,6 +6,7 @@ namespace Content.GraphQL.Constants {
     {
         public static string AdminPolicy = "AdminPolicy";
         public static string BelongsToSite = "BelongsToSite";
+        public static string Authenticated = "Authenticated";
     }
 
     public static class Roles

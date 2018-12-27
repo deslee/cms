@@ -13,7 +13,7 @@ namespace Content.GraphQL.Tests
 
         public PostTests()
         {
-            contentSchema = ContentSchemaFactory.CreateContentSchema();
+            contentSchema = ContentSchemaFactory.CreateContentSchema("Data Source=post-tests.db");
             var data = contentSchema.ExecuteQueryAndAssert(@"
                 mutation createSite($site: SiteInput!) {
                     upsertSite(site: $site) {
