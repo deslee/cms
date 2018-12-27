@@ -1,3 +1,0 @@
-[submodule "Dependencies/GraphQL.Server"]
-	path = Dependencies/GraphQL.Server
-	url = git@github.com:deslee/server.git

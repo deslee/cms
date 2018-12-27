@@ -4,6 +4,7 @@ using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
 using Content.GraphQL.Mapping.Profiles;
+using Content.GraphQL.Services;
 using GraphQL;
 using Microsoft.EntityFrameworkCore;
 using Ninject;
@@ -24,6 +25,10 @@ namespace Content.GraphQL.Tests {
             kernel.Bind<ContentQuery>().ToSelf();
             kernel.Bind<ContentMutation>().ToSelf();
             kernel.Bind<ContentSchema>().ToConstant(new ContentSchema(new FuncDependencyResolver(resolver: type => kernel.Get(type))));
+            
+            kernel.Bind<IUserService>().To<UserService>();
+            kernel.Bind<ISiteService>().To<SiteService>();
+            kernel.Bind<IPostService>().To<PostService>();
 
             foreach (Type type in typeof(ContentSchema).Assembly.GetTypes())
             {

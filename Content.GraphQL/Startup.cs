@@ -38,7 +38,6 @@ namespace Content.GraphQL
             var builder = new DbContextOptionsBuilder<DataContext>();
             ConfigureDatabase(builder);
             var options = builder.Options;
-            services.AddSingleton<IDataContextProvider>(new DataContextProvider(options));
             MigrateDatabase(options);
 
             var appSettingsSection = Configuration.GetSection("AppSettings");

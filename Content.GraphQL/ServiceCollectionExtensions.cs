@@ -60,9 +60,12 @@ namespace Content.GraphQL {
             }
 
             // add auth rules
-            services.AddSingleton<IAuthorizationEvaluator, AuthorizationEvaluator>();
+            services.AddTransient<IAuthorizationEvaluator, AuthorizationEvaluator>();
             services.AddTransient<IValidationRule, AuthorizationValidationRule>();
-            services.AddSingleton<AuthorizationSettings, ContentAuthorizationSettings>();
+            services.AddTransient<AuthorizationSettings, ContentAuthorizationSettings>();
+
+            // add field middleware
+            services.AddTransient<IFieldMiddleware, LoggingMiddleware>();
 
             // Add GraphQL services and configure options
             services.AddGraphQL(options =>
@@ -70,8 +73,7 @@ namespace Content.GraphQL {
                 options.EnableMetrics = true;
                 options.ExposeExceptions = true;
             })
-            .AddUserContextBuilder<UserContextFromJwtBuilder>()
-            .AddFieldMiddleware<LoggingMiddleware>();
+            .AddUserContextBuilder<UserContextFromJwtBuilder>();
         }
 
         public static void AddCustomServices(this IServiceCollection services) {

@@ -16,7 +16,7 @@ namespace Content.GraphQL.Mapping.Profiles
         {
             CreateMap<SiteInput, Site>();
             CreateMap<PostInput, Post>()
-                .ForMember(d => d.PostGroups, o => o.MapFrom((src, dest, res, ctx) => src.Categories.Select(groupName => new PostGroup {
+                .ForMember(d => d.PostGroups, o => o.MapFrom((src, dest, res, ctx) => src.Categories?.Select(groupName => new PostGroup {
                     Post = dest,
                     PostId = dest.Id,
                     Group = new Group {
