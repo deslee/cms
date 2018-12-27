@@ -18,13 +18,12 @@ namespace Content.GraphQL.Services
         {
             var userService = httpContext.RequestServices.GetRequiredService<IUserService>();
 
-
-            var email = httpContext.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            if (email == null)
+            var userId = httpContext.User?.Claims?.FirstOrDefault(c => c.Type == Constants.ClaimTypes.DatabaseId)?.Value;
+            if (userId == null)
             {
                 return new UserContext();
             }
-            var user = await userService.GetUserByEmail(email);
+            var user = await userService.GetUserById(userId);
             if (user == null) {
                 return new UserContext();
             }

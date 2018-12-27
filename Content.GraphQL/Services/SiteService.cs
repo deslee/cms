@@ -21,6 +21,7 @@ namespace Content.GraphQL.Services
     public interface ISiteService
     {
         Task<MutationResult<Site>> upsertSite(SiteInput siteInput, UserContext userContext);
+        Task<MutationResult> DeleteSite(string siteId, UserContext userContext);
         Task<Site> GetSite(string id);
         Task<IList<Site>> GetSites(UserContext user);
     }
@@ -36,6 +37,38 @@ namespace Content.GraphQL.Services
             this.dataContext = dataContext;
             this.mapper = mapper;
             this.logger = logger;
+        }
+
+        public async Task<MutationResult> DeleteSite(string siteId, UserContext userContext)
+        {
+            try
+            {
+                // validate
+                var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
+                if (!validated)
+                {
+                    return new MutationResult<Site>
+                    {
+                        ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
+                    };
+                }
+
+                // delete
+                var site = await dataContext.Sites.FindAsync(siteId);
+                dataContext.Sites.Remove(site);
+
+                await dataContext.SaveChangesAsync();
+
+                return new MutationResult();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occured while deleting a site");
+                return new MutationResult
+                {
+                    ErrorMessage = "An unexpected error occured. Please try again."
+                };
+            }
         }
 
         public async Task<Site> GetSite(string id)

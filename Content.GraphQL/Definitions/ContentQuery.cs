@@ -57,7 +57,7 @@ namespace Content.GraphQL.Definitions
             );
             Field<UserType>(
                 "me",
-                resolve: context => userService.GetUserByEmail((context.UserContext as UserContext)?.Email)
+                resolve: context => userService.GetUserById((context.UserContext as UserContext)?.Id)
             );
         }
     }

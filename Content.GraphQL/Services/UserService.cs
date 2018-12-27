@@ -22,6 +22,7 @@ namespace Content.GraphQL.Services
 {
     public interface IUserService
     {
+        Task<User> GetUserById(string id);
         Task<User> GetUserByEmail(string email);
         Task<User> AddUserAsync(User user);
         Task<MutationResult<User>> Login(LoginInput loginInput);
@@ -55,6 +56,11 @@ namespace Content.GraphQL.Services
         public async Task<User> GetUserByEmail(string email)
         {
             return await dataContext.Users.FirstOrDefaultAsync(u => u.Email == email.ToLower());
+        }
+
+        public async Task<User> GetUserById(string id)
+        {
+            return await dataContext.Users.FindAsync(id);
         }
 
         public async Task<MutationResult<User>> Login(LoginInput loginInput)

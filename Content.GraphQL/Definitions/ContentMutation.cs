@@ -52,12 +52,21 @@ namespace Content.GraphQL.Definitions
                 resolve: context => postService.UpsertPost(context.GetArgument<PostInput>("post"), (context.UserContext as UserContext), context.GetArgument<string>("siteId"))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
-            // Field<MutationResultType>(
-            //     "deletePost",
-            //     arguments: new QueryArguments(
-            //         new QueryArgument
-            //     )
-            // )
+            Field<MutationResultType>(
+                "deletePost",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "postId" }
+                ),
+                resolve: context => postService.DeletePost(context.GetArgument<string>("postId"), (context.UserContext as UserContext))
+            );
+            
+            Field<MutationResultType>(
+                "deleteSite",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
+                ),
+                resolve: context => siteService.DeleteSite(context.GetArgument<string>("siteId"), (context.UserContext as UserContext))
+            );
 
             Field<MutationResultType<User, UserType>>(
                 "register",

@@ -21,6 +21,7 @@ namespace Content.GraphQL.Services
     {
         Task<MutationResult<Post>> UpsertPost(PostInput postInput, UserContext userContext, string siteId);
         Task<IList<Post>> GetPosts(string siteId);
+        Task<MutationResult> DeletePost(string postId, UserContext userContext);
         Task<Post> GetPost(string postId);
     }
 
@@ -37,10 +38,44 @@ namespace Content.GraphQL.Services
             this.logger = logger;
         }
 
+        public async Task<MutationResult> DeletePost(string postId, UserContext userContext)
+        {
+            try
+            {
+                // find post
+                var post = await dataContext.Posts.FindAsync(postId);
+                var siteId = dataContext.Entry(post).Property("SiteId").CurrentValue as string;
+
+                // validate
+                var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
+                if (!validated)
+                {
+                    return new MutationResult<Site>
+                    {
+                        ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
+                    };
+                }
+
+                // delete
+                dataContext.Posts.Remove(post);
+
+                await dataContext.SaveChangesAsync();
+
+                return new MutationResult();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occured while deleting a post");
+                return new MutationResult
+                {
+                    ErrorMessage = "An unexpected error occured. Please try again."
+                };
+            }
+        }
+
         public async Task<Post> GetPost(string postId)
         {
-            return await dataContext.Posts
-                .FirstOrDefaultAsync(s => s.Id == postId);
+            return await dataContext.Posts.FindAsync(postId);
         }
 
         public async Task<IList<Post>> GetPosts(string siteId)
