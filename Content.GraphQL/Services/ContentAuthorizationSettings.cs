@@ -2,7 +2,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Content.Data;
 using Content.GraphQL.Constants;
-using Content.GraphQL.Requirements;
 using GraphQL.Authorization;
 
 namespace Content.GraphQL.Services
@@ -11,9 +10,8 @@ namespace Content.GraphQL.Services
     {
         public ContentAuthorizationSettings(DataContext dataContext)
         {
-            AddPolicy(Content.GraphQL.Constants.Policies.AdminPolicy, _ => _.RequireClaim(ClaimTypes.Role, Roles.Admin));
-            AddPolicy(Content.GraphQL.Constants.Policies.BelongsToSite, _ => _.AddRequirement(new BelongsToSiteAuthorizationRequirement(dataContext)));
-            AddPolicy(Content.GraphQL.Constants.Policies.Authenticated, _ => _.RequireClaim(ClaimTypes.Email));
+            AddPolicy(Content.GraphQL.Constants.Policies.AdminPolicy, _ => _.RequireClaim(Constants.ClaimTypes.Role, Roles.Admin));
+            AddPolicy(Content.GraphQL.Constants.Policies.Authenticated, _ => _.RequireClaim(Constants.ClaimTypes.Email));
         }
     }
 }

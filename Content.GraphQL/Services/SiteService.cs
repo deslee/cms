@@ -20,7 +20,7 @@ namespace Content.GraphQL.Services
 {
     public interface ISiteService
     {
-        Task<MutationResult<Site>> upsertSite(SiteInput siteInput);
+        Task<MutationResult<Site>> upsertSite(SiteInput siteInput, UserContext userContext);
         Task<Site> GetSite(string id);
         Task<IList<Site>> GetSites(UserContext user);
     }
@@ -48,33 +48,61 @@ namespace Content.GraphQL.Services
         {
             return await dataContext.Sites
                 .Include(s => s.SiteUsers)
-                .Where(s => userContext.AuthenticatedUser != null && s.SiteUsers.Any(su => su.UserId == userContext.AuthenticatedUser.Id))
+                .Where(s => userContext != null && s.SiteUsers.Any(su => su.UserId == userContext.Id))
                 .ToListAsync();
         }
 
-        public async Task<MutationResult<Site>> upsertSite(SiteInput siteInput)
+        public async Task<MutationResult<Site>> upsertSite(SiteInput siteInput, UserContext userContext)
         {
-            var site = mapper.Map<Site>(siteInput);
-            var emails = siteInput.Users.Select(e => e.ToLower());
-            
-            var userIds = await dataContext.Users.Where(u => emails.Contains(u.Email)).Select(u => u.Id).ToListAsync();
+            try
+            {
+                var site = mapper.Map<Site>(siteInput);
+                var emails = siteInput.Users.Select(e => e.ToLower());
 
-            dataContext.Sites.Update(site);
-            var siteUsers = userIds.Select(userId => new SiteUser {
-                UserId = userId,
-                SiteId = site.Id
-            }).ToList();
-
-            foreach(var siteUser in siteUsers) {
-                if (!(await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteUser.SiteId && su.UserId == siteUser.UserId))) {
-                    dataContext.SiteUsers.Add(siteUser);
+                // validate
+                if (siteInput.Id != null)
+                {
+                    var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteInput.Id && su.UserId == userContext.Id);
+                    if (!validated)
+                    {
+                        return new MutationResult<Site>
+                        {
+                            ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteInput.Id}."
+                        };
+                    }
                 }
-            }
 
-            await dataContext.SaveChangesAsync();
-            return new MutationResult<Site> {
-                Data = site
-            };
+                var userIds = await dataContext.Users.Where(u => emails.Contains(u.Email)).Select(u => u.Id).ToListAsync();
+
+                dataContext.Sites.Update(site);
+                var siteUsers = userIds.Select(userId => new SiteUser
+                {
+                    UserId = userId,
+                    SiteId = site.Id
+                }).ToList();
+
+                foreach (var siteUser in siteUsers)
+                {
+                    if (!(await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteUser.SiteId && su.UserId == siteUser.UserId)))
+                    {
+                        dataContext.SiteUsers.Add(siteUser);
+                    }
+                }
+
+                await dataContext.SaveChangesAsync();
+                return new MutationResult<Site>
+                {
+                    Data = site
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occured while upserting a site");
+                return new MutationResult<Site>
+                {
+                    ErrorMessage = "An unexpected error occured. Please try again."
+                };
+            }
         }
     }
 }

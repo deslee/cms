@@ -29,7 +29,7 @@ namespace Content.GraphQL.Services
                 return new UserContext();
             }
             var moreClaims = await userService.GetClaimsForUser(user);
-            return new UserContext(user, httpContext.User.Claims.Concat(moreClaims));
+            return new UserContext(httpContext.User.Claims.Concat(moreClaims));
         }
     }
 }

@@ -53,11 +53,11 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "postId" }
                 ),
-                resolve: context => postService.GetPostAsync(context.GetArgument<string>("postId"))
+                resolve: context => postService.GetPost(context.GetArgument<string>("postId"))
             );
             Field<UserType>(
                 "me",
-                resolve: context => (context.UserContext as UserContext).AuthenticatedUser
+                resolve: context => userService.GetUserByEmail((context.UserContext as UserContext)?.Email)
             );
         }
     }

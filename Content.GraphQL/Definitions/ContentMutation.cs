@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Content.GraphQL.Services;
 using GraphQL.Authorization;
 using Content.GraphQL.Definitions.Types.Result;
+using Content.GraphQL.Models;
 
 namespace Content.GraphQL.Definitions
 {
@@ -39,7 +40,7 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<SiteInputType>> { Name = "site" }
                 ),
-                resolve: context => siteService.upsertSite(context.GetArgument<SiteInput>("site"))
+                resolve: context => siteService.upsertSite(context.GetArgument<SiteInput>("site"), (context.UserContext as UserContext))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType<Post, PostType>>(
@@ -48,8 +49,15 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<PostInputType>> { Name = "post" },
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: context => postService.UpsertPost(context.GetArgument<PostInput>("post"), context.GetArgument<string>("siteId"))
-            ).AuthorizeWith(Content.GraphQL.Constants.Policies.BelongsToSite);
+                resolve: context => postService.UpsertPost(context.GetArgument<PostInput>("post"), (context.UserContext as UserContext), context.GetArgument<string>("siteId"))
+            ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
+
+            // Field<MutationResultType>(
+            //     "deletePost",
+            //     arguments: new QueryArguments(
+            //         new QueryArgument
+            //     )
+            // )
 
             Field<MutationResultType<User, UserType>>(
                 "register",

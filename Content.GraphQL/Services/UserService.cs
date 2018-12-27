@@ -15,6 +15,7 @@ using Content.GraphQL.Models.Result;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Content.GraphQL.Services
@@ -34,12 +35,14 @@ namespace Content.GraphQL.Services
         private readonly DataContext dataContext;
         private readonly IMapper mapper;
         private readonly AppSettings appSettings;
+        private readonly ILogger<UserService> logger;
 
-        public UserService(DataContext dataContext, IMapper mapper, AppSettings appSettings)
+        public UserService(DataContext dataContext, IMapper mapper, AppSettings appSettings, ILogger<UserService> logger)
         {
             this.dataContext = dataContext;
             this.mapper = mapper;
             this.appSettings = appSettings;
+            this.logger = logger;
         }
 
         public async Task<User> AddUserAsync(User user)
@@ -56,55 +59,77 @@ namespace Content.GraphQL.Services
 
         public async Task<MutationResult<User>> Login(LoginInput loginInput)
         {
-            var user = await GetUserByEmail(loginInput.Email.ToLower());
-
-            var validPassword = await ValidatePassword(loginInput.Password, user.Password, user.Salt);
-
-            if (validPassword)
+            try
             {
-                return new MutationResult<User>
+                var user = await GetUserByEmail(loginInput.Email.ToLower());
+
+                var validPassword = await ValidatePassword(loginInput.Password, user.Password, user.Salt);
+
+                if (validPassword)
                 {
-                    Data = user
-                };
+                    return new MutationResult<User>
+                    {
+                        Data = user
+                    };
+                }
+                else
+                {
+                    return new MutationResult<User>
+                    {
+                        ErrorMessage = "Invalid login"
+                    };
+                }
             }
-            else
+            catch (Exception ex)
             {
+                logger.LogError(ex, "An error occured while logging in");
                 return new MutationResult<User>
                 {
-                    ErrorMessage = "Invalid login"
+                    ErrorMessage = "An unexpected error occured. Please try again."
                 };
             }
         }
 
         public async Task<MutationResult<User>> RegisterUser(RegisterInput registerInput)
         {
-            registerInput.Email = registerInput.Email.Trim().ToLower();
-
-            var existsAlready = await dataContext.Users.AnyAsync(u => u.Email == registerInput.Email);
-            if (existsAlready)
+            try
             {
+                registerInput.Email = registerInput.Email.Trim().ToLower();
+
+                var existsAlready = await dataContext.Users.AnyAsync(u => u.Email == registerInput.Email);
+                if (existsAlready)
+                {
+                    return new MutationResult<User>
+                    {
+                        ErrorMessage = "User already exists"
+                    };
+                }
+
+                // generate a 128-bit salt using a secure PRNG
+                byte[] salt = new byte[128 / 8];
+                using (var rng = RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(salt);
+                }
+                registerInput.Password = await GetHash(registerInput.Password, salt);
+
+                var user = mapper.Map<User>(registerInput);
+                user.Salt = Convert.ToBase64String(salt);
+
+                var addedUser = await AddUserAsync(user);
                 return new MutationResult<User>
                 {
-                    ErrorMessage = "User already exists"
+                    Data = addedUser
                 };
             }
-
-            // generate a 128-bit salt using a secure PRNG
-            byte[] salt = new byte[128 / 8];
-            using (var rng = RandomNumberGenerator.Create())
+            catch (Exception ex)
             {
-                rng.GetBytes(salt);
+                logger.LogError(ex, "An error occured while registering a user");
+                return new MutationResult<User>
+                {
+                    ErrorMessage = "An unexpected error occured. Please try again."
+                };
             }
-            registerInput.Password = await GetHash(registerInput.Password, salt);
-
-            var user = mapper.Map<User>(registerInput);
-            user.Salt = Convert.ToBase64String(salt);
-
-            var addedUser = await AddUserAsync(user);
-            return new MutationResult<User>
-            {
-                Data = addedUser
-            };
         }
 
         private async Task<bool> ValidatePassword(string password, string hashedPassword, string salt)
@@ -132,8 +157,9 @@ namespace Content.GraphQL.Services
                         var tokenDescriptor = new SecurityTokenDescriptor
                         {
                             Subject = new ClaimsIdentity(new[] {
-                            new Claim(ClaimTypes.Email, user.Email.ToString())
-                        }),
+                                new Claim(Constants.ClaimTypes.Email, user.Email.ToString()),
+                                new Claim(Constants.ClaimTypes.DatabaseId, user.Id)
+                            }),
                             Expires = DateTime.UtcNow.AddDays(7),
                             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                         };
@@ -148,7 +174,7 @@ namespace Content.GraphQL.Services
             var claims = new List<Claim>();
             if (user.Email == "desmondclee@gmail.com")
             {
-                claims.Add(new Claim(ClaimTypes.Role, Roles.Admin));
+                claims.Add(new Claim(Constants.ClaimTypes.Role, Roles.Admin));
             }
             return Task.FromResult(claims.AsEnumerable());
         }
