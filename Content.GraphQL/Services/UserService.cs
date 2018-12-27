@@ -10,6 +10,7 @@ using AutoMapper;
 using Content.Data;
 using Content.Data.Models;
 using Content.GraphQL.Constants;
+using Content.GraphQL.Models;
 using Content.GraphQL.Models.Input;
 using Content.GraphQL.Models.Result;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
@@ -27,7 +28,7 @@ namespace Content.GraphQL.Services
         Task<User> AddUserAsync(User user);
         Task<MutationResult<User>> Login(LoginInput loginInput);
         Task<MutationResult<User>> RegisterUser(RegisterInput registerInput);
-        Task<string> CreateJwtToken(User source);
+        Task<string> CreateJwtToken(User source, UserContext userContext);
         Task<IEnumerable<Claim>> GetClaimsForUser(User user);
     }
 
@@ -154,8 +155,14 @@ namespace Content.GraphQL.Services
                     )));
         }
 
-        public async Task<string> CreateJwtToken(User user)
+        public async Task<string> CreateJwtToken(User user, UserContext userContext)
         {
+            // validate
+            var validated = user.Id == userContext.Id;
+            if (!validated) {
+                return null;
+            }
+
             var token = await Task.Run(() =>
                     {
                         var tokenHandler = new JwtSecurityTokenHandler();
