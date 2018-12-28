@@ -6,7 +6,7 @@ import { getClient } from './data/apolloClient';
 import { BrowserRouter as Router, Route, Link, Redirect, Switch } from "react-router-dom";
 import AppBar from './components/AppBar';
 import 'semantic-ui-css/semantic.min.css'
-import DashboardPage from './pages/DashboardPage';
+import SiteListingPage from './pages/SiteListingPage';
 import LoginPage from './pages/LoginPage';
 import PrivateRoute from './utils/PrivateRoute';
 import { AUTH_USER_KEY } from './utils/Constants';
@@ -65,11 +65,9 @@ class App extends Component<Props, State> {
         <ApolloProvider client={getClient(authUser.user && authUser.user.token)}>
           <Router>
             <Switch>
-              <PrivateRoute path="/dashboard" component={DashboardPage} />
+              <PrivateRoute path="/sites" component={SiteListingPage} />
               <Route path="/login" component={LoginPage} />
-
-
-              <Redirect to="/dashboard" />
+              <Redirect to="/sites" />
             </Switch>
           </Router>
         </ApolloProvider>

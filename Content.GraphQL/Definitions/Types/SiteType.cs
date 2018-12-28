@@ -31,10 +31,13 @@ namespace Content.GraphQL.Definitions.Types
                     return context.Source.Groups;
                 }
             );
-            Field<ListGraphType<PostType>>(
+            FieldAsync<ListGraphType<PostType>>(
                 name: "posts", 
                 description: "The posts of the Site",
-                resolve: context => context.Source.Posts
+                resolve: async context => {
+                    await dataContext.Entry(context.Source).Collection(s => s.Posts).LoadAsync();
+                    return context.Source.Posts;
+                }
             );
         }
     }
