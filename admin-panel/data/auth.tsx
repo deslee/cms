@@ -1,10 +1,16 @@
 import * as React from 'react'
 
-export type AuthUser = any;
+export type AuthUser = {
+    email: string
+    name: string
+    token: string
+};
+
+export type UpdateAuthUser = (user: AuthUser) => void;
 
 export interface AuthUserContext {
     user?: AuthUser;
-    updateUser: (user: AuthUser) => void;
+    updateUser: UpdateAuthUser;
 }
 
 const Context = React.createContext<AuthUserContext>({

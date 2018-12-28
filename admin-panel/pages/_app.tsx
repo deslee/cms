@@ -1,13 +1,13 @@
 import * as React from 'react'
 import App, { Container } from 'next/app'
-import { AuthUserProvider, AuthUserContext } from '../data/auth';
+import { AuthUserProvider, AuthUserContext, UpdateAuthUser, AuthUser } from '../data/auth';
 
 interface State {
     authUser: AuthUserContext
 }
 
 class ContentAdminApp extends App {
-    updateUser = (user: any) => {
+    updateUser: UpdateAuthUser = (user: AuthUser) => {
         this.setState({
             authUser: {
                 user

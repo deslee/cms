@@ -35,6 +35,7 @@ namespace Content.GraphQL
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(corsOptions => corsOptions.AddPolicy("AllowAllOrigins", policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
             var builder = new DbContextOptionsBuilder<DataContext>();
             ConfigureDatabase(builder);
             var options = builder.Options;
@@ -66,6 +67,7 @@ namespace Content.GraphQL
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCors("AllowAllOrigins");
             app.UseAuthentication();
             app.UseCorrelationId(new CorrelationIdOptions
             {

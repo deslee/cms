@@ -76,7 +76,7 @@ namespace Content.GraphQL.Definitions
                 resolve: context => userService.RegisterUser(context.GetArgument<RegisterInput>("registration"))
             );
 
-            Field<MutationResultType<User, UserType>>(
+            Field<LoginResultType>(
                 "login",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<LoginInputType>> { Name = "login" }

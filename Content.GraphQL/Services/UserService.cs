@@ -26,7 +26,7 @@ namespace Content.GraphQL.Services
         Task<User> GetUserById(string id);
         Task<User> GetUserByEmail(string email);
         Task<User> AddUserAsync(User user);
-        Task<MutationResult<User>> Login(LoginInput loginInput);
+        Task<LoginResult> Login(LoginInput loginInput);
         Task<MutationResult<User>> RegisterUser(RegisterInput registerInput);
         Task<string> CreateJwtToken(User source, UserContext userContext);
         Task<IEnumerable<Claim>> GetClaimsForUser(User user);
@@ -64,24 +64,35 @@ namespace Content.GraphQL.Services
             return await dataContext.Users.FindAsync(id);
         }
 
-        public async Task<MutationResult<User>> Login(LoginInput loginInput)
+        public async Task<LoginResult> Login(LoginInput loginInput)
         {
             try
             {
                 var user = await GetUserByEmail(loginInput.Email.ToLower());
 
+                if (user == null)
+                {
+                    return new LoginResult
+                    {
+                        ErrorMessage = "Invalid login"
+                    };
+                }
+
                 var validPassword = await ValidatePassword(loginInput.Password, user.Password, user.Salt);
+
+                var token = await CreateJwtToken(user, new UserContext(new[] { new Claim(Constants.ClaimTypes.DatabaseId, user.Id) }));
 
                 if (validPassword)
                 {
-                    return new MutationResult<User>
+                    return new LoginResult
                     {
-                        Data = user
+                        Data = user,
+                        Token = token
                     };
                 }
                 else
                 {
-                    return new MutationResult<User>
+                    return new LoginResult
                     {
                         ErrorMessage = "Invalid login"
                     };
@@ -90,7 +101,7 @@ namespace Content.GraphQL.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occured while logging in");
-                return new MutationResult<User>
+                return new LoginResult
                 {
                     ErrorMessage = "An unexpected error occured. Please try again."
                 };
@@ -159,7 +170,8 @@ namespace Content.GraphQL.Services
         {
             // validate
             var validated = user.Id == userContext.Id;
-            if (!validated) {
+            if (!validated)
+            {
                 return null;
             }
 
