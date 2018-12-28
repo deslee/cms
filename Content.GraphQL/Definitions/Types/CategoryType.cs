@@ -31,9 +31,9 @@ namespace Content.GraphQL.Definitions.Types
                 resolve: async context => {
                     dataContext.Attach(context.Source);
                     return await dataContext.Entry(context.Source)
-                        .Collection(p => p.PostGroups)
+                        .Collection(p => p.ItemGroups)
                         .Query()
-                        .Select(pg => pg.Post)
+                        .Select(pg => pg.Item)
                         .ToListAsync();
                 }
             );

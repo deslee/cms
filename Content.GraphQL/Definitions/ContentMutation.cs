@@ -43,7 +43,7 @@ namespace Content.GraphQL.Definitions
                 resolve: context => siteService.upsertSite(context.GetArgument<SiteInput>("site"), (context.UserContext as UserContext))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
-            Field<MutationResultType<Post, PostType>>(
+            Field<MutationResultType<Item, PostType>>(
                 "upsertPost",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<PostInputType>> { Name = "post" },

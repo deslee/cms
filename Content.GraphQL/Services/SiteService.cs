@@ -55,6 +55,12 @@ namespace Content.GraphQL.Services
 
                 // delete
                 var site = await dataContext.Sites.FindAsync(siteId);
+                if (site == null) {
+                    return new MutationResult<Site>
+                    {
+                        ErrorMessage = $"Site {siteId} does not exist."
+                    };
+                }
                 dataContext.Sites.Remove(site);
 
                 await dataContext.SaveChangesAsync();

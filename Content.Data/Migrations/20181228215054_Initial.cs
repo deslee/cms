@@ -40,6 +40,7 @@ namespace Content.Data.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     SiteId = table.Column<string>(nullable: false),
+                    State = table.Column<int>(nullable: false),
                     Data = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -74,18 +75,19 @@ namespace Content.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Posts",
+                name: "Items",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
                     SiteId = table.Column<string>(nullable: false),
-                    Data = table.Column<string>(nullable: true)
+                    Data = table.Column<string>(nullable: true),
+                    Type = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Posts", x => x.Id);
+                    table.PrimaryKey("PK_Items", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Posts_Sites_SiteId",
+                        name: "FK_Items_Sites_SiteId",
                         column: x => x.SiteId,
                         principalTable: "Sites",
                         principalColumn: "Id",
@@ -118,26 +120,26 @@ namespace Content.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PostGroups",
+                name: "ItemGroups",
                 columns: table => new
                 {
-                    PostId = table.Column<string>(nullable: false),
+                    ItemId = table.Column<string>(nullable: false),
                     GroupId = table.Column<string>(nullable: false),
                     Order = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PostGroups", x => new { x.PostId, x.GroupId });
+                    table.PrimaryKey("PK_ItemGroups", x => new { x.ItemId, x.GroupId });
                     table.ForeignKey(
-                        name: "FK_PostGroups_Groups_GroupId",
+                        name: "FK_ItemGroups_Groups_GroupId",
                         column: x => x.GroupId,
                         principalTable: "Groups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PostGroups_Posts_PostId",
-                        column: x => x.PostId,
-                        principalTable: "Posts",
+                        name: "FK_ItemGroups_Items_ItemId",
+                        column: x => x.ItemId,
+                        principalTable: "Items",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -153,13 +155,13 @@ namespace Content.Data.Migrations
                 column: "SiteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PostGroups_GroupId",
-                table: "PostGroups",
+                name: "IX_ItemGroups_GroupId",
+                table: "ItemGroups",
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Posts_SiteId",
-                table: "Posts",
+                name: "IX_Items_SiteId",
+                table: "Items",
                 column: "SiteId");
 
             migrationBuilder.CreateIndex(
@@ -180,7 +182,7 @@ namespace Content.Data.Migrations
                 name: "Assets");
 
             migrationBuilder.DropTable(
-                name: "PostGroups");
+                name: "ItemGroups");
 
             migrationBuilder.DropTable(
                 name: "SiteUsers");
@@ -189,7 +191,7 @@ namespace Content.Data.Migrations
                 name: "Groups");
 
             migrationBuilder.DropTable(
-                name: "Posts");
+                name: "Items");
 
             migrationBuilder.DropTable(
                 name: "Users");

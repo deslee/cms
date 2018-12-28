@@ -16,6 +16,6 @@ namespace Content.Data.Models
         public JObject Data { get; set; }
         [Required]
         public string Name { get; set; }
-        public virtual ICollection<PostGroup> PostGroups { get; set; }
+        public virtual ICollection<ItemGroup> ItemGroups { get; set; }
     }
 }

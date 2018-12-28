@@ -25,6 +25,8 @@ namespace Content.Data.Migrations
                     b.Property<string>("SiteId")
                         .IsRequired();
 
+                    b.Property<int>("State");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SiteId");
@@ -52,7 +54,7 @@ namespace Content.Data.Migrations
                     b.ToTable("Groups");
                 });
 
-            modelBuilder.Entity("Content.Data.Models.Post", b =>
+            modelBuilder.Entity("Content.Data.Models.Item", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -62,26 +64,28 @@ namespace Content.Data.Migrations
                     b.Property<string>("SiteId")
                         .IsRequired();
 
+                    b.Property<string>("Type");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SiteId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Items");
                 });
 
-            modelBuilder.Entity("Content.Data.Models.PostGroup", b =>
+            modelBuilder.Entity("Content.Data.Models.ItemGroup", b =>
                 {
-                    b.Property<string>("PostId");
+                    b.Property<string>("ItemId");
 
                     b.Property<string>("GroupId");
 
                     b.Property<int>("Order");
 
-                    b.HasKey("PostId", "GroupId");
+                    b.HasKey("ItemId", "GroupId");
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("PostGroups");
+                    b.ToTable("ItemGroups");
                 });
 
             modelBuilder.Entity("Content.Data.Models.Site", b =>
@@ -150,24 +154,24 @@ namespace Content.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Content.Data.Models.Post", b =>
+            modelBuilder.Entity("Content.Data.Models.Item", b =>
                 {
                     b.HasOne("Content.Data.Models.Site", "Site")
-                        .WithMany("Posts")
+                        .WithMany("Items")
                         .HasForeignKey("SiteId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Content.Data.Models.PostGroup", b =>
+            modelBuilder.Entity("Content.Data.Models.ItemGroup", b =>
                 {
                     b.HasOne("Content.Data.Models.Group", "Group")
-                        .WithMany("PostGroups")
+                        .WithMany("ItemGroups")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Content.Data.Models.Post", "Post")
-                        .WithMany("PostGroups")
-                        .HasForeignKey("PostId")
+                    b.HasOne("Content.Data.Models.Item", "Item")
+                        .WithMany("ItemGroups")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

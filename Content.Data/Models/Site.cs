@@ -11,7 +11,7 @@ namespace Content.Data.Models
         public string Name { get; set; }
         [JsonString]
         public JObject Data { get; set; }
-        public virtual ICollection<Post> Posts { get; set; }
+        public virtual ICollection<Item> Items { get; set; }
         public virtual ICollection<Group> Groups { get; set; }
         public virtual ICollection<Asset> Assets { get; set; }
         public virtual ICollection<SiteUser> SiteUsers { get; set; }

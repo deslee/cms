@@ -18,7 +18,7 @@ namespace Content.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // composite keys
-            modelBuilder.Entity<PostGroup>().HasKey(e => new { e.PostId, e.GroupId });
+            modelBuilder.Entity<ItemGroup>().HasKey(e => new { e.ItemId, e.GroupId });
             modelBuilder.Entity<SiteUser>().HasKey(e => new { e.UserId, e.SiteId });
 
             modelBuilder.Entity<User>().HasIndex(e => e.Email).IsUnique();
@@ -46,11 +46,11 @@ namespace Content.Data
         }
 
         public DbSet<Site> Sites { get; set; }
-        public DbSet<Post> Posts { get; set; }
+        public DbSet<Item> Items { get; set; }
         public DbSet<Asset> Assets { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Group> Groups { get; set; }
-        public DbSet<PostGroup> PostGroups { get; set; }
+        public DbSet<ItemGroup> ItemGroups { get; set; }
         public DbSet<SiteUser> SiteUsers { get; set; }
         public string ConnectionString { get; }
     }

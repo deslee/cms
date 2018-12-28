@@ -19,10 +19,10 @@ namespace Content.GraphQL.Services
 {
     public interface IPostService
     {
-        Task<MutationResult<Post>> UpsertPost(PostInput postInput, UserContext userContext, string siteId);
-        Task<IList<Post>> GetPosts(string siteId);
+        Task<MutationResult<Item>> UpsertPost(PostInput postInput, UserContext userContext, string siteId);
+        Task<IList<Item>> GetPosts(string siteId);
         Task<MutationResult> DeletePost(string postId, UserContext userContext);
-        Task<Post> GetPost(string postId);
+        Task<Item> GetPost(string postId);
     }
 
     public class PostService : IPostService
@@ -43,7 +43,13 @@ namespace Content.GraphQL.Services
             try
             {
                 // find post
-                var post = await dataContext.Posts.FindAsync(postId);
+                var post = await dataContext.Items.FindAsync(postId);
+                if (post == null) {
+                    return new MutationResult<Site>
+                    {
+                        ErrorMessage = $"Post {postId} does not exist."
+                    };
+                }
                 var siteId = dataContext.Entry(post).Property("SiteId").CurrentValue as string;
 
                 // validate
@@ -57,7 +63,7 @@ namespace Content.GraphQL.Services
                 }
 
                 // delete
-                dataContext.Posts.Remove(post);
+                dataContext.Items.Remove(post);
 
                 await dataContext.SaveChangesAsync();
 
@@ -73,29 +79,29 @@ namespace Content.GraphQL.Services
             }
         }
 
-        public async Task<Post> GetPost(string postId)
+        public async Task<Item> GetPost(string postId)
         {
-            return await dataContext.Posts.FindAsync(postId);
+            return await dataContext.Items.FindAsync(postId);
         }
 
-        public async Task<IList<Post>> GetPosts(string siteId)
+        public async Task<IList<Item>> GetPosts(string siteId)
         {
-            return await dataContext.Posts
+            return await dataContext.Items
                 .Where(p => EF.Property<string>(p, "SiteId") == siteId)
                 .ToListAsync();
         }
 
-        public async Task<MutationResult<Post>> UpsertPost(PostInput postInput, UserContext userContext, string siteId)
+        public async Task<MutationResult<Item>> UpsertPost(PostInput postInput, UserContext userContext, string siteId)
         {
             try
             {
-                var post = mapper.Map<Post>(postInput);
+                var post = mapper.Map<Item>(postInput);
 
                 // validate authenticated user belogns to site
                 var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
                 if (!validated)
                 {
-                    return new MutationResult<Post>
+                    return new MutationResult<Item>
                     {
                         ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
                     };
@@ -105,15 +111,15 @@ namespace Content.GraphQL.Services
                 dataContext.Entry(post).Property("SiteId").CurrentValue = siteId;
 
                 // remove groups in post that are not in payload
-                var foundGroupsInPost = await dataContext.PostGroups.Where(pg => pg.PostId == post.Id).ToListAsync();
+                var foundGroupsInPost = await dataContext.ItemGroups.Where(pg => pg.ItemId == post.Id).ToListAsync();
                 var groupsToDeleteFromPost =
-                    foundGroupsInPost.Where(fc => post.PostGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
-                dataContext.PostGroups.RemoveRange(groupsToDeleteFromPost);
+                    foundGroupsInPost.Where(fc => post.ItemGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
+                dataContext.ItemGroups.RemoveRange(groupsToDeleteFromPost);
 
                 var allGroupsInSite = await dataContext.Groups.Where(c => EF.Property<string>(c, "SiteId") == siteId).ToListAsync();
 
                 // assign group ids to groups with the same names
-                foreach (PostGroup pg in post.PostGroups)
+                foreach (ItemGroup pg in post.ItemGroups)
                 {
                     var foundGroupInSite = allGroupsInSite.FirstOrDefault(g => g.Name == pg.Group.Name);
                     if (foundGroupInSite != null)
@@ -127,7 +133,7 @@ namespace Content.GraphQL.Services
                 // remove groups from site that no longer have posts
                 foreach (var group in allGroupsInSite)
                 {
-                    var count = await dataContext.PostGroups.Where(pg => pg.GroupId == group.Id).CountAsync();
+                    var count = await dataContext.ItemGroups.Where(pg => pg.GroupId == group.Id).CountAsync();
                     if (count == 0)
                     {
                         dataContext.Groups.Remove(group);
@@ -136,7 +142,7 @@ namespace Content.GraphQL.Services
 
                 dataContext.Update(post);
                 await dataContext.SaveChangesAsync();
-                return new MutationResult<Post>
+                return new MutationResult<Item>
                 {
                     Data = post
                 };
@@ -144,7 +150,7 @@ namespace Content.GraphQL.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occured while upserting a post");
-                return new MutationResult<Post>
+                return new MutationResult<Item>
                 {
                     ErrorMessage = "An unexpected error occured. Please try again."
                 };

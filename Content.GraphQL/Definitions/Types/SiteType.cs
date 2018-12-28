@@ -35,8 +35,8 @@ namespace Content.GraphQL.Definitions.Types
                 name: "posts", 
                 description: "The posts of the Site",
                 resolve: async context => {
-                    await dataContext.Entry(context.Source).Collection(s => s.Posts).LoadAsync();
-                    return context.Source.Posts;
+                    await dataContext.Entry(context.Source).Collection(s => s.Items).LoadAsync();
+                    return context.Source.Items;
                 }
             );
         }

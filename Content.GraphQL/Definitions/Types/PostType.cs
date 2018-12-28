@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Content.GraphQL.Definitions.Types
 {
-    public class PostType : ObjectGraphType<Post>
+    public class PostType : ObjectGraphType<Item>
     {
         public PostType(DataContext dataContext)
         {
@@ -36,7 +36,7 @@ namespace Content.GraphQL.Definitions.Types
                     dataContext.Attach(context.Source);
 
                     return await dataContext.Entry(context.Source)
-                        .Collection(p => p.PostGroups)
+                        .Collection(p => p.ItemGroups)
                         .Query()
                         .Select(pg => pg.Group)
                         .ToListAsync();
