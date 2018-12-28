@@ -4,7 +4,7 @@ import { withAuth, WithAuthInjectedProps, AuthUser } from '../data/auth';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import { mutateSafely } from '../data/helpers';
-import { Button, Menu, Dropdown } from 'semantic-ui-react';
+import { Button, Menu, Dropdown, Icon, Header } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 
 interface Props {

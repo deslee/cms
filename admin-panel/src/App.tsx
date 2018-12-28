@@ -10,6 +10,7 @@ import SiteListingPage from './pages/SiteListingPage';
 import LoginPage from './pages/LoginPage';
 import PrivateRoute from './utils/PrivateRoute';
 import { AUTH_USER_KEY } from './utils/Constants';
+import SiteDashboard from './pages/SiteDashboard';
 
 interface Props { }
 interface State {
@@ -65,9 +66,9 @@ class App extends Component<Props, State> {
         <ApolloProvider client={getClient(authUser.user && authUser.user.token)}>
           <Router>
             <Switch>
-              <PrivateRoute path="/sites" component={SiteListingPage} />
+              <PrivateRoute path="/sites/:id" component={SiteDashboard} />
               <Route path="/login" component={LoginPage} />
-              <Redirect to="/sites" />
+              <Redirect to={`/sites/${process.env.REACT_APP_SITE_ID}`} />
             </Switch>
           </Router>
         </ApolloProvider>

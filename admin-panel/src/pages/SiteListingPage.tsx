@@ -3,8 +3,8 @@ import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import AppBar from '../components/AppBar';
 import SiteList from '../components/Sites/SiteList'
-import Site from '../components/Sites/Site'
 import { RouteComponentProps, Route } from 'react-router-dom';
+import SiteComponent from '../components/Sites/SiteComponent';
 
 const GET_SITES = gql`
     query getSites {
@@ -59,7 +59,7 @@ class SiteListingComponent extends React.Component<Props & RouteComponentProps<a
                     if (result.loading) {
                         return <div>Loading site...</div>
                     } else {
-                        return <Site {...result.data.site} />
+                        return <SiteComponent {...result.data.site} />
                     }
                 }}</Query>} />
             </div>

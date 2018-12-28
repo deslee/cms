@@ -13,21 +13,6 @@
             "cwd": "${workspaceFolder}/admin-panel"
         },
         {
-            "type": "node",
-            "request": "launch",
-            "name": "Frontend: Server",
-            "args": [
-                "--inspect",
-                "${workspaceFolder}/admin-panel/debug.js"
-            ],
-            "console": "integratedTerminal",
-            "env": {
-                "PORT": "4000"
-            },
-            "protocol": "inspector",
-            "cwd": "${workspaceFolder}/admin-panel"
-        },
-        {
             "name": ".NET Core Launch (GraphQL)",
             "type": "coreclr",
             "request": "launch",

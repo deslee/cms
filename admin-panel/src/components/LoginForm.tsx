@@ -51,8 +51,8 @@ class LoginFormComponent extends React.Component<Props> {
                 onSubmit={this.handleSubmit}
             >{formik => (
                 <Form onSubmit={formik.handleSubmit} error={formik.status}>
-                    <Field type="email" name="email" placeholder="Email" component={FormComponent} />
-                    <Field type="password" name="password" placeholder="Password" component={FormComponent} />
+                    <Field type="email" name="email" label="Email" component={FormComponent} />
+                    <Field type="password" name="password" label="Password" component={FormComponent} />
                     <Message error header='Error' content={formik.status} />
                     <Button type="submit">Submit</Button>
                 </Form>

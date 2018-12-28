@@ -1,5 +1,9 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom';
+import { Table, Form } from 'semantic-ui-react';
+import SiteDataForm from './SiteDataForm';
+
+import styles from './SiteComponent.module.css';
 
 interface Post {
     id: string
@@ -21,15 +25,11 @@ class SiteComponent extends React.Component<Props> {
             posts
         } = this.props;
 
-        return <div>
-            <h1>{name}</h1>
-            {posts.map(post => <div key={post.id}>
-                <div>{post.title}</div>
-                <div>slices:</div>
-                {post.slices.map((slice, i) => <div key={i}>
-                    <pre>{JSON.stringify(slice, null, 2)}</pre>
-                </div>)}
-            </div>)}
+        return <div className={styles.root}>
+            <h1>Site Data</h1>
+            <SiteDataForm initialValues={{
+                heading: name
+            }} />
         </div>
     }
 }
