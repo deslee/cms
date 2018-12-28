@@ -1,7 +1,12 @@
 import * as React from 'react'
-import { Formik, FormikActions, Field, FieldProps } from 'formik';
+import { Formik, FormikActions, Field } from 'formik';
 import * as Yup from 'yup';
 import FormComponent from './Form/FormComponent';
+import { Button, Form, Message } from 'semantic-ui-react'
+import gql from 'graphql-tag';
+import { Mutation } from 'react-apollo';
+import { mutateSafely } from '../data/helpers';
+import { AuthUser, WithAuthInjectedProps, withAuth } from '../data/auth';
 
 export interface LoginFormValues {
     email: string
@@ -21,12 +26,12 @@ interface Props {
     handleLogin: (values: LoginFormValues) => Promise<void>
 }
 
-class LoginForm extends React.Component<Props> {
+class LoginFormComponent extends React.Component<Props> {
     handleSubmit = async (values: LoginFormValues, actions: FormikActions<any>) => {
         const { handleLogin } = this.props;
         try {
             await handleLogin(values);
-        } catch(e) {
+        } catch (e) {
             console.error(e);
             if (e instanceof Error) {
                 actions.setStatus(e.message)
@@ -45,15 +50,49 @@ class LoginForm extends React.Component<Props> {
                 validationSchema={LoginFormSchema}
                 onSubmit={this.handleSubmit}
             >{formik => (
-                <form onSubmit={formik.handleSubmit}>
+                <Form onSubmit={formik.handleSubmit} error={formik.status}>
                     <Field type="email" name="email" placeholder="Email" component={FormComponent} />
                     <Field type="password" name="password" placeholder="Password" component={FormComponent} />
-                    {formik.status && <div>{formik.status}</div>}
-                    <button type="submit">Submit</button>
-                </form>
+                    <Message error header='Error' content={formik.status} />
+                    <Button type="submit">Submit</Button>
+                </Form>
             )}</Formik>
         )
     }
 }
 
-export default LoginForm;
+const LOGIN = gql`
+    mutation Login($login: LoginInput!) {
+        login(login: $login) {
+            success,
+            errorMessage,
+            data {
+                id
+                email
+                name
+            }
+            token
+        }
+    }
+`;
+
+const LoginForm = ({ auth: { updateUser } } : {} & WithAuthInjectedProps) => <Mutation mutation={LOGIN}>
+    {(mutate) => (
+        <LoginFormComponent
+            handleLogin={async (credentials) => {
+                var response = await mutateSafely(mutate, { variables: { login: { email: credentials.email, password: credentials.password } } });
+                let result = response && response.data.login;
+                if (!result.success) {
+                    throw new Error(result.errorMessage || "Failed login");
+                }
+                const authUser: AuthUser = {
+                    email: result.data.email,
+                    name: result.data.name,
+                    token: result.token
+                };
+                await updateUser(authUser);
+            }} />
+    )}
+</Mutation>
+
+export default withAuth<{}>(LoginForm);

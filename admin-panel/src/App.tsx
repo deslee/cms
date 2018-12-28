@@ -3,6 +3,7 @@ import { AuthUserProvider, AuthUserContext, UpdateAuthUser, AuthUser } from './d
 import { ApolloProvider } from 'react-apollo';
 import { getClient } from './data/apolloClient';
 import AppBar from './components/AppBar';
+import 'semantic-ui-css/semantic.min.css'
 
 interface Props { }
 interface State {
