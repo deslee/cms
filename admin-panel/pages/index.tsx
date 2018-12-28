@@ -1,9 +1,10 @@
 import AppBar from "../components/AppBar";
+import { withApi, WithApiInjectedProps } from "../data/api";
 
 interface Props {
 }
 
-const IndexPage = ({}: Props) => {
+const IndexPage = ({}: Props & WithApiInjectedProps) => {
     return (
         <div>
             <AppBar />
@@ -11,4 +12,4 @@ const IndexPage = ({}: Props) => {
     )
 }
 
-export default IndexPage;
+export default withApi(IndexPage);

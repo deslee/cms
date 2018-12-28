@@ -1,5 +1,5 @@
 import { Config, config } from "../config";
-import { AuthUser, AuthUserConsumer, AuthUserContext } from "./auth";
+import { AuthUser, AuthUserConsumer, AuthUserContext, WithAuthInjectedProps } from "./auth";
 
 export class Api {
     config: Config;
@@ -18,24 +18,28 @@ export class Api {
         if (this.user && this.user.token) {
             headers['Authorization'] = `Bearer ${this.user.token}`
         }
+        try {
+            var response = await fetch(
+                this.config.backendUrl,
+                {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        query: query.query,
+                        variables: query.variables || {}
+                    })
+                }
+            )
 
-        var response = await fetch(
-            this.config.backendUrl,
-            {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({
-                    query: query.query,
-                    variables: query.variables || {}
-                })
+            if (response.ok) {
+                var json = response.json();
+                return json;
+            } else {
+                throw new Error("Bad response");
             }
-        )
-
-        if (response.ok) {
-            var json = response.json();
-            return json;
-        } else {
-            throw new Error("Bad response");
+        } catch (e) {
+            console.error(e);
+            throw new Error("An unexpected error occurred")
         }
     }
 
@@ -65,7 +69,7 @@ export class Api {
 
         let login = response.data.login;
         if (!login.success) {
-            throw new Error("Failed login");
+            throw new Error(login.errorMessage || "Failed login");
         }
 
         return {
@@ -76,14 +80,14 @@ export class Api {
     }
 }
 
-export interface WithApiInjectedProps {
+export interface WithApiInjectedProps extends WithAuthInjectedProps {
     api: Api
 }
 
-export const withApi = <P extends object>(Component: React.ComponentType<P & WithApiInjectedProps>) => {
+export const withApi = <P extends object>(Component: React.ComponentType<P & WithApiInjectedProps & WithAuthInjectedProps>) => {
     return (props: P) => (
-        <AuthUserConsumer>{ (authUserContext: AuthUserContext) => (
-            <Component {...props} api={new Api(config, authUserContext.user)} />
+        <AuthUserConsumer>{(authUserContext: AuthUserContext) => (
+            <Component {...props} api={new Api(config, authUserContext.user)} auth={authUserContext} />
         )}</AuthUserConsumer>
     )
 }

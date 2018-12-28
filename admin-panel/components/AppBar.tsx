@@ -1,24 +1,33 @@
 import * as React from 'react'
 import { withApi, WithApiInjectedProps } from "../data/api";
-import { withAuth, WithAuthInjectedProps } from "../data/auth";
+import LoginForm, { LoginFormValues } from './LoginForm';
 
 interface Props {
 
 }
 
+class AppBar extends React.Component<Props & WithApiInjectedProps> {
 
-class AppBar extends React.Component<Props & WithApiInjectedProps & WithAuthInjectedProps> {
+    handleLogin = async (credentials: LoginFormValues) => {
+        const {
+            auth: { updateUser }, api
+        } = this.props;
+        
+        var user = await api.login({ email: credentials.email, password: credentials.password });
+        updateUser(user);
+    }
+
     render() {
         const {
-            auth: { user, updateUser }, api
+            auth: { user }
         } = this.props;
 
         return (
             <div>
-                {user && <div>I AM: {user.name} AND YOU CAN REACH ME AT {user.email}</div>}
+                {!user ? <LoginForm handleLogin={this.handleLogin} /> : <div>I AM: {user.name} AND YOU CAN REACH ME AT {user.email}</div>}
             </div>
         )
     }
 }
 
-export default withApi(withAuth(AppBar));
+export default withApi(AppBar);
