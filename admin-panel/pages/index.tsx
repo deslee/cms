@@ -1,20 +1,14 @@
-import { withAuth, AuthUser } from "../data/auth";
-import { withApi, WithApiInjectedProps } from "../data/api";
+import AppBar from "../components/AppBar";
 
 interface Props {
-    user: AuthUser
 }
 
-const IndexPage = ({ user, api }: Props & WithApiInjectedProps) => {
+const IndexPage = ({}: Props) => {
     return (
-        <div>{user && user.token}
-            <br />
-            <button onClick={async () => {
-                var result = await api.login({ email: 'desmondclee@email.com', password: 'pass' })
-                console.log(result);
-            }}>Login</button>
+        <div>
+            <AppBar />
         </div>
     )
 }
 
-export default withApi(withAuth(IndexPage));
+export default IndexPage;

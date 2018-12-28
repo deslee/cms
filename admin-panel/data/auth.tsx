@@ -20,10 +20,16 @@ const Context = React.createContext<AuthUserContext>({
 export const AuthUserProvider = Context.Provider;
 export const AuthUserConsumer = Context.Consumer;
 
-export const withAuth = <P extends object>(Component: React.ComponentType<P>) => {
+
+
+export interface WithAuthInjectedProps {
+    auth: AuthUserContext
+}
+
+export const withAuth = <P extends object>(Component: React.ComponentType<P & WithAuthInjectedProps>) => {
     return (props: P) => (
         <AuthUserConsumer>{ (authUserContext: AuthUserContext) => (
-            <Component {...props} {...authUserContext} />
+            <Component {...props} auth={authUserContext} />
         )}</AuthUserConsumer>
     )
 }
