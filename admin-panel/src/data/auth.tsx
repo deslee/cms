@@ -8,7 +8,7 @@ export type AuthUser = {
     token: string
 };
 
-export type UpdateAuthUser = (user: AuthUser) => void;
+export type UpdateAuthUser = (user?: AuthUser) => void;
 
 export interface AuthUserContext {
     user?: AuthUser;

@@ -25,16 +25,14 @@ const LOGIN = gql`
 `;
 
 class AppBar extends React.Component<Props & WithAuthInjectedProps> {
-    render() {
+    render() { 
         const {
             auth: { user, updateUser }
         } = this.props;
 
         return (
             <div>
-                {!user ?
-                    <LoginForm /> :
-                    <div>I AM: {user.name} AND YOU CAN REACH ME AT {user.email}</div>}
+                <button onClick={() => updateUser()}>no more user</button>
             </div>
         )
     }

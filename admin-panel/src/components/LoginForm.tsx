@@ -76,7 +76,11 @@ const LOGIN = gql`
     }
 `;
 
-const LoginForm = ({ auth: { updateUser } } : {} & WithAuthInjectedProps) => <Mutation mutation={LOGIN}>
+interface LoginFormProps {
+    loginSuccess: (authUser: AuthUser) => void
+}
+
+const LoginForm = ({ auth: { updateUser }, loginSuccess } : LoginFormProps & WithAuthInjectedProps) => <Mutation mutation={LOGIN}>
     {(mutate) => (
         <LoginFormComponent
             handleLogin={async (credentials) => {
@@ -91,8 +95,9 @@ const LoginForm = ({ auth: { updateUser } } : {} & WithAuthInjectedProps) => <Mu
                     token: result.token
                 };
                 await updateUser(authUser);
+                loginSuccess(authUser);
             }} />
     )}
 </Mutation>
 
-export default withAuth<{}>(LoginForm);
+export default withAuth<LoginFormProps>(LoginForm);
