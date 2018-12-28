@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Frontend: Chrome",
-            "url": "http://localhost:3001",
+            "url": "http://localhost:4000",
             "webRoot": "${workspaceFolder}/admin-panel",
             "cwd": "${workspaceFolder}/admin-panel"
         },
@@ -22,7 +22,7 @@
             ],
             "console": "integratedTerminal",
             "env": {
-                "PORT": "3001"
+                "PORT": "4000"
             },
             "protocol": "inspector",
             "cwd": "${workspaceFolder}/admin-panel"
