@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom';
+import { List } from 'semantic-ui-react';
 
 
 interface Site {
@@ -14,11 +15,14 @@ interface Props {
 class SiteListComponent extends React.Component<Props> {
     render() {
         const { sites } = this.props;
-        return <div>
-            <ul>{sites.map((site) => 
-                <li key={site.id}><Link to={`/sites/${site.id}`}>{site.name}</Link></li>
-            )}</ul>
-        </div>
+        return <List selection relaxed divided size="massive">
+            {sites.map((site) =>
+                <List.Item key={site.id} as={Link} to={`/sites/${site.id}`}>
+                    <List.Header>{site.name}</List.Header>
+                    {site.id}
+                </List.Item>
+            )}
+        </List>
     }
 }
 
