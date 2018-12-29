@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Content.GraphQL.Annotations;
+using Content.GraphQL.Definitions.Types;
 
 namespace Content.GraphQL.Models.Input
 {
@@ -9,7 +10,7 @@ namespace Content.GraphQL.Models.Input
         [EmailAddress]
         public string Email { get; set; }
         public string Password { get; set; }
-        [MapsToData]
+        [MapsToData(UserType.NAME_KEY)]
         public string Name { get; set; }
     }
 }

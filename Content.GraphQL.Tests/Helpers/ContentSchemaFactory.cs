@@ -20,7 +20,7 @@ namespace Content.GraphQL.Tests {
             dataContext.Database.EnsureDeleted();
             dataContext.Database.Migrate();
 
-            kernel.Bind<IMapper>().ToConstant(new MapperConfiguration(cfg => cfg.AddProfile<ContentMapperProfile>()).CreateMapper());
+            kernel.Bind<IJsonDataResolver>().To<JsonDataResolver>();
             kernel.Bind<DataContext>().ToConstant(dataContext);
 
             kernel.Bind<ILogger<SiteService>>().ToConstant(Mock.Of<ILogger<SiteService>>());

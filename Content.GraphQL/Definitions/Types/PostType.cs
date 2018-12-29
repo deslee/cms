@@ -15,6 +15,9 @@ namespace Content.GraphQL.Definitions.Types
 {
     public class PostType : ObjectGraphType<Item>
     {
+        public const string TITLE_KEY = "Title";
+        public const string SLICES_KEY = "Slices";
+
         public PostType(DataContext dataContext)
         {
             Name = "Post";
@@ -26,7 +29,7 @@ namespace Content.GraphQL.Definitions.Types
             Field<StringGraphType>(
                 name: "title",
                 description: "The title of the Post",
-                resolve: context => context.Source.Data["Title"].ToObject<string>()
+                resolve: context => context.Source.Data[TITLE_KEY].ToObject<string>()
             );
             FieldAsync<ListGraphType<CategoryType>>(
                 name: "categories",
@@ -45,15 +48,20 @@ namespace Content.GraphQL.Definitions.Types
             Field<ListGraphType<SliceType>>(
                 name: "slices",
                 description: "The slices of the Post",
-                resolve: context => {
-                    var slices = context.Source.Data["Slices"].Select<JToken, Slice>(slice => {
-                        if (slice["Type"].ToObject<string>() == "paragraph") {
+                resolve: context =>
+                {
+                    var slices = context.Source.Data[SLICES_KEY].Select<JToken, Slice>(slice =>
+                    {
+                        if (slice["Type"].ToObject<string>() == "paragraph")
+                        {
                             return slice.ToObject<ParagraphSlice>();
                         }
-                        else if (slice["Type"].ToObject<string>() == "images") {
+                        else if (slice["Type"].ToObject<string>() == "images")
+                        {
                             return slice.ToObject<ImagesSlice>();
                         }
-                        else if (slice["Type"].ToObject<string>() == "video") {
+                        else if (slice["Type"].ToObject<string>() == "video")
+                        {
                             return slice.ToObject<VideoSlice>();
                         }
                         return null;

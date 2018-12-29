@@ -20,6 +20,8 @@ namespace Content.GraphQL.Definitions.Types
 {
     public class UserType : ObjectGraphType<User>
     {
+        public const string NAME_KEY = "Name";
+
         public UserType(IUserService userService, DataContext dataContext)
         {
             Name = "User";
@@ -33,7 +35,7 @@ namespace Content.GraphQL.Definitions.Types
             );
             Field<StringGraphType>(
                 name: "name",
-                resolve: context => context.Source.Data["Name"]
+                resolve: context => context.Source.Data[NAME_KEY]
             );
             FieldAsync<ListGraphType<SiteType>>(
                 name: "sites",
