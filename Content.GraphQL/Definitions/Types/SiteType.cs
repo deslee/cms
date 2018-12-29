@@ -11,6 +11,11 @@ namespace Content.GraphQL.Definitions.Types
 {
     public class SiteType: ObjectGraphType<Site>
     {
+        public const string TITLE_KEY = "Title";
+        public const string SUBTITLE_KEY = "Subtitle";
+        public const string GOOGLE_ANALYTICS_ID_KEY = "GoogleAnalyticsId";
+        public const string COPYRIGHT_KEY = "Copyright";
+
         public SiteType(DataContext dataContext) {
             Name = "Site";
             Field<StringGraphType>(
@@ -38,6 +43,22 @@ namespace Content.GraphQL.Definitions.Types
                     await dataContext.Entry(context.Source).Collection(s => s.Items).LoadAsync();
                     return context.Source.Items;
                 }
+            );
+            Field<StringGraphType>(
+                "title",
+                resolve: context => context.Source.Data[TITLE_KEY].ToString()
+            );
+            Field<StringGraphType>(
+                "subtitle",
+                resolve: context => context.Source.Data[SUBTITLE_KEY].ToString()
+            );
+            Field<StringGraphType>(
+                "googleAnalyticsId",
+                resolve: context => context.Source.Data[GOOGLE_ANALYTICS_ID_KEY].ToString()
+            );
+            Field<StringGraphType>(
+                "copyright",
+                resolve: context => context.Source.Data[COPYRIGHT_KEY].ToString()
             );
         }
     }
