@@ -1,13 +1,16 @@
 import React from 'react';
 import gql from 'graphql-tag';
-import { Query, withQuery } from 'react-apollo';
+import { Query } from 'react-apollo';
 import SiteComponent from '../components/Sites/SiteComponent';
 import { RouteComponentProps } from 'react-router-dom';
 import { Site } from '../models/models';
 import { Segment as div, Dimmer, Loader } from 'semantic-ui-react';
-import { QueryInjectedProps, withSiteQuery } from '../data/queries';
 
-const GET_SITE = `
+interface Props {
+
+}
+
+const GET_SITE = gql`
     query getSites($siteId: String!) {
         site(siteId: $siteId) {
             id
@@ -38,27 +41,22 @@ const GET_SITE = `
     }
 `
 
-interface Props {
-
-}
-
-class SiteDashboard extends React.Component<Props & QueryInjectedProps<any, any>> {
+class SiteDashboard extends React.Component<Props & RouteComponentProps<any>> {
     render() {
-        const { result: { loading, data } } = this.props;
-        console.log(this.props)
         return (
-            <div style={{ width: '100%', height: '100%' }}>
-                <Dimmer
-                    active={loading}
-                >
-                    <Loader />
-                </Dimmer>
-                {!loading && data && <SiteComponent site={data.site} />}
-            </div>
+            <Query query={GET_SITE} variables={{ siteId: this.props.match.params.id }}>{(result) => {
+                const site: Site = result.data.site;
+                return <div style={{width: '100%', height: '100%'}}>
+                    <Dimmer
+                        active={result.loading}
+                    >
+                        <Loader />
+                    </Dimmer>
+                    {!result.loading && <SiteComponent site={site} />}
+                </div>
+            }}</Query>
         )
     }
 }
 
-const SiteQuery = withSiteQuery({ query: GET_SITE })<Props>(SiteDashboard)
-
-export default ({ match: { params: { id } } }: {} & RouteComponentProps<any>) => <SiteQuery variables={{ siteId: id }} />
+export default SiteDashboard;
