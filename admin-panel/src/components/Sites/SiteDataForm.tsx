@@ -47,56 +47,54 @@ interface Props {
     initialValues: SiteFormData
 }
 
-class SiteDataForm extends React.Component<Props> {
-    render() {
-        const { id, name, initialValues } = this.props;
-        return (
-            <Mutation mutation={UPSERT_SITE}>{(mutate) => (
-                <Formik initialValues={initialValues} validationSchema={SiteFormDataSchema} onSubmit={async (values: SiteFormData, actions: FormikActions<any>) => {
-                    try {
-                        await mutateSafely(mutate, { variables: { site: { id, name, ...values } } })
-                    } catch (e) {
-                        if (e instanceof Error) {
-                            actions.setStatus(e.message)
-                        } else {
-                            actions.setStatus(e.toString())
-                        }
-                    } finally {
-                        actions.setSubmitting(false)
+const SiteDataForm = (props: Props) => {
+    const { id, name, initialValues } = props;
+    return (
+        <Mutation mutation={UPSERT_SITE}>{(mutate) => (
+            <Formik initialValues={initialValues} validationSchema={SiteFormDataSchema} onSubmit={async (values: SiteFormData, actions: FormikActions<any>) => {
+                try {
+                    await mutateSafely(mutate, { variables: { site: { id, name, ...values } } })
+                } catch (e) {
+                    if (e instanceof Error) {
+                        actions.setStatus(e.message)
+                    } else {
+                        actions.setStatus(e.toString())
                     }
-                }}>{formik => (
-                    <div>
-                        <Dimmer active={formik.isSubmitting}>
-                            <Loader />
-                        </Dimmer>
-                        <Form onSubmit={formik.handleSubmit} error={formik.status}>
-                            <Field type="text" name="title" label="Title" component={FormComponent} />
-                            <Field
-                                name="subtitle"
-                                label="Subtitle"
-                                component={FormikTextEditor}
-                            />
-                            <Form.Field>
-                                <label>Header Image</label>
-                                {/* on click: show asset picker popup */}
-                                <Segment placeholder>
-                                    <Header icon>
-                                        <Icon name="file image outline" />
-                                        No header image
-                                </Header>
-                                </Segment>
-                            </Form.Field>
-                            <Field type="text" name="copyright" label="Copyright" component={FormComponent} />
-                            <div>Social media icons</div>
-                            <Field type="text" name="googleAnalyticsId" label="Google Analytics ID" component={FormComponent} />
-                            <Button disabled={formik.isSubmitting} type="submit">Save</Button>
-                            <Message error header='Error' content={formik.status} />
-                        </Form>
-                    </div>
-                )}</Formik>
-            )}</Mutation>
-        )
-    }
+                } finally {
+                    actions.setSubmitting(false)
+                }
+            }}>{formik => (
+                <div>
+                    <Dimmer active={formik.isSubmitting}>
+                        <Loader />
+                    </Dimmer>
+                    <Form onSubmit={formik.handleSubmit} error={formik.status}>
+                        <Field type="text" name="title" label="Title" component={FormComponent} />
+                        <Field
+                            name="subtitle"
+                            label="Subtitle"
+                            component={FormikTextEditor}
+                        />
+                        <Form.Field>
+                            <label>Header Image</label>
+                            {/* on click: show asset picker popup */}
+                            <Segment placeholder>
+                                <Header icon>
+                                    <Icon name="file image outline" />
+                                    No header image
+                            </Header>
+                            </Segment>
+                        </Form.Field>
+                        <Field type="text" name="copyright" label="Copyright" component={FormComponent} />
+                        <div>Social media icons</div>
+                        <Field type="text" name="googleAnalyticsId" label="Google Analytics ID" component={FormComponent} />
+                        <Button disabled={formik.isSubmitting} type="submit">Save</Button>
+                        <Message error header='Error' content={formik.status} />
+                    </Form>
+                </div>
+            )}</Formik>
+        )}</Mutation>
+    )
 }
 
 export default SiteDataForm
