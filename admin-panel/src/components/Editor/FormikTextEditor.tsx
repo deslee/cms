@@ -5,6 +5,7 @@ import { EditorState, RawDraftContentState, convertFromRaw, ContentState, conver
 import TextEditor from './Editor';
 import { FieldProps } from 'formik';
 import { Form } from 'semantic-ui-react';
+import classes from './FormikTextEditor.module.scss';
 
 interface State {
 }
@@ -21,7 +22,7 @@ class FormikTextEditor<V> extends React.Component<Props & FieldProps<V>, State> 
     render() {
         let rawState: { type: string, value: RawDraftContentState };
         let initialState: RawDraftContentState | undefined = undefined;
-        
+
         if (this.props.field.value) {
             try {
                 rawState = JSON.parse(this.props.field.value)
@@ -38,6 +39,7 @@ class FormikTextEditor<V> extends React.Component<Props & FieldProps<V>, State> 
             <Form.Field>
                 <label>{this.props.label}</label>
                 <TextEditor
+                    className={classes.border}
                     initialState={initialState}
                     onChange={(rawState) => {
                         this.props.form.setFieldValue(this.props.field.name, JSON.stringify({ type: 'RawDraftContentState', value: rawState }))

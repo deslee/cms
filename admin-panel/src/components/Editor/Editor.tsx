@@ -10,6 +10,7 @@ interface State {
 interface Props {
     onChange: (rawState: RawDraftContentState) => void;
     initialState?: RawDraftContentState;
+    className?: string;
 }
 
 const toolbar = {
@@ -46,26 +47,13 @@ class TextEditor extends React.Component<Props, State> {
         onChange(convertToRaw(editorState.getCurrentContent()))
     }
 
-    // getHtml = (): string => {
-    //     const html = stateToHTML(this.state.editorState.getCurrentContent());
-    //     return html;
-    // }
-
-    // handleKeyCommand = (command: string, editorState: EditorState) => {
-    //     const newState = RichUtils.handleKeyCommand(editorState, command);
-    //     if (newState) {
-    //         this.onChange(newState);
-    //         return 'handled'
-    //     } else {
-    //         return 'not-handled'
-    //     }
-    // }
-
     render() {
         const { editorState } = this.state;
+        const { className } = this.props;
         return (
             <div>
                 <Editor
+                    editorClassName={className}
                     editorState={editorState}
                     onEditorStateChange={this.onEditorStateChange}
                     toolbar={toolbar}

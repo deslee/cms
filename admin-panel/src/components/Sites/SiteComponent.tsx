@@ -21,7 +21,6 @@ class SiteComponent extends React.Component<Props> {
     render() {
         const { site } = this.props;
         return <div className={styles.root}>
-            <h1>Site Data</h1>
             <SiteDataForm
                 id={site.id}
                 name={site.name}

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Formik, FormikActions, Field } from 'formik';
 import * as Yup from 'yup';
 import FormComponent from '../Form/FormComponent';
-import { Button, Form, Message, Segment, Dimmer, Loader } from 'semantic-ui-react'
+import { Button, Form, Message, Segment as div, Dimmer, Loader } from 'semantic-ui-react'
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 import { mutateSafely } from '../../data/helpers';
@@ -51,7 +51,7 @@ class LoginFormComponent extends React.Component<Props> {
                 validationSchema={LoginFormSchema}
                 onSubmit={this.handleSubmit}
             >{formik => (
-                <Segment>
+                <div>
                     <Dimmer active={formik.isSubmitting}> <Loader /> </Dimmer>
                     <Form onSubmit={formik.handleSubmit} error={formik.status} className={classes.root}>
                         <Field type="email" name="email" label="Email" component={FormComponent} />
@@ -59,7 +59,7 @@ class LoginFormComponent extends React.Component<Props> {
                         <Message error header='Error' content={formik.status} />
                         <Button type="submit">Submit</Button>
                     </Form>
-                </Segment>
+                </div>
             )}</Formik>
         )
     }
