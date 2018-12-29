@@ -27,7 +27,7 @@ namespace Content.GraphQL.Helpers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occured while deleting a site");
+                logger.LogError(ex, "An unexpected error occured while performing a mutation.");
                 var t = Activator.CreateInstance(typeof(T)) as T;
                 t.ErrorMessage = "An unexpected error occured. Please try again.";
                 return t;

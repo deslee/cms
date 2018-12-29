@@ -29,6 +29,7 @@ namespace Content.GraphQL.Services
         Task<MutationResult<User>> RegisterUser(RegisterInput registerInput);
         Task<string> CreateJwtToken(User source, UserContext userContext);
         Task<IEnumerable<Claim>> GetClaimsForUser(User user);
+        Task<MutationResult> AddUserToSite(string userId, string userEmail, string siteId);
     }
 
     public class UserService : IUserService
@@ -185,6 +186,43 @@ namespace Content.GraphQL.Services
                 claims.Add(new Claim(Constants.ClaimTypes.Role, Roles.Admin));
             }
             return Task.FromResult(claims.AsEnumerable());
+        }
+
+        public async Task<MutationResult> AddUserToSite(string userId, string userEmail, string siteId)
+        {
+            if (string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(userEmail))
+            {
+                return new MutationResult { ErrorMessage = "Both userId and userEmail cannot be null" };
+            }
+
+            if (string.IsNullOrWhiteSpace(siteId)) {
+                return new MutationResult { ErrorMessage = "siteId cannot be null" };
+            }
+
+            var site = await dataContext.Sites.FirstOrDefaultAsync(s => s.Id == siteId);
+            if (site == null) {
+                return new MutationResult { ErrorMessage = $"Site {siteId} does not exist" };
+            }
+
+            var siteUser = new SiteUser {
+                Site = site,
+                SiteId = siteId
+            };
+            
+            if (userId != null) {
+                siteUser.UserId = userId;
+            } else {
+                var user = await dataContext.Users.FirstOrDefaultAsync(u => u.Email == userEmail.ToLower());
+                siteUser.UserId = user.Id;
+            }
+
+            if (await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteUser.SiteId && su.UserId == siteUser.UserId)) {
+                return new MutationResult { ErrorMessage = $"User is already added to site" };
+            }
+            dataContext.SiteUsers.Update(siteUser);
+
+            await dataContext.SaveChangesAsync();
+            return new MutationResult();
         }
     }
 }

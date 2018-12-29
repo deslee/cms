@@ -61,7 +61,7 @@ namespace Content.GraphQL.Definitions
                 ),
                 resolve: context => mutationExecutionHelper.ExecuteSafely(() => postService.DeletePost(context.GetArgument<string>("postId"), (context.UserContext as UserContext)))
             );
-            
+
             Field<MutationResultType>(
                 "deleteSite",
                 arguments: new QueryArguments(
@@ -84,6 +84,16 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<LoginInputType>> { Name = "login" }
                 ),
                 resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.Login(context.GetArgument<LoginInput>("login")))
+            );
+
+            Field<MutationResultType>(
+                "addUserToSite",
+                arguments: new QueryArguments(
+                    new QueryArgument<StringGraphType> { Name = "userId", Description = "User Id. Either email or user id must be present" },
+                    new QueryArgument<StringGraphType> { Name = "userEmail", Description = "Email. Either email or user id must be present" },
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
+                ),
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.AddUserToSite(userId: context.GetArgument<string>("userId"), userEmail: context.GetArgument<string>("userEmail"), siteId: context.GetArgument<string>("siteId")))
             );
         }
     }
