@@ -1,8 +1,7 @@
 import * as React from 'react'
 import * as Yup from 'yup';
 import { Formik, FormikActions, Field } from 'formik';
-import Site from './Site';
-import { Form, Segment, Header, Icon, Button, Message } from 'semantic-ui-react';
+import { Form, Segment, Header, Icon, Button, Message, Dimmer, Loader } from 'semantic-ui-react';
 import FormComponent from '../Form/FormComponent';
 import TextEditor from '../Editor/Editor';
 import FormikTextEditor from '../Editor/FormikTextEditor';
@@ -66,30 +65,34 @@ class SiteDataForm extends React.Component<Props> {
                         actions.setSubmitting(false)
                     }
                 }}>{formik => (
-                    <Form onSubmit={formik.handleSubmit} error={formik.status}>
-                        <Field type="text" name="title" label="Title" component={FormComponent} />
-                        <Field
-                            name="subtitle"
-                            label="Subtitle"
-                            component={FormikTextEditor}
-                        />
-                        {/* <Field type="text" name="subtitle" label="Subtitle" component={FormComponent} /> */}
-                        <Form.Field>
-                            <label>Header Image</label>
-                            {/* on click: show asset picker popup */}
-                            <Segment placeholder>
-                                <Header icon>
-                                    <Icon name="file image outline" />
-                                    No header image
+                    <div>
+                        <Dimmer active={formik.isSubmitting}>
+                            <Loader />
+                        </Dimmer>
+                        <Form onSubmit={formik.handleSubmit} error={formik.status}>
+                            <Field type="text" name="title" label="Title" component={FormComponent} />
+                            <Field
+                                name="subtitle"
+                                label="Subtitle"
+                                component={FormikTextEditor}
+                            />
+                            <Form.Field>
+                                <label>Header Image</label>
+                                {/* on click: show asset picker popup */}
+                                <Segment placeholder>
+                                    <Header icon>
+                                        <Icon name="file image outline" />
+                                        No header image
                                 </Header>
-                            </Segment>
-                        </Form.Field>
-                        <Field type="text" name="copyright" label="Copyright" component={FormComponent} />
-                        <div>Social media icons</div>
-                        <Field type="text" name="googleAnalyticsId" label="Google Analytics ID" component={FormComponent} />
-                        <Button type="submit">Save</Button>
-                        <Message error header='Error' content={formik.status} />
-                    </Form>
+                                </Segment>
+                            </Form.Field>
+                            <Field type="text" name="copyright" label="Copyright" component={FormComponent} />
+                            <div>Social media icons</div>
+                            <Field type="text" name="googleAnalyticsId" label="Google Analytics ID" component={FormComponent} />
+                            <Button disabled={formik.isSubmitting} type="submit">Save</Button>
+                            <Message error header='Error' content={formik.status} />
+                        </Form>
+                    </div>
                 )}</Formik>
             )}</Mutation>
         )

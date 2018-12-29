@@ -1,0 +1,5 @@
+.children {
+    max-width: calc(100vw - 190px); 
+    min-height: 100vh;
+    overflow: hidden;
+}

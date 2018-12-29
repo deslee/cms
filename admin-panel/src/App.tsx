@@ -4,13 +4,12 @@ import { ApolloProvider } from 'react-apollo';
 import * as Yup from 'yup';
 import { getClient } from './data/apolloClient';
 import { BrowserRouter as Router, Route, Link, Redirect, Switch } from "react-router-dom";
-import AppBar from './components/AppBar';
 import 'semantic-ui-css/semantic.min.css'
-import SiteListingPage from './pages/SiteListingPage';
 import LoginPage from './pages/LoginPage';
 import PrivateRoute from './utils/PrivateRoute';
 import { AUTH_USER_KEY } from './utils/Constants';
 import SiteDashboard from './pages/SiteDashboard';
+import Container from './components/Container';
 
 interface Props { }
 interface State {
@@ -65,11 +64,13 @@ class App extends Component<Props, State> {
       <AuthUserProvider value={authUser}>
         <ApolloProvider client={getClient(authUser.user && authUser.user.token)}>
           <Router>
-            <Switch>
-              <PrivateRoute path="/sites/:id" component={SiteDashboard} />
-              <Route path="/login" component={LoginPage} />
-              <Redirect to={`/sites/${process.env.REACT_APP_SITE_ID}`} />
-            </Switch>
+            <Container>
+              <Switch>
+                <PrivateRoute path="/sites/:id/edit" component={SiteDashboard} />
+                <Route path="/login" component={LoginPage} />
+                <Redirect to={`/sites/${process.env.REACT_APP_SITE_ID}/edit`} />
+              </Switch>
+            </Container>
           </Router>
         </ApolloProvider>
       </AuthUserProvider>

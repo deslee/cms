@@ -1,12 +1,13 @@
 import * as React from 'react'
 import { Formik, FormikActions, Field } from 'formik';
 import * as Yup from 'yup';
-import FormComponent from './Form/FormComponent';
-import { Button, Form, Message } from 'semantic-ui-react'
+import FormComponent from '../Form/FormComponent';
+import { Button, Form, Message, Segment, Dimmer, Loader } from 'semantic-ui-react'
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
-import { mutateSafely } from '../data/helpers';
-import { AuthUser, WithAuthInjectedProps, withAuth } from '../data/auth';
+import { mutateSafely } from '../../data/helpers';
+import { AuthUser, WithAuthInjectedProps, withAuth } from '../../data/auth';
+import classes from './LoginForm.module.css'
 
 export interface LoginFormValues {
     email: string
@@ -50,12 +51,15 @@ class LoginFormComponent extends React.Component<Props> {
                 validationSchema={LoginFormSchema}
                 onSubmit={this.handleSubmit}
             >{formik => (
-                <Form onSubmit={formik.handleSubmit} error={formik.status}>
-                    <Field type="email" name="email" label="Email" component={FormComponent} />
-                    <Field type="password" name="password" label="Password" component={FormComponent} />
-                    <Message error header='Error' content={formik.status} />
-                    <Button type="submit">Submit</Button>
-                </Form>
+                <Segment>
+                    <Dimmer active={formik.isSubmitting}> <Loader /> </Dimmer>
+                    <Form onSubmit={formik.handleSubmit} error={formik.status} className={classes.root}>
+                        <Field type="email" name="email" label="Email" component={FormComponent} />
+                        <Field type="password" name="password" label="Password" component={FormComponent} />
+                        <Message error header='Error' content={formik.status} />
+                        <Button type="submit">Submit</Button>
+                    </Form>
+                </Segment>
             )}</Formik>
         )
     }
@@ -80,7 +84,7 @@ interface LoginFormProps {
     loginSuccess: (authUser: AuthUser) => void
 }
 
-const LoginForm = ({ auth: { updateUser }, loginSuccess } : LoginFormProps & WithAuthInjectedProps) => <Mutation mutation={LOGIN}>
+const LoginForm = ({ auth: { updateUser }, loginSuccess }: LoginFormProps & WithAuthInjectedProps) => <Mutation mutation={LOGIN}>
     {(mutate) => (
         <LoginFormComponent
             handleLogin={async (credentials) => {

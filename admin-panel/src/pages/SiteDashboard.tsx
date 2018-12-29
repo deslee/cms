@@ -2,8 +2,9 @@ import React from 'react';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import SiteComponent from '../components/Sites/SiteComponent';
-import AppBar from '../components/AppBar';
 import { RouteComponentProps } from 'react-router-dom';
+import { Site } from '../models/models';
+import { Segment as div, Dimmer, Loader } from 'semantic-ui-react';
 
 interface Props {
 
@@ -43,18 +44,17 @@ const GET_SITE = gql`
 class SiteDashboard extends React.Component<Props & RouteComponentProps<any>> {
     render() {
         return (
-            <div>
-                <AppBar />
-                <Query query={GET_SITE} variables={{ siteId: this.props.match.params.id }}>{(result) => {
-                    if (result.loading) {
-                        return <div>Loading...</div>
-                    }
-                    if (!result.data.site) {
-                        return <div>Error</div>
-                    }
-                    return <SiteComponent {...result.data.site} />
-                }}</Query>
-            </div>
+            <Query query={GET_SITE} variables={{ siteId: this.props.match.params.id }}>{(result) => {
+                const site: Site = result.data.site;
+                return <div style={{width: '100%', height: '100%'}}>
+                    <Dimmer
+                        active={result.loading}
+                    >
+                        <Loader />
+                    </Dimmer>
+                    {!result.loading && <SiteComponent site={site} />}
+                </div>
+            }}</Query>
         )
     }
 }
