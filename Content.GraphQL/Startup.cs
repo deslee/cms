@@ -1,21 +1,14 @@
-﻿using System.Text;
-using AutoMapper;
-using Content.Data;
+﻿using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
-using Content.GraphQL.Mapping.Profiles;
-using Content.GraphQL.Services;
 using CorrelationId;
-using GraphQL;
 using GraphQL.Server;
 using GraphQL.Server.Ui.Playground;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
@@ -57,7 +50,6 @@ namespace Content.GraphQL
             services.AddCustomAuthentication(appSettings);
 
             services.AddCorrelationId();
-            services.AddCustomMapper();
 
             services.AddDbContext<DataContext>(optionsAction: ConfigureDatabase);
             services.AddCustomGraphQL<SiteType>();

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using AutoMapper;
 using Content.Data;
 using Content.Data.Models;
 using Content.GraphQL.Constants;
@@ -29,14 +28,14 @@ namespace Content.GraphQL.Services
     public class SiteService : ISiteService
     {
         private readonly DataContext dataContext;
-        private readonly IMapper mapper;
         private readonly ILogger<SiteService> logger;
+        private readonly IJsonDataResolver jsonDataResolver;
 
-        public SiteService(DataContext dataContext, IMapper mapper, ILogger<SiteService> logger)
+        public SiteService(DataContext dataContext, ILogger<SiteService> logger, IJsonDataResolver jsonDataResolver)
         {
             this.dataContext = dataContext;
-            this.mapper = mapper;
             this.logger = logger;
+            this.jsonDataResolver = jsonDataResolver;
         }
 
         public async Task<MutationResult> DeleteSite(string siteId, UserContext userContext)
@@ -95,7 +94,12 @@ namespace Content.GraphQL.Services
         {
             try
             {
-                var site = mapper.Map<Site>(siteInput);
+                var site = new Site {
+                    Id = siteInput.Id,
+                    Name = siteInput.Name,
+                    Data = jsonDataResolver.Resolve(siteInput)
+                };
+
                 var emails = siteInput.Users.Select(e => e.ToLower());
 
                 // validate

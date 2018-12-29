@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using Content.Data;
 using Content.Data.Models;
 using Content.GraphQL.Constants;
@@ -35,16 +34,16 @@ namespace Content.GraphQL.Services
     public class UserService : IUserService
     {
         private readonly DataContext dataContext;
-        private readonly IMapper mapper;
         private readonly AppSettings appSettings;
         private readonly ILogger<UserService> logger;
+        private readonly IJsonDataResolver jsonDataResolver;
 
-        public UserService(DataContext dataContext, IMapper mapper, AppSettings appSettings, ILogger<UserService> logger)
+        public UserService(DataContext dataContext, AppSettings appSettings, ILogger<UserService> logger, IJsonDataResolver jsonDataResolver)
         {
             this.dataContext = dataContext;
-            this.mapper = mapper;
             this.appSettings = appSettings;
             this.logger = logger;
+            this.jsonDataResolver = jsonDataResolver;
         }
 
         public async Task<User> AddUserAsync(User user)
@@ -131,7 +130,12 @@ namespace Content.GraphQL.Services
                 }
                 registerInput.Password = await GetHash(registerInput.Password, salt);
 
-                var user = mapper.Map<User>(registerInput);
+                var user = new User {
+                    Email = registerInput.Email.ToLower(),
+                    Data = jsonDataResolver.Resolve(registerInput),
+                    Password = registerInput.Password
+                };
+
                 user.Salt = Convert.ToBase64String(salt);
 
                 var addedUser = await AddUserAsync(user);

@@ -1,12 +1,17 @@
 using System.Linq;
-using AutoMapper;
 using Content.GraphQL.Annotations;
 using Newtonsoft.Json.Linq;
 
-namespace Content.GraphQL.Mapping.Resolvers {
-    public class JsonDataResolver : IValueResolver<object, object, JObject>
+namespace Content.GraphQL.Services
+{
+    public interface IJsonDataResolver
     {
-        public JObject Resolve(object source, object destination, JObject destMember, ResolutionContext context)
+        JObject Resolve(object source);
+    }
+
+    public class JsonDataResolver : IJsonDataResolver
+    {
+        public JObject Resolve(object source)
         {
             var propertiesToMap = source.GetType().GetProperties().Where(property => property.GetCustomAttributes(typeof(MapsToDataAttribute), false).Any());
 

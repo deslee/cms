@@ -11,7 +11,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Content.GraphQL.Definitions.Types.Input;
 using Content.GraphQL.Models.Input;
-using AutoMapper;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;

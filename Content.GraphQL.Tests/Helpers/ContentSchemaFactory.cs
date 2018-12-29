@@ -1,9 +1,7 @@
 using System;
-using AutoMapper;
 using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
-using Content.GraphQL.Mapping.Profiles;
 using Content.GraphQL.Services;
 using GraphQL;
 using Microsoft.EntityFrameworkCore;

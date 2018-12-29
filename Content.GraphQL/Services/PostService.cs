@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using AutoMapper;
 using Content.Data;
 using Content.Data.Models;
 using Content.GraphQL.Models;
@@ -28,14 +27,14 @@ namespace Content.GraphQL.Services
     public class PostService : IPostService
     {
         private readonly DataContext dataContext;
-        private readonly IMapper mapper;
         private readonly ILogger<PostService> logger;
+        private readonly IJsonDataResolver jsonDataResolver;
 
-        public PostService(DataContext dataContext, IMapper mapper, ILogger<PostService> logger)
+        public PostService(DataContext dataContext, ILogger<PostService> logger, IJsonDataResolver jsonDataResolver)
         {
             this.dataContext = dataContext;
-            this.mapper = mapper;
             this.logger = logger;
+            this.jsonDataResolver = jsonDataResolver;
         }
 
         public async Task<MutationResult> DeletePost(string postId, UserContext userContext)
@@ -44,7 +43,8 @@ namespace Content.GraphQL.Services
             {
                 // find post
                 var post = await dataContext.Items.FindAsync(postId);
-                if (post == null) {
+                if (post == null)
+                {
                     return new MutationResult<Site>
                     {
                         ErrorMessage = $"Post {postId} does not exist."
@@ -95,7 +95,21 @@ namespace Content.GraphQL.Services
         {
             try
             {
-                var post = mapper.Map<Item>(postInput);
+                var item = new Item
+                {
+                    Id = postInput.Id,
+                    Type = "post",
+                    Data = jsonDataResolver.Resolve(postInput)
+                };
+                item.ItemGroups = postInput.Categories?.Select(groupName => new ItemGroup
+                {
+                    Item = item,
+                    ItemId = item.Id,
+                    Group = new Group
+                    {
+                        Name = groupName
+                    }
+                }).ToList();
 
                 // validate authenticated user belogns to site
                 var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
@@ -108,18 +122,18 @@ namespace Content.GraphQL.Services
                 }
 
                 // set the "SiteId" shadow property
-                dataContext.Entry(post).Property("SiteId").CurrentValue = siteId;
+                dataContext.Entry(item).Property("SiteId").CurrentValue = siteId;
 
                 // remove groups in post that are not in payload
-                var foundGroupsInPost = await dataContext.ItemGroups.Where(pg => pg.ItemId == post.Id).ToListAsync();
+                var foundGroupsInPost = await dataContext.ItemGroups.Where(pg => pg.ItemId == item.Id).ToListAsync();
                 var groupsToDeleteFromPost =
-                    foundGroupsInPost.Where(fc => post.ItemGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
+                    foundGroupsInPost.Where(fc => item.ItemGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
                 dataContext.ItemGroups.RemoveRange(groupsToDeleteFromPost);
 
                 var allGroupsInSite = await dataContext.Groups.Where(c => EF.Property<string>(c, "SiteId") == siteId).ToListAsync();
 
                 // assign group ids to groups with the same names
-                foreach (ItemGroup pg in post.ItemGroups)
+                foreach (ItemGroup pg in item.ItemGroups)
                 {
                     var foundGroupInSite = allGroupsInSite.FirstOrDefault(g => g.Name == pg.Group.Name);
                     if (foundGroupInSite != null)
@@ -140,11 +154,11 @@ namespace Content.GraphQL.Services
                     }
                 }
 
-                dataContext.Update(post);
+                dataContext.Update(item);
                 await dataContext.SaveChangesAsync();
                 return new MutationResult<Item>
                 {
-                    Data = post
+                    Data = item
                 };
             }
             catch (Exception ex)

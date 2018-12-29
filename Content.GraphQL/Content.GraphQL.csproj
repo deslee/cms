@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Automapper" Version="8.0.0" />
     <PackageReference Include="CorrelationId" Version="2.1.0" />
     <PackageReference Include="GraphQL" Version="2.4.0" />
     <PackageReference Include="GraphQL.Authorization" Version="2.0.27" />

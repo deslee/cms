@@ -1,10 +1,8 @@
 using System;
 using System.Security.Claims;
 using System.Text;
-using AutoMapper;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Middleware;
-using Content.GraphQL.Mapping.Profiles;
 using Content.GraphQL.Services;
 using GraphQL;
 using GraphQL.Authorization;
@@ -39,12 +37,6 @@ namespace Content.GraphQL {
                 });
         }
         
-        public static void AddCustomMapper(this IServiceCollection services) {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<ContentMapperProfile>());
-            var mapper = config.CreateMapper();
-            services.AddSingleton<IMapper>(mapper);
-        }
-
         public static void AddCustomGraphQL<T>(this IServiceCollection services) {
             services.AddTransient<ContentSchema>(s => new ContentSchema(new FuncDependencyResolver(s.GetRequiredService)));
             services.AddTransient<ContentQuery>();
@@ -77,6 +69,7 @@ namespace Content.GraphQL {
         }
 
         public static void AddCustomServices(this IServiceCollection services) {
+            services.AddTransient<IJsonDataResolver, JsonDataResolver>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ISiteService, SiteService>();
             services.AddTransient<IPostService, PostService>();
