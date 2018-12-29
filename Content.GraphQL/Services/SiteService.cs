@@ -54,7 +54,8 @@ namespace Content.GraphQL.Services
 
                 // delete
                 var site = await dataContext.Sites.FindAsync(siteId);
-                if (site == null) {
+                if (site == null)
+                {
                     return new MutationResult<Site>
                     {
                         ErrorMessage = $"Site {siteId} does not exist."
@@ -94,13 +95,12 @@ namespace Content.GraphQL.Services
         {
             try
             {
-                var site = new Site {
+                var site = new Site
+                {
                     Id = siteInput.Id,
                     Name = siteInput.Name,
                     Data = jsonDataResolver.Resolve(siteInput)
                 };
-
-                var emails = siteInput.Users.Select(e => e.ToLower());
 
                 // validate
                 if (siteInput.Id != null)
@@ -115,21 +115,17 @@ namespace Content.GraphQL.Services
                     }
                 }
 
-                var userIds = await dataContext.Users.Where(u => emails.Contains(u.Email)).Select(u => u.Id).ToListAsync();
-
                 dataContext.Sites.Update(site);
-                var siteUsers = userIds.Select(userId => new SiteUser
-                {
-                    UserId = userId,
-                    SiteId = site.Id
-                }).ToList();
 
-                foreach (var siteUser in siteUsers)
+
+                if (dataContext.Entry(site).State == EntityState.Added)
                 {
-                    if (!(await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteUser.SiteId && su.UserId == siteUser.UserId)))
+                    // give the creating user permission to the site
+                    dataContext.SiteUsers.Add(new SiteUser
                     {
-                        dataContext.SiteUsers.Add(siteUser);
-                    }
+                        UserId = userContext.Id,
+                        SiteId = site.Id
+                    });
                 }
 
                 await dataContext.SaveChangesAsync();
