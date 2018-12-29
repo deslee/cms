@@ -1,16 +1,13 @@
 import React from 'react';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
+import { Query, withQuery } from 'react-apollo';
 import SiteComponent from '../components/Sites/SiteComponent';
 import { RouteComponentProps } from 'react-router-dom';
 import { Site } from '../models/models';
 import { Segment as div, Dimmer, Loader } from 'semantic-ui-react';
+import { QueryInjectedProps, withSiteQuery } from '../data/queries';
 
-interface Props {
-
-}
-
-const GET_SITE = gql`
+const GET_SITE = `
     query getSites($siteId: String!) {
         site(siteId: $siteId) {
             id
@@ -41,22 +38,27 @@ const GET_SITE = gql`
     }
 `
 
-class SiteDashboard extends React.Component<Props & RouteComponentProps<any>> {
+interface Props {
+
+}
+
+class SiteDashboard extends React.Component<Props & QueryInjectedProps<any, any>> {
     render() {
+        const { result: { loading, data } } = this.props;
+        console.log(this.props)
         return (
-            <Query query={GET_SITE} variables={{ siteId: this.props.match.params.id }}>{(result) => {
-                const site: Site = result.data.site;
-                return <div style={{width: '100%', height: '100%'}}>
-                    <Dimmer
-                        active={result.loading}
-                    >
-                        <Loader />
-                    </Dimmer>
-                    {!result.loading && <SiteComponent site={site} />}
-                </div>
-            }}</Query>
+            <div style={{ width: '100%', height: '100%' }}>
+                <Dimmer
+                    active={loading}
+                >
+                    <Loader />
+                </Dimmer>
+                {!loading && data && <SiteComponent site={data.site} />}
+            </div>
         )
     }
 }
 
-export default SiteDashboard;
+const SiteQuery = withSiteQuery({ query: GET_SITE })<Props>(SiteDashboard)
+
+export default ({ match: { params: { id } } }: {} & RouteComponentProps<any>) => <SiteQuery variables={{ siteId: id }} />
