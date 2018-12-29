@@ -39,44 +39,33 @@ namespace Content.GraphQL.Services
 
         public async Task<MutationResult> DeletePost(string postId, UserContext userContext)
         {
-            try
+            // find post
+            var post = await dataContext.Items.FindAsync(postId);
+            if (post == null)
             {
-                // find post
-                var post = await dataContext.Items.FindAsync(postId);
-                if (post == null)
+                return new MutationResult<Site>
                 {
-                    return new MutationResult<Site>
-                    {
-                        ErrorMessage = $"Post {postId} does not exist."
-                    };
-                }
-                var siteId = dataContext.Entry(post).Property("SiteId").CurrentValue as string;
-
-                // validate
-                var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
-                if (!validated)
-                {
-                    return new MutationResult<Site>
-                    {
-                        ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
-                    };
-                }
-
-                // delete
-                dataContext.Items.Remove(post);
-
-                await dataContext.SaveChangesAsync();
-
-                return new MutationResult();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occured while deleting a post");
-                return new MutationResult
-                {
-                    ErrorMessage = "An unexpected error occured. Please try again."
+                    ErrorMessage = $"Post {postId} does not exist."
                 };
             }
+            var siteId = dataContext.Entry(post).Property("SiteId").CurrentValue as string;
+
+            // validate
+            var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
+            if (!validated)
+            {
+                return new MutationResult<Site>
+                {
+                    ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
+                };
+            }
+
+            // delete
+            dataContext.Items.Remove(post);
+
+            await dataContext.SaveChangesAsync();
+
+            return new MutationResult();
         }
 
         public async Task<Item> GetPost(string postId)
@@ -93,82 +82,71 @@ namespace Content.GraphQL.Services
 
         public async Task<MutationResult<Item>> UpsertPost(PostInput postInput, UserContext userContext, string siteId)
         {
-            try
+            var item = new Item
             {
-                var item = new Item
+                Id = postInput.Id,
+                Type = "post",
+                Data = jsonDataResolver.Resolve(postInput)
+            };
+            item.ItemGroups = postInput.Categories?.Select(groupName => new ItemGroup
+            {
+                Item = item,
+                ItemId = item.Id,
+                Group = new Group
                 {
-                    Id = postInput.Id,
-                    Type = "post",
-                    Data = jsonDataResolver.Resolve(postInput)
-                };
-                item.ItemGroups = postInput.Categories?.Select(groupName => new ItemGroup
-                {
-                    Item = item,
-                    ItemId = item.Id,
-                    Group = new Group
-                    {
-                        Name = groupName
-                    }
-                }).ToList();
-
-                // validate authenticated user belogns to site
-                var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
-                if (!validated)
-                {
-                    return new MutationResult<Item>
-                    {
-                        ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
-                    };
+                    Name = groupName
                 }
+            }).ToList();
 
-                // set the "SiteId" shadow property
-                dataContext.Entry(item).Property("SiteId").CurrentValue = siteId;
-
-                // remove groups in post that are not in payload
-                var foundGroupsInPost = await dataContext.ItemGroups.Where(pg => pg.ItemId == item.Id).ToListAsync();
-                var groupsToDeleteFromPost =
-                    foundGroupsInPost.Where(fc => item.ItemGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
-                dataContext.ItemGroups.RemoveRange(groupsToDeleteFromPost);
-
-                var allGroupsInSite = await dataContext.Groups.Where(c => EF.Property<string>(c, "SiteId") == siteId).ToListAsync();
-
-                // assign group ids to groups with the same names
-                foreach (ItemGroup pg in item.ItemGroups)
-                {
-                    var foundGroupInSite = allGroupsInSite.FirstOrDefault(g => g.Name == pg.Group.Name);
-                    if (foundGroupInSite != null)
-                    {
-                        pg.GroupId = foundGroupInSite.Id;
-                        pg.Group.Id = foundGroupInSite.Id;
-                    }
-                    dataContext.Entry(pg.Group).Property("SiteId").CurrentValue = siteId;
-                }
-
-                // remove groups from site that no longer have posts
-                foreach (var group in allGroupsInSite)
-                {
-                    var count = await dataContext.ItemGroups.Where(pg => pg.GroupId == group.Id).CountAsync();
-                    if (count == 0)
-                    {
-                        dataContext.Groups.Remove(group);
-                    }
-                }
-
-                dataContext.Update(item);
-                await dataContext.SaveChangesAsync();
+            // validate authenticated user belogns to site
+            var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
+            if (!validated)
+            {
                 return new MutationResult<Item>
                 {
-                    Data = item
+                    ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
                 };
             }
-            catch (Exception ex)
+
+            // set the "SiteId" shadow property
+            dataContext.Entry(item).Property("SiteId").CurrentValue = siteId;
+
+            // remove groups in post that are not in payload
+            var foundGroupsInPost = await dataContext.ItemGroups.Where(pg => pg.ItemId == item.Id).ToListAsync();
+            var groupsToDeleteFromPost =
+                foundGroupsInPost.Where(fc => item.ItemGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
+            dataContext.ItemGroups.RemoveRange(groupsToDeleteFromPost);
+
+            var allGroupsInSite = await dataContext.Groups.Where(c => EF.Property<string>(c, "SiteId") == siteId).ToListAsync();
+
+            // assign group ids to groups with the same names
+            foreach (ItemGroup pg in item.ItemGroups)
             {
-                logger.LogError(ex, "An error occured while upserting a post");
-                return new MutationResult<Item>
+                var foundGroupInSite = allGroupsInSite.FirstOrDefault(g => g.Name == pg.Group.Name);
+                if (foundGroupInSite != null)
                 {
-                    ErrorMessage = "An unexpected error occured. Please try again."
-                };
+                    pg.GroupId = foundGroupInSite.Id;
+                    pg.Group.Id = foundGroupInSite.Id;
+                }
+                dataContext.Entry(pg.Group).Property("SiteId").CurrentValue = siteId;
             }
+
+            // remove groups from site that no longer have posts
+            foreach (var group in allGroupsInSite)
+            {
+                var count = await dataContext.ItemGroups.Where(pg => pg.GroupId == group.Id).CountAsync();
+                if (count == 0)
+                {
+                    dataContext.Groups.Remove(group);
+                }
+            }
+
+            dataContext.Update(item);
+            await dataContext.SaveChangesAsync();
+            return new MutationResult<Item>
+            {
+                Data = item
+            };
         }
     }
 }

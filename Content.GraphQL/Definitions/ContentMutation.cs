@@ -18,6 +18,7 @@ using Content.GraphQL.Services;
 using GraphQL.Authorization;
 using Content.GraphQL.Definitions.Types.Result;
 using Content.GraphQL.Models;
+using Content.GraphQL.Helpers;
 
 namespace Content.GraphQL.Definitions
 {
@@ -26,12 +27,14 @@ namespace Content.GraphQL.Definitions
         private readonly ISiteService siteService;
         private readonly IPostService postService;
         private readonly IUserService userService;
+        private readonly IMutationExecutionHelper mutationExecutionHelper;
 
-        public ContentMutation(ISiteService siteService, IPostService postService, IUserService userService)
+        public ContentMutation(ISiteService siteService, IPostService postService, IUserService userService, IMutationExecutionHelper mutationExecutionHelper)
         {
             this.siteService = siteService;
             this.postService = postService;
             this.userService = userService;
+            this.mutationExecutionHelper = mutationExecutionHelper;
             Name = "Mutation";
 
             Field<MutationResultType<Site, SiteType>>(
@@ -39,7 +42,7 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<SiteInputType>> { Name = "site" }
                 ),
-                resolve: context => siteService.upsertSite(context.GetArgument<SiteInput>("site"), (context.UserContext as UserContext))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => siteService.upsertSite(context.GetArgument<SiteInput>("site"), (context.UserContext as UserContext)))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType<Item, PostType>>(
@@ -48,7 +51,7 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<PostInputType>> { Name = "post" },
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: context => postService.UpsertPost(context.GetArgument<PostInput>("post"), (context.UserContext as UserContext), context.GetArgument<string>("siteId"))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => postService.UpsertPost(context.GetArgument<PostInput>("post"), (context.UserContext as UserContext), context.GetArgument<string>("siteId")))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType>(
@@ -56,7 +59,7 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "postId" }
                 ),
-                resolve: context => postService.DeletePost(context.GetArgument<string>("postId"), (context.UserContext as UserContext))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => postService.DeletePost(context.GetArgument<string>("postId"), (context.UserContext as UserContext)))
             );
             
             Field<MutationResultType>(
@@ -64,7 +67,7 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: context => siteService.DeleteSite(context.GetArgument<string>("siteId"), (context.UserContext as UserContext))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => siteService.DeleteSite(context.GetArgument<string>("siteId"), (context.UserContext as UserContext)))
             );
 
             Field<MutationResultType<User, UserType>>(
@@ -72,7 +75,7 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<RegisterInputType>> { Name = "registration" }
                 ),
-                resolve: context => userService.RegisterUser(context.GetArgument<RegisterInput>("registration"))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.RegisterUser(context.GetArgument<RegisterInput>("registration")))
             );
 
             Field<LoginResultType>(
@@ -80,7 +83,7 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<LoginInputType>> { Name = "login" }
                 ),
-                resolve: context => userService.Login(context.GetArgument<LoginInput>("login"))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.Login(context.GetArgument<LoginInput>("login")))
             );
         }
     }

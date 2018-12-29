@@ -51,10 +51,6 @@ namespace Content.GraphQL.Definitions.Types
                         .ToListAsync();
                 }
             );
-            Field<StringGraphType>(
-                name: "token",
-                resolve: context => userService.CreateJwtToken(context.Source, context.UserContext as UserContext)
-            );
         }
     }
 }

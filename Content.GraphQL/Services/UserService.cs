@@ -65,93 +65,72 @@ namespace Content.GraphQL.Services
 
         public async Task<LoginResult> Login(LoginInput loginInput)
         {
-            try
+            var user = await GetUserByEmail(loginInput.Email.ToLower());
+
+            if (user == null)
             {
-                var user = await GetUserByEmail(loginInput.Email.ToLower());
-
-                if (user == null)
-                {
-                    return new LoginResult
-                    {
-                        ErrorMessage = "Invalid login"
-                    };
-                }
-
-                var validPassword = await ValidatePassword(loginInput.Password, user.Password, user.Salt);
-
-                var token = await CreateJwtToken(user, new UserContext(new[] { new Claim(Constants.ClaimTypes.DatabaseId, user.Id) }));
-
-                if (validPassword)
-                {
-                    return new LoginResult
-                    {
-                        Data = user,
-                        Token = token
-                    };
-                }
-                else
-                {
-                    return new LoginResult
-                    {
-                        ErrorMessage = "Invalid login"
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occured while logging in");
                 return new LoginResult
                 {
-                    ErrorMessage = "An unexpected error occured. Please try again."
+                    ErrorMessage = "Invalid login"
+                };
+            }
+
+            var validPassword = await ValidatePassword(loginInput.Password, user.Password, user.Salt);
+
+            var token = await CreateJwtToken(user, new UserContext(new[] { new Claim(Constants.ClaimTypes.DatabaseId, user.Id) }));
+
+            if (validPassword)
+            {
+                return new LoginResult
+                {
+                    Data = user,
+                    Token = token
+                };
+            }
+            else
+            {
+                return new LoginResult
+                {
+                    ErrorMessage = "Invalid login"
                 };
             }
         }
 
         public async Task<MutationResult<User>> RegisterUser(RegisterInput registerInput)
         {
-            try
+            registerInput.Email = registerInput.Email.Trim().ToLower();
+
+            var existsAlready = await dataContext.Users.AnyAsync(u => u.Email == registerInput.Email);
+            if (existsAlready)
             {
-                registerInput.Email = registerInput.Email.Trim().ToLower();
-
-                var existsAlready = await dataContext.Users.AnyAsync(u => u.Email == registerInput.Email);
-                if (existsAlready)
-                {
-                    return new MutationResult<User>
-                    {
-                        ErrorMessage = "User already exists"
-                    };
-                }
-
-                // generate a 128-bit salt using a secure PRNG
-                byte[] salt = new byte[128 / 8];
-                using (var rng = RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(salt);
-                }
-                registerInput.Password = await GetHash(registerInput.Password, salt);
-
-                var user = new User {
-                    Email = registerInput.Email.ToLower(),
-                    Data = jsonDataResolver.Resolve(registerInput),
-                    Password = registerInput.Password
-                };
-
-                user.Salt = Convert.ToBase64String(salt);
-
-                var addedUser = await AddUserAsync(user);
                 return new MutationResult<User>
                 {
-                    Data = addedUser
+                    ErrorMessage = "User already exists"
                 };
             }
-            catch (Exception ex)
+
+            // generate a 128-bit salt using a secure PRNG
+            byte[] salt = new byte[128 / 8];
+            using (var rng = RandomNumberGenerator.Create())
             {
-                logger.LogError(ex, "An error occured while registering a user");
-                return new MutationResult<User>
-                {
-                    ErrorMessage = "An unexpected error occured. Please try again."
-                };
+                rng.GetBytes(salt);
             }
+            registerInput.Password = await GetHash(registerInput.Password, salt);
+
+            var user = new User
+            {
+                Email = registerInput.Email.ToLower(),
+                Data = jsonDataResolver.Resolve(registerInput),
+                Password = registerInput.Password
+            };
+
+            user.Salt = Convert.ToBase64String(salt);
+
+            var addedUser = await AddUserAsync(user);
+            return new MutationResult<User>
+            {
+                Data = addedUser
+            };
         }
 
         private async Task<bool> ValidatePassword(string password, string hashedPassword, string salt)

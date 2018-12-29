@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Middleware;
+using Content.GraphQL.Helpers;
 using Content.GraphQL.Services;
 using GraphQL;
 using GraphQL.Authorization;
@@ -73,6 +74,7 @@ namespace Content.GraphQL {
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ISiteService, SiteService>();
             services.AddTransient<IPostService, PostService>();
+            services.AddTransient<IMutationExecutionHelper, MutationExecutionHelper>();
         }
     }
 }

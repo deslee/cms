@@ -40,41 +40,30 @@ namespace Content.GraphQL.Services
 
         public async Task<MutationResult> DeleteSite(string siteId, UserContext userContext)
         {
-            try
+            // validate
+            var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
+            if (!validated)
             {
-                // validate
-                var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
-                if (!validated)
+                return new MutationResult<Site>
                 {
-                    return new MutationResult<Site>
-                    {
-                        ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
-                    };
-                }
-
-                // delete
-                var site = await dataContext.Sites.FindAsync(siteId);
-                if (site == null)
-                {
-                    return new MutationResult<Site>
-                    {
-                        ErrorMessage = $"Site {siteId} does not exist."
-                    };
-                }
-                dataContext.Sites.Remove(site);
-
-                await dataContext.SaveChangesAsync();
-
-                return new MutationResult();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occured while deleting a site");
-                return new MutationResult
-                {
-                    ErrorMessage = "An unexpected error occured. Please try again."
+                    ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteId}."
                 };
             }
+
+            // delete
+            var site = await dataContext.Sites.FindAsync(siteId);
+            if (site == null)
+            {
+                return new MutationResult<Site>
+                {
+                    ErrorMessage = $"Site {siteId} does not exist."
+                };
+            }
+            dataContext.Sites.Remove(site);
+
+            await dataContext.SaveChangesAsync();
+
+            return new MutationResult();
         }
 
         public async Task<Site> GetSite(string id)
@@ -93,55 +82,44 @@ namespace Content.GraphQL.Services
 
         public async Task<MutationResult<Site>> upsertSite(SiteInput siteInput, UserContext userContext)
         {
-            try
+            var site = new Site
             {
-                var site = new Site
-                {
-                    Id = siteInput.Id,
-                    Name = siteInput.Name,
-                    Data = jsonDataResolver.Resolve(siteInput)
-                };
+                Id = siteInput.Id,
+                Name = siteInput.Name,
+                Data = jsonDataResolver.Resolve(siteInput)
+            };
 
-                // validate
-                if (siteInput.Id != null)
-                {
-                    var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteInput.Id && su.UserId == userContext.Id);
-                    if (!validated)
-                    {
-                        return new MutationResult<Site>
-                        {
-                            ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteInput.Id}."
-                        };
-                    }
-                }
-
-                dataContext.Sites.Update(site);
-
-
-                if (dataContext.Entry(site).State == EntityState.Added)
-                {
-                    // give the creating user permission to the site
-                    dataContext.SiteUsers.Add(new SiteUser
-                    {
-                        UserId = userContext.Id,
-                        SiteId = site.Id
-                    });
-                }
-
-                await dataContext.SaveChangesAsync();
-                return new MutationResult<Site>
-                {
-                    Data = site
-                };
-            }
-            catch (Exception ex)
+            // validate
+            if (siteInput.Id != null)
             {
-                logger.LogError(ex, "An error occured while upserting a site");
-                return new MutationResult<Site>
+                var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteInput.Id && su.UserId == userContext.Id);
+                if (!validated)
                 {
-                    ErrorMessage = "An unexpected error occured. Please try again."
-                };
+                    return new MutationResult<Site>
+                    {
+                        ErrorMessage = $"User {userContext?.Email} has no permission to update site {siteInput.Id}."
+                    };
+                }
             }
+
+            dataContext.Sites.Update(site);
+
+
+            if (dataContext.Entry(site).State == EntityState.Added)
+            {
+                // give the creating user permission to the site
+                dataContext.SiteUsers.Add(new SiteUser
+                {
+                    UserId = userContext.Id,
+                    SiteId = site.Id
+                });
+            }
+
+            await dataContext.SaveChangesAsync();
+            return new MutationResult<Site>
+            {
+                Data = site
+            };
         }
     }
 }
