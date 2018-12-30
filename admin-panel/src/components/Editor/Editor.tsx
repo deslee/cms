@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Editor } from 'react-draft-wysiwyg';
 import '../../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import classes from './Editor.module.scss';
 import { EditorState, RawDraftContentState, convertFromRaw, ContentState, convertToRaw } from 'draft-js';
 
 interface State {
@@ -10,7 +11,6 @@ interface State {
 interface Props {
     onChange: (rawState: RawDraftContentState) => void;
     initialState?: RawDraftContentState;
-    className?: string;
 }
 
 const toolbar = {
@@ -49,11 +49,10 @@ class TextEditor extends React.Component<Props, State> {
 
     render() {
         const { editorState } = this.state;
-        const { className } = this.props;
         return (
             <div>
                 <Editor
-                    editorClassName={className}
+                    editorClassName={classes.border}
                     editorState={editorState}
                     onEditorStateChange={this.onEditorStateChange}
                     toolbar={toolbar}

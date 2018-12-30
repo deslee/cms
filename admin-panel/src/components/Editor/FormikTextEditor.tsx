@@ -1,11 +1,9 @@
 import * as React from 'react';
-import { Editor } from 'react-draft-wysiwyg';
 import '../../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { EditorState, RawDraftContentState, convertFromRaw, ContentState, convertToRaw } from 'draft-js';
 import TextEditor from './Editor';
 import { FieldProps } from 'formik';
 import { Form } from 'semantic-ui-react';
-import classes from './FormikTextEditor.module.scss';
 
 interface State {
 }
@@ -39,7 +37,6 @@ class FormikTextEditor<V> extends React.Component<Props & FieldProps<V>, State> 
             <Form.Field>
                 <label>{this.props.label}</label>
                 <TextEditor
-                    className={classes.border}
                     initialState={initialState}
                     onChange={(rawState) => {
                         this.props.form.setFieldValue(this.props.field.name, JSON.stringify({ type: 'RawDraftContentState', value: rawState }))
