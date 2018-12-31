@@ -14,7 +14,7 @@ interface Props {
 }
 
 const toolbar = {
-    options: ['inline', 'blockType', 'fontSize', 'list', 'textAlign', 'link', 'emoji', 'history']
+    options: ['inline', 'blockType', 'list', 'textAlign', 'link', 'history']
 }
 
 class TextEditor extends React.Component<Props, State> {

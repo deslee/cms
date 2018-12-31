@@ -1,21 +1,21 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom';
 import { Table, Form } from 'semantic-ui-react';
-import SiteDataForm from './SiteDataForm';
+import SiteDataForm, { SiteFormData } from './SiteDataForm';
 
 import styles from './SiteComponent.module.scss';
 import { Site } from '../../models/models';
 
 interface Props {
     site: Site;
+    handleEditSite: (values: SiteFormData) => Promise<void>;
 }
 
 const SiteComponent = (props: Props) => {
-    const { site } = props;
+    const { site, handleEditSite } = props;
     return <div className={styles.root}>
         <SiteDataForm
-            id={site.id}
-            name={site.name}
+            handleEditSite={handleEditSite}
             initialValues={{
                 title: site.title,
                 subtitle: site.subtitle,

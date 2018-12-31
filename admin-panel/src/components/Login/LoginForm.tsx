@@ -1,9 +1,10 @@
 import * as React from 'react'
-import { Formik, FormikActions, Field } from 'formik';
+import { Formik, Field } from 'formik';
 import * as Yup from 'yup';
 import FormComponent from '../Form/FormComponent';
 import { Button, Form, Message, Dimmer, Loader } from 'semantic-ui-react'
 import classes from './LoginForm.module.css'
+import handleWithFormValues from '../../utils/handleWithFormValues';
 
 export interface LoginFormValues {
     email: string
@@ -27,20 +28,7 @@ export default ({ handleLogin }: LoginFormProps) => (
     <Formik
         initialValues={initialValues}
         validationSchema={LoginFormSchema}
-        onSubmit={async (values: LoginFormValues, actions: FormikActions<any>) => {
-            try {
-                await handleLogin(values);
-            } catch (e) {
-                if (e instanceof Error) {
-                    actions.setStatus(e.message)
-                } else {
-                    actions.setStatus(e.toString())
-                }
-            } finally {
-                actions.setSubmitting(false);
-            }
-        }
-        }
+        onSubmit={(values, actions) => handleWithFormValues(handleLogin, values, actions)}
     >{formik => (
         <div>
             <Dimmer active={formik.isSubmitting}> <Loader /> </Dimmer>

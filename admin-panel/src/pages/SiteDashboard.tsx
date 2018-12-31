@@ -1,10 +1,12 @@
 import React from 'react';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
+import { Query, Mutation, MutationFn } from 'react-apollo';
 import SiteComponent from '../components/Sites/SiteComponent';
 import { RouteComponentProps } from 'react-router-dom';
 import { Site } from '../models/models';
 import { Segment as div, Dimmer, Loader } from 'semantic-ui-react';
+import { SiteFormData } from '../components/Sites/SiteDataForm';
+import { mutateSafely } from '../data/helpers';
 
 interface Props {
 
@@ -41,20 +43,53 @@ const GET_SITE = gql`
     }
 `
 
+const UPSERT_SITE = gql`
+    mutation upsertSite($site: SiteInput!) {
+        upsertSite(site: $site) {
+            success
+            errorMessage
+            data {
+                id
+                name
+                title
+                subtitle
+                googleAnalyticsId
+                copyright
+            }
+        }
+    }
+    `
+
+
 class SiteDashboard extends React.Component<Props & RouteComponentProps<any>> {
     render() {
         return (
-            <Query query={GET_SITE} variables={{ siteId: this.props.match.params.id }}>{(result) => {
-                const site: Site = result.data.site;
-                return <div style={{width: '100%', height: '100%'}}>
-                    <Dimmer
-                        active={result.loading}
-                    >
-                        <Loader />
-                    </Dimmer>
-                    {!result.loading && <SiteComponent site={site} />}
-                </div>
-            }}</Query>
+            <Mutation mutation={UPSERT_SITE}>{(upsertSite) => (
+                <Query query={GET_SITE} variables={{ siteId: this.props.match.params.id }}>{(result) => {
+                    const site: Site = result.data.site;
+                    return <div style={{ width: '100%', height: '100%' }}>
+                        <Dimmer
+                            active={result.loading}
+                        >
+                            <Loader />
+                        </Dimmer>
+                        {
+                            !result.loading && 
+                            <SiteComponent site={site} handleEditSite={async (values) => {
+                                    await mutateSafely(upsertSite, {
+                                        variables: {
+                                            site: {
+                                                id: site.id,
+                                                name: site.name,
+                                                ...values
+                                            }
+                                        }
+                                    })
+                            }} />
+                        }
+                    </div>
+                }}</Query>
+            )}</Mutation>
         )
     }
 }
