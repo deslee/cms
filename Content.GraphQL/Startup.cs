@@ -29,10 +29,10 @@ namespace Content.GraphQL
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors(corsOptions => corsOptions.AddPolicy("AllowAllOrigins", policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
             var builder = new DbContextOptionsBuilder<DataContext>();
             ConfigureDatabase(builder);
-            var options = builder.Options;
-            MigrateDatabase(options);
+            MigrateDatabase(builder.Options);
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
@@ -48,9 +48,7 @@ namespace Content.GraphQL
                 .CreateLogger();
 
             services.AddCustomAuthentication(appSettings);
-
             services.AddCorrelationId();
-
             services.AddDbContext<DataContext>(optionsAction: ConfigureDatabase);
             services.AddCustomGraphQL<SiteType>();
             services.AddCustomServices();
@@ -60,6 +58,7 @@ namespace Content.GraphQL
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseCors("AllowAllOrigins");
+
             app.UseAuthentication();
             app.UseCorrelationId(new CorrelationIdOptions
             {
