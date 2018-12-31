@@ -37,14 +37,12 @@ namespace Content.GraphQL.Services
         private readonly DataContext dataContext;
         private readonly AppSettings appSettings;
         private readonly ILogger<UserService> logger;
-        private readonly IJsonDataResolver jsonDataResolver;
 
-        public UserService(DataContext dataContext, AppSettings appSettings, ILogger<UserService> logger, IJsonDataResolver jsonDataResolver)
+        public UserService(DataContext dataContext, AppSettings appSettings, ILogger<UserService> logger)
         {
             this.dataContext = dataContext;
             this.appSettings = appSettings;
             this.logger = logger;
-            this.jsonDataResolver = jsonDataResolver;
         }
 
         public async Task<User> AddUserAsync(User user)
@@ -121,7 +119,6 @@ namespace Content.GraphQL.Services
             var user = new User
             {
                 Email = registerInput.Email.ToLower(),
-                Data = jsonDataResolver.Resolve(registerInput),
                 Password = registerInput.Password
             };
 

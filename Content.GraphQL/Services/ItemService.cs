@@ -13,42 +13,42 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Content.GraphQL.Services
 {
-    public interface IPostService
+    public interface IItemService
     {
-        Task<MutationResult<Item>> UpsertPost(PostInput postInput, UserContext userContext, string siteId);
-        Task<IList<Item>> GetPosts(string siteId);
-        Task<MutationResult> DeletePost(string postId, UserContext userContext);
-        Task<Item> GetPost(string postId);
+        Task<MutationResult<Item>> UpsertItem(ItemInput itemInput, UserContext userContext, string siteId);
+        Task<IList<Item>> GetItems(string siteId);
+        Task<MutationResult> DeleteItem(string itemId, UserContext userContext);
+        Task<Item> GetItem(string itemId);
     }
 
-    public class PostService : IPostService
+    public class ItemService : IItemService
     {
         private readonly DataContext dataContext;
-        private readonly ILogger<PostService> logger;
-        private readonly IJsonDataResolver jsonDataResolver;
+        private readonly ILogger<ItemService> logger;
 
-        public PostService(DataContext dataContext, ILogger<PostService> logger, IJsonDataResolver jsonDataResolver)
+        public ItemService(DataContext dataContext, ILogger<ItemService> logger)
         {
             this.dataContext = dataContext;
             this.logger = logger;
-            this.jsonDataResolver = jsonDataResolver;
         }
 
-        public async Task<MutationResult> DeletePost(string postId, UserContext userContext)
+        public async Task<MutationResult> DeleteItem(string itemId, UserContext userContext)
         {
-            // find post
-            var post = await dataContext.Items.FindAsync(postId);
-            if (post == null)
+            // find item
+            var item = await dataContext.Items.FindAsync(itemId);
+            if (item == null)
             {
                 return new MutationResult<Site>
                 {
-                    ErrorMessage = $"Post {postId} does not exist."
+                    ErrorMessage = $"Item {itemId} does not exist."
                 };
             }
-            var siteId = dataContext.Entry(post).Property("SiteId").CurrentValue as string;
+            var siteId = dataContext.Entry(item).Property("SiteId").CurrentValue as string;
 
             // validate
             var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
@@ -61,34 +61,48 @@ namespace Content.GraphQL.Services
             }
 
             // delete
-            dataContext.Items.Remove(post);
+            dataContext.Items.Remove(item);
 
             await dataContext.SaveChangesAsync();
 
             return new MutationResult();
         }
 
-        public async Task<Item> GetPost(string postId)
+        public async Task<Item> GetItem(string itemId)
         {
-            return await dataContext.Items.FindAsync(postId);
+            return await dataContext.Items.FindAsync(itemId);
         }
 
-        public async Task<IList<Item>> GetPosts(string siteId)
+        public async Task<IList<Item>> GetItems(string siteId)
         {
             return await dataContext.Items
                 .Where(p => EF.Property<string>(p, "SiteId") == siteId)
                 .ToListAsync();
         }
 
-        public async Task<MutationResult<Item>> UpsertPost(PostInput postInput, UserContext userContext, string siteId)
+        public async Task<MutationResult<Item>> UpsertItem(ItemInput itemInput, UserContext userContext, string siteId)
         {
+            JObject data;
+            try
+            {
+                data = JsonConvert.DeserializeObject<JObject>(itemInput.Data);
+            }
+            catch (JsonReaderException ex)
+            {
+                logger.LogError(ex, "Json parsing exception");
+                return new MutationResult<Item>
+                {
+                    ErrorMessage = "Invalid data json"
+                };
+            }
+
             var item = new Item
             {
-                Id = postInput.Id,
-                Type = "post",
-                Data = jsonDataResolver.Resolve(postInput)
+                Id = itemInput.Id,
+                Type = itemInput.Type,
+                Data = data
             };
-            item.ItemGroups = postInput.Categories?.Select(groupName => new ItemGroup
+            item.ItemGroups = itemInput.Groups?.Select(groupName => new ItemGroup
             {
                 Item = item,
                 ItemId = item.Id,
@@ -111,11 +125,11 @@ namespace Content.GraphQL.Services
             // set the "SiteId" shadow property
             dataContext.Entry(item).Property("SiteId").CurrentValue = siteId;
 
-            // remove groups in post that are not in payload
-            var foundGroupsInPost = await dataContext.ItemGroups.Where(pg => pg.ItemId == item.Id).ToListAsync();
-            var groupsToDeleteFromPost =
-                foundGroupsInPost.Where(fc => item.ItemGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
-            dataContext.ItemGroups.RemoveRange(groupsToDeleteFromPost);
+            // remove groups in item that are not in payload
+            var foundGroupsInItem = await dataContext.ItemGroups.Where(pg => pg.ItemId == item.Id).ToListAsync();
+            var groupsToDeleteFromItem =
+                foundGroupsInItem.Where(fc => item.ItemGroups.FirstOrDefault(x => x.GroupId == fc.GroupId) == null).ToList();
+            dataContext.ItemGroups.RemoveRange(groupsToDeleteFromItem);
 
             var allGroupsInSite = await dataContext.Groups.Where(c => EF.Property<string>(c, "SiteId") == siteId).ToListAsync();
 
@@ -131,7 +145,7 @@ namespace Content.GraphQL.Services
                 dataContext.Entry(pg.Group).Property("SiteId").CurrentValue = siteId;
             }
 
-            // remove groups from site that no longer have posts
+            // remove groups from site that no longer have items
             foreach (var group in allGroupsInSite)
             {
                 var count = await dataContext.ItemGroups.Where(pg => pg.GroupId == group.Id).CountAsync();

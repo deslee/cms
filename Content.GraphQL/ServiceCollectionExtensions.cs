@@ -70,10 +70,9 @@ namespace Content.GraphQL {
         }
 
         public static void AddCustomServices(this IServiceCollection services) {
-            services.AddTransient<IJsonDataResolver, JsonDataResolver>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ISiteService, SiteService>();
-            services.AddTransient<IPostService, PostService>();
+            services.AddTransient<IItemService, ItemService>();
             services.AddTransient<IMutationExecutionHelper, MutationExecutionHelper>();
         }
     }

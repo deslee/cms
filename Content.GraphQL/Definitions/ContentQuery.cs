@@ -20,14 +20,14 @@ namespace Content.GraphQL.Definitions
     public class ContentQuery : ObjectGraphType
     {
         private readonly ISiteService siteService;
-        private readonly IPostService postService;
+        private readonly IItemService itemService;
         private readonly IUserService userService;
 
-        public ContentQuery(ISiteService siteService, IPostService postService, IUserService userService)
+        public ContentQuery(ISiteService siteService, IItemService itemService, IUserService userService)
         {
             Name = "Query";
             this.siteService = siteService;
-            this.postService = postService;
+            this.itemService = itemService;
             this.userService = userService;
 
             Field<ListGraphType<SiteType>>(
@@ -41,19 +41,19 @@ namespace Content.GraphQL.Definitions
                 ),
                 resolve: context => siteService.GetSite(context.GetArgument<string>("siteId"))
             );
-            Field<ListGraphType<PostType>>(
-                "posts",
+            Field<ListGraphType<ItemType>>(
+                "items",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: context => postService.GetPosts(context.GetArgument<string>("siteId"))
+                resolve: context => itemService.GetItems(context.GetArgument<string>("siteId"))
             );
-            Field<PostType>(
-                "post",
+            Field<ItemType>(
+                "item",
                 arguments: new QueryArguments(
-                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "postId" }
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "itemId" }
                 ),
-                resolve: context => postService.GetPost(context.GetArgument<string>("postId"))
+                resolve: context => itemService.GetItem(context.GetArgument<string>("itemId"))
             );
             Field<UserType>(
                 "me",

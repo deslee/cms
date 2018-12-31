@@ -16,10 +16,6 @@ namespace Content.GraphQL.Definitions
             Query = resolver.Resolve<ContentQuery>();
             Mutation = resolver.Resolve<ContentMutation>();
             
-            RegisterType<ParagraphSliceType>();
-            RegisterType<VideoSliceType>();
-            RegisterType<ImagesSliceType>();
-
             // register middleware
             var middlewares = resolver.Resolve<IEnumerable<IFieldMiddleware>>();
             FieldMiddlewareBuilder builder = new FieldMiddlewareBuilder();

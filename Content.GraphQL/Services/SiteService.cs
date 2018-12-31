@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Content.GraphQL.Services
 {
@@ -29,13 +31,11 @@ namespace Content.GraphQL.Services
     {
         private readonly DataContext dataContext;
         private readonly ILogger<SiteService> logger;
-        private readonly IJsonDataResolver jsonDataResolver;
 
-        public SiteService(DataContext dataContext, ILogger<SiteService> logger, IJsonDataResolver jsonDataResolver)
+        public SiteService(DataContext dataContext, ILogger<SiteService> logger)
         {
             this.dataContext = dataContext;
             this.logger = logger;
-            this.jsonDataResolver = jsonDataResolver;
         }
 
         public async Task<MutationResult> DeleteSite(string siteId, UserContext userContext)
@@ -82,11 +82,25 @@ namespace Content.GraphQL.Services
 
         public async Task<MutationResult<Site>> UpsertSite(SiteInput siteInput, UserContext userContext)
         {
+            JObject data;
+            try
+            {
+                data = JsonConvert.DeserializeObject<JObject>(siteInput.Data);
+            }
+            catch (JsonReaderException ex)
+            {
+                logger.LogError(ex, "Json parsing exception");
+                return new MutationResult<Site>
+                {
+                    ErrorMessage = "Invalid data json"
+                };
+            }
+
             var site = new Site
             {
                 Id = siteInput.Id,
                 Name = siteInput.Name,
-                Data = jsonDataResolver.Resolve(siteInput)
+                Data = data
             };
 
             // validate

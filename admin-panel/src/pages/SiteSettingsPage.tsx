@@ -15,10 +15,7 @@ const GET_SITE = gql`
         site(siteId: $siteId) {
             id
             name
-            title
-            subtitle
-            googleAnalyticsId
-            copyright
+            data
         }
     }
 `
@@ -31,10 +28,7 @@ const UPSERT_SITE = gql`
             data {
                 id
                 name
-                title
-                subtitle
-                googleAnalyticsId
-                copyright
+                data
             }
         }
     }
@@ -43,7 +37,8 @@ const UPSERT_SITE = gql`
 export default ({ match: { params: { siteId }} }: Props & RouteComponentProps<any>) => 
     <Container>
         <Query query={GET_SITE} variables={{ siteId: siteId }}>{(result) => {
-            const siteSettings = result.data.site;
+            const site = result.data.site;
+            const siteSettings = site && JSON.parse(site.data)
             return <div style={{ width: '100%', height: '100%' }}>
                 <Dimmer
                     active={result.loading}
@@ -66,9 +61,9 @@ export default ({ match: { params: { siteId }} }: Props & RouteComponentProps<an
                                 await mutateSafely(upsertSite, 'upsertSite', {
                                     variables: {
                                         site: {
-                                            id: siteSettings.id,
-                                            name: siteSettings.name,
-                                            ...values
+                                            id: site.id,
+                                            name: site.name,
+                                            data: JSON.stringify(values)
                                         }
                                     }
                                 })

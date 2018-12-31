@@ -25,14 +25,14 @@ namespace Content.GraphQL.Definitions
     public class ContentMutation : ObjectGraphType
     {
         private readonly ISiteService siteService;
-        private readonly IPostService postService;
+        private readonly IItemService itemService;
         private readonly IUserService userService;
         private readonly IMutationExecutionHelper mutationExecutionHelper;
 
-        public ContentMutation(ISiteService siteService, IPostService postService, IUserService userService, IMutationExecutionHelper mutationExecutionHelper)
+        public ContentMutation(ISiteService siteService, IItemService itemService, IUserService userService, IMutationExecutionHelper mutationExecutionHelper)
         {
             this.siteService = siteService;
-            this.postService = postService;
+            this.itemService = itemService;
             this.userService = userService;
             this.mutationExecutionHelper = mutationExecutionHelper;
             Name = "Mutation";
@@ -45,21 +45,21 @@ namespace Content.GraphQL.Definitions
                 resolve: context => mutationExecutionHelper.ExecuteSafely(() => siteService.UpsertSite(context.GetArgument<SiteInput>("site"), (context.UserContext as UserContext)))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
-            Field<MutationResultType<Item, PostType>>(
-                "upsertPost",
+            Field<MutationResultType<Item, ItemType>>(
+                "upsertItem",
                 arguments: new QueryArguments(
-                    new QueryArgument<NonNullGraphType<PostInputType>> { Name = "post" },
+                    new QueryArgument<NonNullGraphType<ItemInputType>> { Name = "item" },
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: context => mutationExecutionHelper.ExecuteSafely(() => postService.UpsertPost(context.GetArgument<PostInput>("post"), (context.UserContext as UserContext), context.GetArgument<string>("siteId")))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => itemService.UpsertItem(context.GetArgument<ItemInput>("item"), (context.UserContext as UserContext), context.GetArgument<string>("siteId")))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType>(
-                "deletePost",
+                "deleteItem",
                 arguments: new QueryArguments(
-                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "postId" }
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "itemId" }
                 ),
-                resolve: context => mutationExecutionHelper.ExecuteSafely(() => postService.DeletePost(context.GetArgument<string>("postId"), (context.UserContext as UserContext)))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => itemService.DeleteItem(context.GetArgument<string>("itemId"), (context.UserContext as UserContext)))
             );
 
             Field<MutationResultType>(

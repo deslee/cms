@@ -6,16 +6,12 @@ using Content.Data.Models;
 using Content.GraphQL.Services;
 using GraphQL;
 using GraphQL.Types;
+using Newtonsoft.Json;
 
 namespace Content.GraphQL.Definitions.Types
 {
     public class SiteType: ObjectGraphType<Site>
     {
-        public const string TITLE_KEY = "Title";
-        public const string SUBTITLE_KEY = "Subtitle";
-        public const string GOOGLE_ANALYTICS_ID_KEY = "GoogleAnalyticsId";
-        public const string COPYRIGHT_KEY = "Copyright";
-
         public SiteType(DataContext dataContext) {
             Name = "Site";
             Field<StringGraphType>(
@@ -28,37 +24,26 @@ namespace Content.GraphQL.Definitions.Types
                 description: "The name of the Site",
                 resolve: context => context.Source.Name.ToString()
             );
-            FieldAsync<ListGraphType<CategoryType>>(
-                name: "categories", 
-                description: "The categories of the Site",
+            Field<StringGraphType>(
+                name: "data",
+                description: "Serialized JSON representation of site data",
+                resolve: context => JsonConvert.SerializeObject(context.Source.Data)
+            );
+            FieldAsync<ListGraphType<GroupType>>(
+                name: "groups", 
+                description: "The groups of the Site",
                 resolve: async context => {
                     await dataContext.Entry(context.Source).Collection(s => s.Groups).LoadAsync();
                     return context.Source.Groups;
                 }
             );
-            FieldAsync<ListGraphType<PostType>>(
-                name: "posts", 
-                description: "The posts of the Site",
+            FieldAsync<ListGraphType<ItemType>>(
+                name: "items", 
+                description: "The items of the Site",
                 resolve: async context => {
                     await dataContext.Entry(context.Source).Collection(s => s.Items).LoadAsync();
                     return context.Source.Items;
                 }
-            );
-            Field<StringGraphType>(
-                "title",
-                resolve: context => context.Source.Data[TITLE_KEY].ToString()
-            );
-            Field<StringGraphType>(
-                "subtitle",
-                resolve: context => context.Source.Data[SUBTITLE_KEY].ToString()
-            );
-            Field<StringGraphType>(
-                "googleAnalyticsId",
-                resolve: context => context.Source.Data[GOOGLE_ANALYTICS_ID_KEY].ToString()
-            );
-            Field<StringGraphType>(
-                "copyright",
-                resolve: context => context.Source.Data[COPYRIGHT_KEY].ToString()
             );
         }
     }

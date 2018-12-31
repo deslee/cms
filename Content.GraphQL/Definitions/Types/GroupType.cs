@@ -10,24 +10,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Content.GraphQL.Definitions.Types
 {
-    public class CategoryType : ObjectGraphType<Group>
+    public class GroupType : ObjectGraphType<Group>
     {
         private DataContext dataContext;
 
-        public CategoryType(DataContext dataContext)
+        public GroupType(DataContext dataContext)
         {
             this.dataContext = dataContext;
-            Name = "Category";
+            Name = "Group";
 
             Field<StringGraphType>(
                 name: "name",
-                description: "The name of the Category",
+                description: "The name of the Group",
                 resolve: context => context.Source.Name
             );
 
-            FieldAsync<ListGraphType<PostType>>(
-                name: "posts",
-                description: "The posts of the Category",
+            FieldAsync<ListGraphType<ItemType>>(
+                name: "items",
+                description: "The items in the Group",
                 resolve: async context => {
                     dataContext.Attach(context.Source);
                     return await dataContext.Entry(context.Source)

@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Content.Data.Models
 {
-    public class Group
+    public class Group : IAuditable
     {
         public string Id { get; set; }
         [Required]
@@ -17,5 +17,9 @@ namespace Content.Data.Models
         [Required]
         public string Name { get; set; }
         public virtual ICollection<ItemGroup> ItemGroups { get; set; }
+        public string CreatedBy { get; set; }
+        public string LastUpdatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime LastUpdatedAt { get; set; }
     }
 }
