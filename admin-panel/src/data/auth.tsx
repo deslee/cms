@@ -3,8 +3,6 @@ import * as React from 'react'
 import { wrapDisplayName } from 'recompose'
 
 export type AuthUser = {
-    email: string
-    name: string
     token: string
 };
 

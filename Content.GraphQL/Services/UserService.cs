@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Content.GraphQL.Services
 {
@@ -26,6 +28,7 @@ namespace Content.GraphQL.Services
         Task<User> GetUserByEmail(string email);
         Task<User> AddUserAsync(User user);
         Task<LoginResult> Login(LoginInput loginInput);
+        Task<MutationResult<User>> UpdateUser(UserInput userInput);
         Task<MutationResult<User>> RegisterUser(RegisterInput registerInput);
         Task<string> CreateJwtToken(User source, UserContext userContext);
         Task<IEnumerable<Claim>> GetClaimsForUser(User user);
@@ -97,6 +100,20 @@ namespace Content.GraphQL.Services
 
         public async Task<MutationResult<User>> RegisterUser(RegisterInput registerInput)
         {
+            JObject data;
+            try
+            {
+                data = JsonConvert.DeserializeObject<JObject>(registerInput.Data);
+            }
+            catch (JsonReaderException ex)
+            {
+                logger.LogError(ex, "Json parsing exception");
+                return new MutationResult<User>
+                {
+                    ErrorMessage = "Invalid data json"
+                };
+            }
+
             registerInput.Email = registerInput.Email.Trim().ToLower();
 
             var existsAlready = await dataContext.Users.AnyAsync(u => u.Email == registerInput.Email);
@@ -119,7 +136,8 @@ namespace Content.GraphQL.Services
             var user = new User
             {
                 Email = registerInput.Email.ToLower(),
-                Password = registerInput.Password
+                Password = registerInput.Password,
+                Data = data
             };
 
             user.Salt = Convert.ToBase64String(salt);
@@ -192,34 +210,73 @@ namespace Content.GraphQL.Services
                 return new MutationResult { ErrorMessage = "Both userId and userEmail cannot be null" };
             }
 
-            if (string.IsNullOrWhiteSpace(siteId)) {
+            if (string.IsNullOrWhiteSpace(siteId))
+            {
                 return new MutationResult { ErrorMessage = "siteId cannot be null" };
             }
 
             var site = await dataContext.Sites.FirstOrDefaultAsync(s => s.Id == siteId);
-            if (site == null) {
+            if (site == null)
+            {
                 return new MutationResult { ErrorMessage = $"Site {siteId} does not exist" };
             }
 
-            var siteUser = new SiteUser {
+            var siteUser = new SiteUser
+            {
                 Site = site,
                 SiteId = siteId
             };
-            
-            if (userId != null) {
+
+            if (userId != null)
+            {
                 siteUser.UserId = userId;
-            } else {
+            }
+            else
+            {
                 var user = await dataContext.Users.FirstOrDefaultAsync(u => u.Email == userEmail.ToLower());
                 siteUser.UserId = user.Id;
             }
 
-            if (await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteUser.SiteId && su.UserId == siteUser.UserId)) {
+            if (await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteUser.SiteId && su.UserId == siteUser.UserId))
+            {
                 return new MutationResult { ErrorMessage = $"User is already added to site" };
             }
             dataContext.SiteUsers.Update(siteUser);
 
             await dataContext.SaveChangesAsync();
             return new MutationResult();
+        }
+
+        public async Task<MutationResult<User>> UpdateUser(UserInput userInput)
+        {
+            JObject data;
+            try
+            {
+                data = JsonConvert.DeserializeObject<JObject>(userInput.Data);
+            }
+            catch (JsonReaderException ex)
+            {
+                logger.LogError(ex, "Json parsing exception");
+                return new MutationResult<User>
+                {
+                    ErrorMessage = "Invalid data json"
+                };
+            }
+
+            var user = await dataContext.Users.FirstOrDefaultAsync(u => u.Id == userInput.Id);
+            if (user == null)
+            {
+                return new MutationResult<User> { ErrorMessage = $"User {userInput.Id} not found." };
+            }
+
+            user.Email = userInput.Email.ToLower();
+            user.Data = data;
+
+            await dataContext.SaveChangesAsync();
+            return new MutationResult<User>
+            {
+                Data = user
+            };
         }
     }
 }

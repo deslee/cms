@@ -14,14 +14,13 @@ using GraphQL.Types;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Content.GraphQL.Definitions.Types
 {
     public class UserType : ObjectGraphType<User>
     {
-        public const string NAME_KEY = "Name";
-
         public UserType(IUserService userService, DataContext dataContext)
         {
             Name = "User";
@@ -34,8 +33,9 @@ namespace Content.GraphQL.Definitions.Types
                 resolve: context => context.Source.Email
             );
             Field<StringGraphType>(
-                name: "name",
-                resolve: context => context.Source.Data[NAME_KEY]
+                name: "data",
+                description: "Serialized JSON representation of user data",
+                resolve: context => JsonConvert.SerializeObject(context.Source.Data)
             );
             FieldAsync<ListGraphType<SiteType>>(
                 name: "sites",

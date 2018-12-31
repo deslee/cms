@@ -86,6 +86,14 @@ namespace Content.GraphQL.Definitions
                 resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.Login(context.GetArgument<LoginInput>("login")))
             );
 
+            Field<MutationResultType<User, UserType>>(
+                "updateUser",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<UserInputType>> { Name = "user" }
+                ),
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.UpdateUser(context.GetArgument<UserInput>("user")))
+            );
+
             Field<MutationResultType>(
                 "addUserToSite",
                 arguments: new QueryArguments(

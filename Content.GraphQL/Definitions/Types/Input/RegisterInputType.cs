@@ -11,7 +11,7 @@ namespace Content.GraphQL.Definitions.Types.Input
         {
             Name = "RegisterInput";
             Field(r => r.Email).Description("Email Address");
-            Field(r => r.Name).Description("Your name");
+            Field(x => x.Data).Description("Serialized JSON representation of user data");
             Field(r => r.Password).Description("Password");
         }
     }

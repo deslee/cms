@@ -38,7 +38,7 @@ const SiteDataForm = (props: Props) => {
                 <Dimmer active={formik.isSubmitting}>
                     <Loader />
                 </Dimmer>
-                <Form onSubmit={formik.handleSubmit} error={formik.status}>
+                <Form onSubmit={formik.handleSubmit} error={Boolean(formik.status)}>
                     <Field type="text" name="title" label="Title" component={FormComponent} />
                     <Field
                         name="subtitle"

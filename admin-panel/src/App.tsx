@@ -5,10 +5,11 @@ import * as Yup from 'yup';
 import { getClient } from './data/apolloClient';
 import { BrowserRouter as Router, Route, Link, Redirect, Switch } from "react-router-dom";
 import 'semantic-ui-css/semantic.min.css'
-import LoginPage from './pages/LoginPage';
+import LoginPage from './pages/Login/LoginPage';
 import PrivateRoute from './utils/PrivateRoute';
 import { AUTH_USER_KEY } from './utils/Constants';
-import SitePage from './pages/SitePage';
+import SitePage from './pages/Site/SitePage';
+import UserProfilePage from './pages/User/UserProfilePage';
 
 interface Props { }
 interface State {
@@ -18,10 +19,6 @@ interface State {
 let initialUser: AuthUser | undefined;
 try {
   const authUserSchema = Yup.object().shape({
-    email: Yup.string()
-      .required("Required"),
-    name: Yup.string()
-      .required("Required"),
     token: Yup.string()
       .required("Required")
   })
@@ -68,6 +65,7 @@ class App extends Component<Props, State> {
             <Switch>
               <PrivateRoute path="/sites/:siteId" component={SitePage} />
               <Route path="/login" component={LoginPage} />
+              <PrivateRoute path="/user/profile" component={UserProfilePage} />
               <Redirect to={`/sites/${process.env.REACT_APP_SITE_ID}`} />
             </Switch>
           </Router>
