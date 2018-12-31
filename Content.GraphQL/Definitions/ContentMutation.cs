@@ -42,7 +42,7 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<SiteInputType>> { Name = "site" }
                 ),
-                resolve: context => mutationExecutionHelper.ExecuteSafely(() => siteService.upsertSite(context.GetArgument<SiteInput>("site"), (context.UserContext as UserContext)))
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => siteService.UpsertSite(context.GetArgument<SiteInput>("site"), (context.UserContext as UserContext)))
             ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType<Item, PostType>>(
