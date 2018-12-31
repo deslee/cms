@@ -6,14 +6,13 @@ interface Props {
     label?: string;
 }
 
-export default class FormComponent<V> extends React.Component<Props & FieldProps<V>> {
-    render() {
-        const { field, form, label, ...props } = this.props;
-        const touched: boolean = form.touched[field.name];
-        const error: string = form.errors[field.name];
-        return (<Form.Field>
-            <Form.Input label={label} {...props} {...field} error={Boolean(error)} />
-            {touched && error && <div>{error}</div>}
-        </Form.Field>)
-    }
+export default <V extends {}>(
+    { field, form, label, ...rest } : Props & FieldProps<V>
+) => {
+    const touched: boolean = form.touched[field.name];
+    const error: string = form.errors[field.name];
+    return (<Form.Field>
+        <Form.Input label={label} {...rest} {...field} error={Boolean(error)} />
+        {touched && error && <div>{error}</div>}
+    </Form.Field>)
 }

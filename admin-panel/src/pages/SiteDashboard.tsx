@@ -63,7 +63,6 @@ const UPSERT_SITE = gql`
 class SiteDashboard extends React.Component<Props & RouteComponentProps<any>> {
     render() {
         return (
-            <Mutation mutation={UPSERT_SITE}>{(upsertSite) => (
                 <Query query={GET_SITE} variables={{ siteId: this.props.match.params.id }}>{(result) => {
                     const site: Site = result.data.site;
                     return <div style={{ width: '100%', height: '100%' }}>
@@ -74,7 +73,8 @@ class SiteDashboard extends React.Component<Props & RouteComponentProps<any>> {
                         </Dimmer>
                         {
                             !result.loading && 
-                            <SiteComponent site={site} handleEditSite={async (values) => {
+                            <Mutation mutation={UPSERT_SITE}>{(upsertSite) => (
+                                <SiteComponent site={site} handleEditSite={async (values) => {
                                     await mutateSafely(upsertSite, {
                                         variables: {
                                             site: {
@@ -84,11 +84,11 @@ class SiteDashboard extends React.Component<Props & RouteComponentProps<any>> {
                                             }
                                         }
                                     })
-                            }} />
+                                }} />
+                            )}</Mutation>
                         }
                     </div>
                 }}</Query>
-            )}</Mutation>
         )
     }
 }
