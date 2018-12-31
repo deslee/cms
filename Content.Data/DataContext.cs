@@ -20,6 +20,7 @@ namespace Content.Data
             // composite keys
             modelBuilder.Entity<ItemGroup>().HasKey(e => new { e.ItemId, e.GroupId });
             modelBuilder.Entity<SiteUser>().HasKey(e => new { e.UserId, e.SiteId });
+            modelBuilder.Entity<ItemAsset>().HasKey(e => new { e.ItemId, e.AssetId });
 
             modelBuilder.Entity<User>().HasIndex(e => e.Email).IsUnique();
 
@@ -51,6 +52,7 @@ namespace Content.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<ItemGroup> ItemGroups { get; set; }
+        public DbSet<ItemAsset> ItemAssets { get; set; }
         public DbSet<SiteUser> SiteUsers { get; set; }
         public string ConnectionString { get; }
     }

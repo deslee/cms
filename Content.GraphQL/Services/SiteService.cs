@@ -19,7 +19,7 @@ namespace Content.GraphQL.Services
 {
     public interface ISiteService
     {
-        Task<MutationResult<Site>> upsertSite(SiteInput siteInput, UserContext userContext);
+        Task<MutationResult<Site>> UpsertSite(SiteInput siteInput, UserContext userContext);
         Task<MutationResult> DeleteSite(string siteId, UserContext userContext);
         Task<Site> GetSite(string id);
         Task<IList<Site>> GetSites(UserContext user);
@@ -80,7 +80,7 @@ namespace Content.GraphQL.Services
                 .ToListAsync();
         }
 
-        public async Task<MutationResult<Site>> upsertSite(SiteInput siteInput, UserContext userContext)
+        public async Task<MutationResult<Site>> UpsertSite(SiteInput siteInput, UserContext userContext)
         {
             var site = new Site
             {

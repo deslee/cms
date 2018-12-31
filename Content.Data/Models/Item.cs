@@ -15,5 +15,6 @@ namespace Content.Data.Models
         public JObject Data { get; set; }
         public string Type { get; set; }
         public virtual ICollection<ItemGroup> ItemGroups { get; set; }
+        public virtual ICollection<ItemAsset> ItemAssets { get; set; }
     }
 }
