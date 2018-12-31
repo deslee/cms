@@ -32,7 +32,7 @@ export default ({ handleLogin }: LoginFormProps) => (
     >{formik => (
         <div>
             <Dimmer active={formik.isSubmitting}> <Loader /> </Dimmer>
-            <Form onSubmit={formik.handleSubmit} error={formik.status} className={classes.root}>
+            <Form onSubmit={formik.handleSubmit} error={Boolean(formik.status)} className={classes.root}>
                 <Field type="email" name="email" label="Email" component={FormComponent} />
                 <Field type="password" name="password" label="Password" component={FormComponent} />
                 <Message error header='Error' content={formik.status} />

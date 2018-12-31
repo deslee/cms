@@ -27,7 +27,9 @@ try {
   })
 
   var parsed = JSON.parse(localStorage.getItem(AUTH_USER_KEY));
-  initialUser = authUserSchema.validateSync(parsed) as AuthUser;
+  if (parsed) {
+    initialUser = authUserSchema.validateSync(parsed) as AuthUser;
+  }
 } catch (e) {
   console.log("json parsing error: ")
   console.error(e);

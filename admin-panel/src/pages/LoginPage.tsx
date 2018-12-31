@@ -28,13 +28,9 @@ interface Props {
 class LoginPage extends React.Component<Props & RouteComponentProps<any> & WithAuthInjectedProps> {
     render() {
         const { history, auth: { updateUser } } = this.props;
-        return <Mutation mutation={LOGIN}>{mutate => (
+        return <Mutation mutation={LOGIN}>{login => (
             <LoginForm handleLogin={async (loginFormValues) => {
-                var response = await mutateSafely(mutate, { variables: { login: { email: loginFormValues.email, password: loginFormValues.password } } });
-                let result = response && response.data.login;
-                if (!result.success) {
-                    throw new Error(result.errorMessage || "Failed login");
-                }
+                var result = await mutateSafely(login, 'login', { variables: { login: { email: loginFormValues.email, password: loginFormValues.password } } });
                 const authUser: AuthUser = {
                     email: result.data.email,
                     name: result.data.name,

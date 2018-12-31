@@ -52,7 +52,9 @@ export default ({ match: { params: { siteId }} }: Props & RouteComponentProps<an
                 </Dimmer>
                 {
                     !result.loading &&
-                    <Mutation mutation={UPSERT_SITE}>{(upsertSite) => (
+                    <Mutation
+                        mutation={UPSERT_SITE}
+                    >{(upsertSite) => (
                         <SiteDataForm
                             initialValues={{
                                 title: siteSettings.title,
@@ -61,7 +63,7 @@ export default ({ match: { params: { siteId }} }: Props & RouteComponentProps<an
                                 googleAnalyticsId: siteSettings.googleAnalyticsId
                             }}
                             handleEditSite={async (values) => {
-                                await mutateSafely(upsertSite, {
+                                await mutateSafely(upsertSite, 'upsertSite', {
                                     variables: {
                                         site: {
                                             id: siteSettings.id,

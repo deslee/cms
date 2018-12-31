@@ -3,11 +3,19 @@ import { MutationFn, MutationOptions, OperationVariables } from "react-apollo";
 
 export async function mutateSafely<TData = any, TVariables = OperationVariables>(
     mutationFn: MutationFn<TData, TVariables>,
-    options?: MutationOptions<TData, TVariables>): Promise<void | FetchResult<TData>> {
+    data: string,
+    options?: MutationOptions<TData, TVariables>,
+    defaultErrorMessage = "Request failed"
+): Promise<void | FetchResult<TData>> {
+    let response: any;
     try {
-        return await mutationFn(options);
+        response = await mutationFn(options);
     } catch (e) {
-        console.error(e);
         throw new Error("An unexpected error occurred")
     }
+    const mutationResult = response && response.data[data];
+    if (!mutationResult.success) {
+        throw new Error(mutationResult.errorMessage || defaultErrorMessage);
+    }
+    return mutationResult;
 }
