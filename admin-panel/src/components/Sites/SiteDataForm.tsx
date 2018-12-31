@@ -6,11 +6,21 @@ import FormComponent from '../Form/FormComponent';
 import FormikTextEditor from '../Editor/FormikTextEditor';
 import handleWithFormValues from '../../utils/handleWithFormValues';
 
+enum ContactType {
+    FACEBOOK, INSTAGRAM, LINKEDIN, EMAIL, YOUTUBE, VIMEO, TWITTER
+}
+
+interface ContactIconLink {
+    type?: ContactType,
+    url?: string
+}
+
 export interface SiteFormData {
     title?: string;
     subtitle?: string;
     copyright?: string;
     googleAnalyticsId?: string;
+    contactIcons?: ContactIconLink[];
 }
 
 const SiteFormDataSchema = Yup.object().shape({
@@ -19,6 +29,10 @@ const SiteFormDataSchema = Yup.object().shape({
     //header_image: Yup.object(),
     copyright: Yup.string(),
     googleAnalyticsId: Yup.string(),
+    contactIcons: Yup.array().of(Yup.object().shape({
+        type: Yup.string().required(),
+        url: Yup.string().required()
+    }))
 })
 
 interface Props {
@@ -56,7 +70,14 @@ const SiteDataForm = (props: Props) => {
                         </Segment>
                     </Form.Field>
                     <Field type="text" name="copyright" label="Copyright" component={FormComponent} />
-                    <div>Social media icons</div>
+                    {(formik.values['contactIcons'] || []).map((contactIcon, idx) => <Field name={`contactIcons[${idx}]`} component={(f) => <div>{JSON.stringify(f)}</div>} />)}
+                    <Button as={'a'} onClick={() => {
+                        var v = (formik.values['contactIcons'] || [])
+                        v.push({
+
+                        });
+                        formik.setFieldValue('contactIcons', v);
+                    }} >Add social media icon</Button>
                     <Field type="text" name="googleAnalyticsId" label="Google Analytics ID" component={FormComponent} />
                     <Button disabled={formik.isSubmitting} type="submit">Save</Button>
                     <Message error header='Error' content={formik.status} />
