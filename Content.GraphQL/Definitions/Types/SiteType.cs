@@ -14,16 +14,12 @@ namespace Content.GraphQL.Definitions.Types
     {
         public SiteType(DataContext dataContext) {
             Name = "Site";
-            Field<StringGraphType>(
-                name: "id",
-                description: "The id of the Site",
-                resolve: context => context.Source.Id.ToString()
-            );
-            Field<StringGraphType>(
-                name: "name",
-                description: "The name of the Site",
-                resolve: context => context.Source.Name.ToString()
-            );
+            Field(t => t.Id).Description("The id of the Site");
+            Field(t => t.Name).Description("The name of the Site");
+            Field<DateTimeGraphType>("createdAt", resolve: context => context.Source.CreatedAt);
+            Field(t => t.CreatedBy);
+            Field<DateTimeGraphType>("lastUpdatedAt", resolve: context => context.Source.LastUpdatedAt);
+            Field(t => t.LastUpdatedBy);
             Field<StringGraphType>(
                 name: "data",
                 description: "Serialized JSON representation of site data",

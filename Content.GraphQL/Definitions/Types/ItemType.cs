@@ -19,11 +19,11 @@ namespace Content.GraphQL.Definitions.Types
         public ItemType(DataContext dataContext)
         {
             Name = "Item";
-            Field<StringGraphType>(
-                name: "id",
-                description: "The id of the Item",
-                resolve: context => context.Source.Id.ToString()
-            );
+            Field(t => t.Id).Description("The id of the Item");
+            Field<DateTimeGraphType>("createdAt", resolve: context => context.Source.CreatedAt);
+            Field(t => t.CreatedBy);
+            Field<DateTimeGraphType>("lastUpdatedAt", resolve: context => context.Source.LastUpdatedAt);
+            Field(t => t.LastUpdatedBy);
             Field<StringGraphType>(
                 name: "data",
                 description: "Serialized JSON representation of item data",

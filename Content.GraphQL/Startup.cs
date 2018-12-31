@@ -51,6 +51,7 @@ namespace Content.GraphQL
             services.AddCorrelationId();
             services.AddDbContext<DataContext>(optionsAction: ConfigureDatabase);
             services.AddCustomGraphQL<SiteType>();
+            services.AddHttpContextAccessor();
             services.AddCustomServices();
         }
 
@@ -83,7 +84,7 @@ namespace Content.GraphQL
 
         private void MigrateDatabase(DbContextOptions options)
         {
-            var dataContext = new DataContext(options);
+            var dataContext = new DataContext(options, new SystemUserAccessor());
             dataContext.Database.Migrate();
         }
 

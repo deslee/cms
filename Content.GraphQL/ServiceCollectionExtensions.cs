@@ -1,6 +1,7 @@
 using System;
 using System.Security.Claims;
 using System.Text;
+using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Middleware;
 using Content.GraphQL.Helpers;
@@ -10,6 +11,7 @@ using GraphQL.Authorization;
 using GraphQL.Server;
 using GraphQL.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
@@ -70,6 +72,7 @@ namespace Content.GraphQL {
         }
 
         public static void AddCustomServices(this IServiceCollection services) {
+            services.AddTransient<IUserAccessor, DatabaseUserAccessor>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ISiteService, SiteService>();
             services.AddTransient<IItemService, ItemService>();

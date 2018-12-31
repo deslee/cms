@@ -11,7 +11,7 @@ namespace Content.Data.Console
             var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
             optionsBuilder.UseSqlite("Data Source=content.db");
 
-            return new DataContext(optionsBuilder.Options);
+            return new DataContext(optionsBuilder.Options, new SystemUserAccessor());
         }
     }
 }
