@@ -5,6 +5,7 @@ import { withAuth, WithAuthInjectedProps } from "../../data/auth";
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { getUserProfile } from '../../accessors/UserAccessors';
+import classes from './NavigationMenu.module.scss';
 
 interface Props {
     siteId: string;
@@ -20,7 +21,7 @@ const USER_PROFILE_QUERY = gql`
 `
 
 const NavigationMenu = ({ siteId, location: { pathname }, auth: { updateUser } }: Props & WithAuthInjectedProps & RouteComponentProps) =>
-    <Menu size="large" pointing fluid>
+    <Menu fixed='top' size="large" fluid className={classes.menu}>
         <Menu.Item as={Link} to={`/sites/${siteId}/`} active={/\/sites\/.+\/$/.test(pathname)}>
             <Icon name='browser' />
             Dashboard

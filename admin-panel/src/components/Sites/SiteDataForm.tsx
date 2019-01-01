@@ -7,6 +7,7 @@ import FormikTextEditor from '../Editor/FormikTextEditor';
 import handleWithFormValues from '../../utils/handleWithFormValues';
 import { forEachLimit } from 'async';
 import posed, { PoseGroup } from 'react-pose'
+import classes from './SiteDataForm.module.scss';
 const Item = posed.div()
 
 interface ContactIconLink {
@@ -100,7 +101,7 @@ const SiteDataForm = (props: Props) => {
                             <PoseGroup>
                             {
                                 formik.values.contactIcons.map((contactIcon, idx, list) => <Item key={contactIcon.type || idx}>
-                                    <Segment size="tiny" style={{marginBottom: '1rem'}}>
+                                    <Segment className={classes.contactIconFieldSegment} size="tiny" style={{marginBottom: '1rem'}}>
                                         <Form.Field>
                                             <Form.Group widths="equal">
                                                 <Field name={`contactIcons[${idx}].type`} component={ContactIconDropdown} />

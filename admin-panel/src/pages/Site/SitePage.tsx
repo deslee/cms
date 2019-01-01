@@ -14,7 +14,7 @@ interface RouteParams {
 const SitePage = ({
     match: { params: { siteId } }
 }: Props & RouteComponentProps<RouteParams>) =>
-    <div>
+    <div className={classes.root}>
         <NavigationMenu siteId={siteId} />
         <div className={classes.children}>
             <Switch>

@@ -6,6 +6,7 @@ import { Dimmer, Loader, Container } from 'semantic-ui-react';
 import { mutateSafely } from '../../data/helpers';
 import SiteDataForm from '../../components/Sites/SiteDataForm';
 import { getSiteSettings } from '../../accessors/SiteAccessors';
+import classes from './SiteSettingsPage.module.scss';
 
 interface Props {
 
@@ -36,10 +37,10 @@ const UPSERT_SITE = gql`
 `
 
 export default ({ match: { params: { siteId }} }: Props & RouteComponentProps<any>) => 
-    <Container>
+    <Container className={classes.root}>
         <Query query={GET_SITE} variables={{ siteId: siteId }}>{({ data, loading }) => {
             const site = data.site;
-            return loading ? <Dimmer active={loading}><Loader /></Dimmer> : <div style={{ width: '100%', height: '100%' }}>
+            return loading ? <Dimmer active={loading}><Loader /></Dimmer> : <div>
                 {site ? <Mutation
                     mutation={UPSERT_SITE}
                 >{(upsertSite) => (
