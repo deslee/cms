@@ -44,9 +44,7 @@ export default ({ match: { params: { siteId }} }: Props & RouteComponentProps<an
                     mutation={UPSERT_SITE}
                 >{(upsertSite) => (
                     <SiteDataForm
-                        initialValues={
-                            getSiteSettings(site)
-                        }
+                        initialValues={getSiteSettings(site)}
                         handleEditSite={async (values) => {
                             await mutateSafely(upsertSite, 'upsertSite', {
                                 variables: {

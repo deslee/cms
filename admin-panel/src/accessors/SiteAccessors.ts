@@ -1,10 +1,16 @@
 import * as Yup from 'yup'
 
+interface ContactIcon {
+    type: string,
+    value: string
+}
+
 interface SiteSettings {
     title: string
     subtitle: string
     copyright: string
-    googleAnalyticsId: string
+    googleAnalyticsId: string,
+    contactIcons: ContactIcon[]
 }
 
 const SiteSettingsSchema = Yup.object().shape({
@@ -19,8 +25,12 @@ export function getSiteSettings(site) {
         throw new Error("Assert fail")
     }
 
-    const data = JSON.parse(site.data);
-    SiteSettingsSchema.validateSync(data);
+    const siteSettings = JSON.parse(site.data) as SiteSettings;
+    SiteSettingsSchema.validateSync(siteSettings);
 
-    return data as SiteSettings
+    if (!siteSettings.contactIcons) {
+        siteSettings.contactIcons = []
+    }
+
+    return siteSettings;
 }

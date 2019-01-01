@@ -1,18 +1,15 @@
 import * as React from 'react'
 import * as Yup from 'yup';
-import { Formik, Field } from 'formik';
-import { Form, Segment, Header, Icon, Button, Message, Dimmer, Loader } from 'semantic-ui-react';
+import { Formik, Field, FieldProps, FieldArray, getIn } from 'formik';
+import { Form, Segment, Header, Icon, Button, Message, Dimmer, Loader, Dropdown } from 'semantic-ui-react';
 import FormComponent from '../Form/FormComponent';
 import FormikTextEditor from '../Editor/FormikTextEditor';
 import handleWithFormValues from '../../utils/handleWithFormValues';
-
-enum ContactType {
-    FACEBOOK, INSTAGRAM, LINKEDIN, EMAIL, YOUTUBE, VIMEO, TWITTER
-}
+import { forEachLimit } from 'async';
 
 interface ContactIconLink {
-    type?: ContactType,
-    url?: string
+    type?: string,
+    value?: string
 }
 
 export interface SiteFormData {
@@ -20,8 +17,15 @@ export interface SiteFormData {
     subtitle?: string;
     copyright?: string;
     googleAnalyticsId?: string;
-    contactIcons?: ContactIconLink[];
+    contactIcons: ContactIconLink[];
 }
+
+const ContactIconTypeOptions = [
+    'Facebook', 'Instagram', 'Linkedin', 'Email', 'Youtube', 'Vimeo', 'Twitter'
+].map(x => ({
+    text: x,
+    value: x.toLowerCase()
+}));
 
 const SiteFormDataSchema = Yup.object().shape({
     title: Yup.string().required('Required'),
@@ -31,7 +35,7 @@ const SiteFormDataSchema = Yup.object().shape({
     googleAnalyticsId: Yup.string(),
     contactIcons: Yup.array().of(Yup.object().shape({
         type: Yup.string().required(),
-        url: Yup.string().required()
+        value: Yup.string().required()
     }))
 })
 
@@ -40,6 +44,24 @@ interface Props {
     handleEditSite: (values: SiteFormData) => Promise<void>;
 }
 
+const ContactIconDropdown = ({ field, form }: FieldProps) => {
+    const touched: boolean = getIn(form.touched, field.name)
+    const error: string = getIn(form.errors, field.name)
+
+    return <Form.Field>
+        <label>Contact Icon</label>
+        <Dropdown
+            value={field.value}
+            onChange={(e, data) => { form.setFieldValue(field.name, data.value) }}
+            options={ContactIconTypeOptions}
+            selection
+            placeholder="Contact Icon"
+            error={Boolean(error)}
+        />
+        {touched && error && <div>{error}</div>}
+    </Form.Field>
+
+}
 const SiteDataForm = (props: Props) => {
     const { initialValues, handleEditSite } = props;
     return (
@@ -70,14 +92,29 @@ const SiteDataForm = (props: Props) => {
                         </Segment>
                     </Form.Field>
                     <Field type="text" name="copyright" label="Copyright" component={FormComponent} />
-                    {(formik.values['contactIcons'] || []).map((contactIcon, idx) => <Field name={`contactIcons[${idx}]`} component={(f) => <div>{JSON.stringify(f)}</div>} />)}
-                    <Button as={'a'} onClick={() => {
-                        var v = (formik.values['contactIcons'] || [])
-                        v.push({
-
-                        });
-                        formik.setFieldValue('contactIcons', v);
-                    }} >Add social media icon</Button>
+                    <FieldArray
+                        name="contactIcons"
+                        render={arrayHelpers => <React.Fragment>
+                            {
+                                formik.values.contactIcons.map((contactIcon, idx) => <Segment key={idx} size="tiny">
+                                    <Form.Field>
+                                        <Form.Group widths="equal">
+                                            <Field name={`contactIcons[${idx}].type`} component={ContactIconDropdown} />
+                                            <Field label="Value" name={`contactIcons[${idx}].value`} component={FormComponent} />
+                                        </Form.Group>
+                                    </Form.Field>
+                                    <Button.Group basic>
+                                        <Button as={'a'} icon="arrow up" onClick={() => arrayHelpers.move(idx, idx - 1)} /> />
+                                        <Button as={'a'} icon="arrow down" onClick={() => arrayHelpers.move(idx, idx + 1)} />
+                                        <Button as={'a'} icon="trash" onClick={() => arrayHelpers.remove(idx)} />
+                                    </Button.Group>
+                                </Segment>)
+                            }
+                            <Form.Field>
+                                <Button as={'a'} onClick={() => { arrayHelpers.push({}) }} >Add social media icon</Button>
+                            </Form.Field>
+                        </React.Fragment>}
+                    />
                     <Field type="text" name="googleAnalyticsId" label="Google Analytics ID" component={FormComponent} />
                     <Button disabled={formik.isSubmitting} type="submit">Save</Button>
                     <Message error header='Error' content={formik.status} />
