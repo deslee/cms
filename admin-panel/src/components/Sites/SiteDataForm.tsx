@@ -6,6 +6,8 @@ import FormComponent from '../Form/FormComponent';
 import FormikTextEditor from '../Editor/FormikTextEditor';
 import handleWithFormValues from '../../utils/handleWithFormValues';
 import { forEachLimit } from 'async';
+import posed, { PoseGroup } from 'react-pose'
+const Item = posed.div()
 
 interface ContactIconLink {
     type?: string,
@@ -95,21 +97,26 @@ const SiteDataForm = (props: Props) => {
                     <FieldArray
                         name="contactIcons"
                         render={arrayHelpers => <React.Fragment>
+                            <PoseGroup>
                             {
-                                formik.values.contactIcons.map((contactIcon, idx) => <Segment key={idx} size="tiny">
-                                    <Form.Field>
-                                        <Form.Group widths="equal">
-                                            <Field name={`contactIcons[${idx}].type`} component={ContactIconDropdown} />
-                                            <Field label="Value" name={`contactIcons[${idx}].value`} component={FormComponent} />
-                                        </Form.Group>
-                                    </Form.Field>
-                                    <Button.Group basic>
-                                        <Button as={'a'} icon="arrow up" onClick={() => arrayHelpers.move(idx, idx - 1)} /> />
-                                        <Button as={'a'} icon="arrow down" onClick={() => arrayHelpers.move(idx, idx + 1)} />
-                                        <Button as={'a'} icon="trash" onClick={() => arrayHelpers.remove(idx)} />
-                                    </Button.Group>
-                                </Segment>)
+                                formik.values.contactIcons.map((contactIcon, idx, list) => <Item key={contactIcon.type || idx}>
+                                    <Segment size="tiny" style={{marginBottom: '1rem'}}>
+                                        <Form.Field>
+                                            <Form.Group widths="equal">
+                                                <Field name={`contactIcons[${idx}].type`} component={ContactIconDropdown} />
+                                                <Field label="Value" name={`contactIcons[${idx}].value`} component={FormComponent} />
+                                            </Form.Group>
+                                        </Form.Field>
+                                        <Button.Group basic>
+                                            <Button disabled={idx == 0} as={'a'} icon="arrow up" onClick={() => arrayHelpers.move(idx, idx - 1)} /> />
+                                            <Button disabled={idx == list.length - 1} as={'a'} icon="arrow down" onClick={() => arrayHelpers.move(idx, idx + 1)} />
+                                            <Button as={'a'} icon="trash" onClick={() => arrayHelpers.remove(idx)} />
+                                        </Button.Group>
+                                    </Segment>
+                                </Item>
+                                )
                             }
+                            </PoseGroup>
                             <Form.Field>
                                 <Button as={'a'} onClick={() => { arrayHelpers.push({}) }} >Add social media icon</Button>
                             </Form.Field>
