@@ -1,8 +1,11 @@
 ﻿using Content.Data;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
+using Content.GraphQL.Models;
+using Content.GraphQL.Services;
 using CorrelationId;
 using GraphQL.Server;
+using GraphQL.Server.Transports.AspNetCore;
 using GraphQL.Server.Ui.Playground;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -78,6 +81,22 @@ namespace Content.GraphQL
             });
 
             app.UseGraphQL<ContentSchema>("/graphql");
+
+            app.Use(async (context, next) =>
+            {
+                if (!context.Request.Path.StartsWithSegments("/uploadAsset")) {
+                    await next.Invoke();
+                }
+                var userContextBuilder = context.RequestServices.GetService<IUserContextBuilder>();
+                var dataContext = context.RequestServices.GetService<DataContext>();
+                var userContext = await userContextBuilder.BuildUserContext(context) as UserContext;
+                context.Request.Form.TryGetValue("siteId", out var siteIds);
+                var siteId = siteIds[0];
+                var hasPermission = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
+                var files = context.Request.Form.Files;
+                var file = files[0];
+            });
+
             // use graphql-playground middleware at default url /ui/playground
             app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
         }

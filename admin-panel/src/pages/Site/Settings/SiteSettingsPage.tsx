@@ -3,9 +3,9 @@ import gql from 'graphql-tag';
 import { Query, Mutation } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 import { Dimmer, Loader, Container } from 'semantic-ui-react';
-import { mutateSafely } from '../../data/helpers';
-import SiteDataForm from '../../components/Sites/SiteDataForm';
-import { getSiteSettings } from '../../accessors/SiteAccessors';
+import { mutateSafely } from '../../../data/helpers';
+import SiteDataForm from '../../../components/Sites/SiteDataForm';
+import { getSiteSettings } from '../../../accessors/SiteAccessors';
 import classes from './SiteSettingsPage.module.scss';
 
 interface Props {

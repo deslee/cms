@@ -3,5 +3,5 @@ export type Config = {
 }
 
 export const config: Config = {
-    backendUrl: 'http://localhost:3000/graphql'
+    backendUrl: 'http://localhost:3000'
 };

@@ -11,7 +11,7 @@ export function getClient(jwtToken: string) {
     }
 
     const client = new ApolloClient({
-        uri: config.backendUrl,
+        uri: `${config.backendUrl}/graphql`,
         headers: headers
     });
 
