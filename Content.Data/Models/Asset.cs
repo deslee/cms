@@ -12,8 +12,8 @@ namespace Content.Data.Models
         public string Id { get; set; }
         [Required]
         public Site Site { get; set; }
-        public int State { get; set; }
-        public int Type { get; set; }
+        public string State { get; set; }
+        public string Type { get; set; }
         [JsonString]
         public JObject Data { get; set; }
         public virtual ICollection<ItemAsset> ItemAssets { get; set; }

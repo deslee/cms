@@ -34,9 +34,9 @@ namespace Content.Data.Migrations
                     b.Property<string>("SiteId")
                         .IsRequired();
 
-                    b.Property<int>("State");
+                    b.Property<string>("State");
 
-                    b.Property<int>("Type");
+                    b.Property<string>("Type");
 
                     b.HasKey("Id");
 

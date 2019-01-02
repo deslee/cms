@@ -1,6 +1,10 @@
-﻿using Content.Data;
+﻿using System;
+using System.IO;
+using Content.Data;
+using Content.Data.Models;
 using Content.GraphQL.Definitions;
 using Content.GraphQL.Definitions.Types;
+using Content.GraphQL.Middleware;
 using Content.GraphQL.Models;
 using Content.GraphQL.Services;
 using CorrelationId;
@@ -9,9 +13,12 @@ using GraphQL.Server.Transports.AspNetCore;
 using GraphQL.Server.Ui.Playground;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
@@ -50,6 +57,11 @@ namespace Content.GraphQL
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {XCorrelationID} {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
+            services.Configure<FormOptions>(options => {
+                options.ValueLengthLimit = int.MaxValue;
+                options.MultipartBodyLengthLimit = long.MaxValue;
+            });
+
             services.AddCustomAuthentication(appSettings);
             services.AddCorrelationId();
             services.AddDbContext<DataContext>(optionsAction: ConfigureDatabase);
@@ -81,21 +93,8 @@ namespace Content.GraphQL
             });
 
             app.UseGraphQL<ContentSchema>("/graphql");
-
-            app.Use(async (context, next) =>
-            {
-                if (!context.Request.Path.StartsWithSegments("/uploadAsset")) {
-                    await next.Invoke();
-                }
-                var userContextBuilder = context.RequestServices.GetService<IUserContextBuilder>();
-                var dataContext = context.RequestServices.GetService<DataContext>();
-                var userContext = await userContextBuilder.BuildUserContext(context) as UserContext;
-                context.Request.Form.TryGetValue("siteId", out var siteIds);
-                var siteId = siteIds[0];
-                var hasPermission = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
-                var files = context.Request.Form.Files;
-                var file = files[0];
-            });
+            app.UseMiddleware<ViewAssetMiddleware>(new PathString("/asset"));
+            app.UseMiddleware<UploadAssetMiddleware>(new PathString("/uploadAsset"));
 
             // use graphql-playground middleware at default url /ui/playground
             app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());

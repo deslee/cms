@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Content.Data.Migrations
 {
@@ -12,7 +13,11 @@ namespace Content.Data.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    Data = table.Column<string>(nullable: true)
+                    Data = table.Column<string>(nullable: true),
+                    CreatedBy = table.Column<string>(nullable: true),
+                    LastUpdatedBy = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -27,7 +32,11 @@ namespace Content.Data.Migrations
                     Email = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     Salt = table.Column<string>(nullable: true),
-                    Data = table.Column<string>(nullable: true)
+                    Data = table.Column<string>(nullable: true),
+                    CreatedBy = table.Column<string>(nullable: true),
+                    LastUpdatedBy = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -40,8 +49,13 @@ namespace Content.Data.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     SiteId = table.Column<string>(nullable: false),
-                    State = table.Column<int>(nullable: false),
-                    Data = table.Column<string>(nullable: true)
+                    State = table.Column<string>(nullable: true),
+                    Type = table.Column<string>(nullable: true),
+                    Data = table.Column<string>(nullable: true),
+                    CreatedBy = table.Column<string>(nullable: true),
+                    LastUpdatedBy = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,7 +75,11 @@ namespace Content.Data.Migrations
                     Id = table.Column<string>(nullable: false),
                     SiteId = table.Column<string>(nullable: false),
                     Data = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    CreatedBy = table.Column<string>(nullable: true),
+                    LastUpdatedBy = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,7 +99,11 @@ namespace Content.Data.Migrations
                     Id = table.Column<string>(nullable: false),
                     SiteId = table.Column<string>(nullable: false),
                     Data = table.Column<string>(nullable: true),
-                    Type = table.Column<string>(nullable: true)
+                    Type = table.Column<string>(nullable: true),
+                    CreatedBy = table.Column<string>(nullable: true),
+                    LastUpdatedBy = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -100,7 +122,11 @@ namespace Content.Data.Migrations
                 {
                     UserId = table.Column<string>(nullable: false),
                     SiteId = table.Column<string>(nullable: false),
-                    Order = table.Column<int>(nullable: false)
+                    Order = table.Column<int>(nullable: false),
+                    CreatedBy = table.Column<string>(nullable: true),
+                    LastUpdatedBy = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -120,12 +146,45 @@ namespace Content.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ItemAssets",
+                columns: table => new
+                {
+                    ItemId = table.Column<string>(nullable: false),
+                    AssetId = table.Column<string>(nullable: false),
+                    Order = table.Column<int>(nullable: false),
+                    CreatedBy = table.Column<string>(nullable: true),
+                    LastUpdatedBy = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemAssets", x => new { x.ItemId, x.AssetId });
+                    table.ForeignKey(
+                        name: "FK_ItemAssets_Assets_AssetId",
+                        column: x => x.AssetId,
+                        principalTable: "Assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ItemAssets_Items_ItemId",
+                        column: x => x.ItemId,
+                        principalTable: "Items",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ItemGroups",
                 columns: table => new
                 {
                     ItemId = table.Column<string>(nullable: false),
                     GroupId = table.Column<string>(nullable: false),
-                    Order = table.Column<int>(nullable: false)
+                    Order = table.Column<int>(nullable: false),
+                    CreatedBy = table.Column<string>(nullable: true),
+                    LastUpdatedBy = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -155,6 +214,11 @@ namespace Content.Data.Migrations
                 column: "SiteId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ItemAssets_AssetId",
+                table: "ItemAssets",
+                column: "AssetId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ItemGroups_GroupId",
                 table: "ItemGroups",
                 column: "GroupId");
@@ -179,13 +243,16 @@ namespace Content.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Assets");
+                name: "ItemAssets");
 
             migrationBuilder.DropTable(
                 name: "ItemGroups");
 
             migrationBuilder.DropTable(
                 name: "SiteUsers");
+
+            migrationBuilder.DropTable(
+                name: "Assets");
 
             migrationBuilder.DropTable(
                 name: "Groups");
