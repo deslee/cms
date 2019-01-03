@@ -42,6 +42,7 @@ namespace Content.GraphQL.Middleware
             var guid = Guid.NewGuid().ToString();
             var extension = Path.GetExtension(file.FileName);
             var fileName = guid + extension;
+            var originalFileName = file.FileName;
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), appSettings.AssetDirectory, fileName);
             // create directory if it doesn't already exist
@@ -59,7 +60,8 @@ namespace Content.GraphQL.Middleware
                 Type = MimeTypes.MimeTypeMap.GetMimeType(extension),
                 Data = JObject.FromObject(new
                 {
-                    extension = extension
+                    extension = extension,
+                    fileName = originalFileName
                 })
             };
 

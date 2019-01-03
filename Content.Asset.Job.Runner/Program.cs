@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Content.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace Content.Asset.Job.Runner
 {
@@ -19,7 +21,21 @@ namespace Content.Asset.Job.Runner
 
             var options = new DbContextOptionsBuilder().UseSqlite(configuration.GetConnectionString("OperationalDatabase")).Options;
 
-            var processor = new AssetProcessor(() => new DataContext(options, new SystemUserAccessor()));
+            var appSettings = configuration.GetSection("AppSettings");
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .Enrich.FromLogContext()
+                .WriteTo.Seq(serverUrl: appSettings.GetValue<string>("SeqUrl"), apiKey: appSettings.GetValue<string>("SeqApiKey"))
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {assetId} {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
+            IAssetProcessor processor = new AssetProcessor(() => new DataContext(options, new SystemUserAccessor()), appSettings.GetValue<string>("AssetDirectory"));
+
+            while(true) {
+                processor.Run();
+                Thread.Sleep(1000);
+            }
         }
     }
 }

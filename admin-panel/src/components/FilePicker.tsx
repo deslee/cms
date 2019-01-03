@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Button } from 'semantic-ui-react';
 
 interface Props {
-    handleFilePicked: (files: any) => void;
+    handleFilePicked: (files: any) => Promise<void>;
 }
 
 class FilePicker extends React.Component<Props> {
@@ -12,8 +12,9 @@ class FilePicker extends React.Component<Props> {
         this.fileInput.click();
     }
 
-    fileChanged = (e) => {
-        this.props.handleFilePicked(e.target.files);
+    fileChanged = async (e) => {
+        await this.props.handleFilePicked(this.fileInput.files);
+        this.fileInput.value = null;
     }
 
     render() {

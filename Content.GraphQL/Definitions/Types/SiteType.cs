@@ -20,6 +20,10 @@ namespace Content.GraphQL.Definitions.Types
             Field(t => t.CreatedBy);
             Field<DateTimeGraphType>("lastUpdatedAt", resolve: context => context.Source.LastUpdatedAt);
             Field(t => t.LastUpdatedBy);
+            FieldAsync<ListGraphType<AssetType>>("assets", resolve: async context => {
+                await dataContext.Entry(context.Source).Collection(s => s.Assets).LoadAsync();
+                return context.Source.Assets;
+            });
             Field<StringGraphType>(
                 name: "data",
                 description: "Serialized JSON representation of site data",
