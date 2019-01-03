@@ -40,8 +40,10 @@ namespace Content.GraphQL
         {
             services.AddCors(corsOptions => corsOptions.AddPolicy("AllowAllOrigins", policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
+            Action<DbContextOptionsBuilder> configureDatabase = b => b.UseSqlite(Configuration.GetConnectionString("OperationalDatabase"));
+
             var builder = new DbContextOptionsBuilder<DataContext>();
-            ConfigureDatabase(builder);
+            configureDatabase(builder);
             MigrateDatabase(builder.Options);
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -64,7 +66,7 @@ namespace Content.GraphQL
 
             services.AddCustomAuthentication(appSettings);
             services.AddCorrelationId();
-            services.AddDbContext<DataContext>(optionsAction: ConfigureDatabase);
+            services.AddDbContext<DataContext>(optionsAction: configureDatabase);
             services.AddCustomGraphQL<SiteType>();
             services.AddHttpContextAccessor();
             services.AddCustomServices();
@@ -104,11 +106,6 @@ namespace Content.GraphQL
         {
             var dataContext = new DataContext(options, new SystemUserAccessor());
             dataContext.Database.Migrate();
-        }
-
-        protected static internal void ConfigureDatabase(DbContextOptionsBuilder builder)
-        {
-            builder.UseSqlite("Data Source=content.db");
         }
     }
 }

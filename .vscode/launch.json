@@ -13,6 +13,19 @@
             "cwd": "${workspaceFolder}/admin-panel"
         },
         {
+            "name": ".NET Core Launch (Asset Job Runner)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Content.Asset.Job.Runner/bin/Debug/netcoreapp2.2/Content.Asset.Job.Runner.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Content.Asset.Job.Runner",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+            }
+        },
+        {
             "name": ".NET Core Launch (GraphQL)",
             "type": "coreclr",
             "request": "launch",
