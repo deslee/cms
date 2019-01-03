@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Content.Data;
 using Content.Data.Models;
@@ -22,7 +23,7 @@ namespace Content.GraphQL.Definitions.Types
             Field(t => t.LastUpdatedBy);
             FieldAsync<ListGraphType<AssetType>>("assets", resolve: async context => {
                 await dataContext.Entry(context.Source).Collection(s => s.Assets).LoadAsync();
-                return context.Source.Assets;
+                return context.Source.Assets.OrderByDescending(a => a.LastUpdatedAt);
             });
             Field<StringGraphType>(
                 name: "data",

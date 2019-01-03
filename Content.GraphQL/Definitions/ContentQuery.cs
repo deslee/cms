@@ -23,7 +23,7 @@ namespace Content.GraphQL.Definitions
         private readonly IItemService itemService;
         private readonly IUserService userService;
 
-        public ContentQuery(ISiteService siteService, IItemService itemService, IUserService userService)
+        public ContentQuery(ISiteService siteService, IItemService itemService, IUserService userService, DataContext dataContext)
         {
             Name = "Query";
             this.siteService = siteService;
@@ -54,6 +54,13 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "itemId" }
                 ),
                 resolve: context => itemService.GetItem(context.GetArgument<string>("itemId"))
+            );
+            Field<AssetType>(
+                "asset",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "assetId" }
+                ),
+                resolve: context => dataContext.Assets.FindAsync(context.GetArgument<string>("assetId"))
             );
             Field<UserType>(
                 "me",
