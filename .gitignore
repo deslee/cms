@@ -1,6 +1,6 @@
 content.db
 content.tests.db
-assets/
+/assets/
 .next
 
 node_modules

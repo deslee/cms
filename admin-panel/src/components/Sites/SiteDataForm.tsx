@@ -37,8 +37,8 @@ const SiteFormDataSchema = Yup.object().shape({
     copyright: Yup.string(),
     googleAnalyticsId: Yup.string(),
     contactIcons: Yup.array().of(Yup.object().shape({
-        type: Yup.string().required(),
-        value: Yup.string().required()
+        type: Yup.string().required("Required"),
+        value: Yup.string().required("Required")
     }))
 })
 
