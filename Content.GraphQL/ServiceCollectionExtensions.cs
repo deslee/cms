@@ -76,6 +76,7 @@ namespace Content.GraphQL {
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ISiteService, SiteService>();
             services.AddTransient<IItemService, ItemService>();
+            services.AddTransient<IAssetService, AssetService>();
             services.AddTransient<IMutationExecutionHelper, MutationExecutionHelper>();
         }
     }

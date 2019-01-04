@@ -27,13 +27,15 @@ namespace Content.GraphQL.Definitions
         private readonly ISiteService siteService;
         private readonly IItemService itemService;
         private readonly IUserService userService;
+        private readonly IAssetService assetService;
         private readonly IMutationExecutionHelper mutationExecutionHelper;
 
-        public ContentMutation(ISiteService siteService, IItemService itemService, IUserService userService, IMutationExecutionHelper mutationExecutionHelper)
+        public ContentMutation(ISiteService siteService, IItemService itemService, IUserService userService, IAssetService assetService, IMutationExecutionHelper mutationExecutionHelper)
         {
             this.siteService = siteService;
             this.itemService = itemService;
             this.userService = userService;
+            this.assetService = assetService;
             this.mutationExecutionHelper = mutationExecutionHelper;
             Name = "Mutation";
 
@@ -68,6 +70,14 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
                 resolve: context => mutationExecutionHelper.ExecuteSafely(() => siteService.DeleteSite(context.GetArgument<string>("siteId"), (context.UserContext as UserContext)))
+            );
+
+            Field<MutationResultType>(
+                "deleteAsset",
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "assetId" }
+                ),
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => assetService.DeleteAsset(context.GetArgument<string>("assetId"), (context.UserContext as UserContext)))
             );
 
             Field<MutationResultType<User, UserType>>(
