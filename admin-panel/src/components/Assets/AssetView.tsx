@@ -22,7 +22,7 @@ class AssetView extends React.Component<Props, State> {
     render() {
         const { asset, onDelete } = this.props;
         return <div>
-            <Image src={`${config.backendUrl}/asset/${asset.id}${asset.extension}`} />
+            <Image src={`${config.backendUrl}/asset/${asset.id}`} />
             <Button onClick={this.open} color="red">Delete</Button>
             <Confirm open={this.state.confirmOpen} onCancel={this.close} onConfirm={() => onDelete()} />
         </div>

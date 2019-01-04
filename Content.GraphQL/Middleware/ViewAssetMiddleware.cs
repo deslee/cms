@@ -17,6 +17,7 @@ namespace Content.GraphQL.Middleware
     {
         private readonly RequestDelegate next;
         private readonly PathString path;
+        private static readonly string DEFAULT_EXTENSION = ".png";
 
         public ViewAssetMiddleware(RequestDelegate next, PathString path) {
             this.next = next;
@@ -31,15 +32,23 @@ namespace Content.GraphQL.Middleware
                 return;
             }
 
-            var fileName = context.Request.Path.ToString().Substring(this.path.ToString().Length).Replace("/", "");
+            var id = context.Request.Path.ToString().Substring(this.path.ToString().Length).Replace("/", "");
 
-            var id = Path.GetFileNameWithoutExtension(fileName);
             var asset = await dataContext.Assets.FindAsync(id);
 
             if (asset == null) {
                 context.Response.StatusCode = 404;
                 return;
             }
+
+            var fileName = id;
+            if (context.Request.Query.TryGetValue("w", out var sizes))
+            {
+                var size = sizes[0];
+                fileName += $"-{size}";
+            }
+            var extension = DEFAULT_EXTENSION;
+            fileName += extension;
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), appSettings.AssetDirectory, fileName);
 
@@ -48,7 +57,7 @@ namespace Content.GraphQL.Middleware
                 return;
             }
 
-            context.Response.ContentType = asset.Type;
+            context.Response.ContentType = MimeTypes.MimeTypeMap.GetMimeType(extension);
 
             await context.Response.SendFileAsync(filePath);
         }

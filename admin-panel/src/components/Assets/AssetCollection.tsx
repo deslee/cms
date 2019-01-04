@@ -13,8 +13,7 @@ const AssetCollection = ({ assets }: Props) => <div>
     <Grid padded={true} columns={4}>
         {assets.map(asset => <Grid.Column key={asset.id}>
             <Card as={Link} to={`assets/${asset.id}`}>
-                <Image src={`${config.backendUrl}/asset/${asset.id}${asset.extension}`} />
-
+                {asset.state === "RESIZED" ? <Image src={`${config.backendUrl}/asset/${asset.id}`} /> : <div>processing</div>}
                 <Card.Content>
                     <Card.Header className={classes.assetHeader}>
                         {asset.fileName}

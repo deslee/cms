@@ -72,23 +72,27 @@ namespace Content.Asset.Job
 
                 using (var input = File.OpenRead(filePath))
                 {
-                    using (var image = Image.Load(input, out var format))
+                    using (var image = Image.Load(input))
                     {
                         Log.Information("Loaded asset " + asset.Id);
+
+                        var converted = image.Clone();
+                        var convertedFilePath = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, $"{asset.Id}.png");
+                        Log.Information($"writing {convertedFilePath}");
+                        converted.Save(convertedFilePath);
+                        Log.Information($"wrote {convertedFilePath}");
+
                         foreach (int width in Widths)
                         {
-                            var outputFileName = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, $"{asset.Id}-{width}.png");
-                            using (var outputStream = new FileStream(outputFileName, FileMode.Create))
-                            {
-                                Log.Information($"writing {outputFileName}");
+                            var outputFilePath = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, $"{asset.Id}-{width}.png");
+                            Log.Information($"writing {outputFilePath}");
 
-                                var widthHeightRatio = ((decimal)image.Height / image.Width);
+                            var widthHeightRatio = ((decimal)image.Height / image.Width);
 
-                                var resizedImage = image.Clone();
-                                resizedImage.Mutate(c => c.Resize(width, (int) Math.Round(width * widthHeightRatio)));
-                                resizedImage.Save(outputStream, format);
-                                Log.Information($"wrote {outputFileName}");
-                            }
+                            var resizedImage = image.Clone();
+                            resizedImage.Mutate(c => c.Resize(width, (int) Math.Round(width * widthHeightRatio)));
+                            resizedImage.Save(outputFilePath);
+                            Log.Information($"wrote {outputFilePath}");
                         }
                     }
                 }

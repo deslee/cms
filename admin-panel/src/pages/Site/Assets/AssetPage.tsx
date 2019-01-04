@@ -143,7 +143,7 @@ class AssetPage extends React.Component<Props & RouteComponentProps & WithApollo
                 }
             }</Query>} />
             <Route component={() =>
-                <Query query={GET_ASSETS_FOR_SITE} variables={{ siteId: siteId }}>{({ data, loading, error }) => {
+                <Query query={GET_ASSETS_FOR_SITE} pollInterval={1000} variables={{ siteId: siteId }}>{({ data, loading, error }) => {
                     if (loading) {
                         return <Dimmer active={loading}><Loader /></Dimmer>
                     }
