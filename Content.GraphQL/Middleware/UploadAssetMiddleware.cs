@@ -31,28 +31,30 @@ namespace Content.GraphQL.Middleware
                 return;
             }
 
+            // per-request override request body size limit
             context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
 
+            // validate site id
             var userContext = await userContextBuilder.BuildUserContext(context) as UserContext;
             context.Request.Form.TryGetValue("siteId", out var siteIds);
             var siteId = siteIds[0];
             var hasPermission = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
-
-            var file = context.Request.Form.Files[0];
-            var guid = Guid.NewGuid().ToString();
-            var extension = Path.GetExtension(file.FileName);
-            var fileName = guid + extension;
-            var originalFileName = file.FileName;
-
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), appSettings.AssetDirectory, fileName);
-            // create directory if it doesn't already exist
-            (new FileInfo(filePath)).Directory.Create();
-
-            using (var targetStream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(targetStream);
+            if (!hasPermission) {
+                context.Response.StatusCode = 401;
+                return;
             }
 
+            // get form file
+            var file = context.Request.Form.Files[0];
+
+            var guid = Guid.NewGuid().ToString();
+            var extension = Path.GetExtension(file.FileName);
+
+            var savedFilename = guid + extension;
+            // save file to asset directory
+            await saveFile(file, Path.Combine(Directory.GetCurrentDirectory(), appSettings.AssetDirectory, savedFilename));
+
+            // save asset to database
             var asset = new Asset
             {
                 Id = guid,
@@ -61,7 +63,8 @@ namespace Content.GraphQL.Middleware
                 Data = JObject.FromObject(new
                 {
                     extension = extension,
-                    fileName = originalFileName
+                    originalFilename = file.FileName,
+                    key = savedFilename
                 })
             };
 
@@ -72,6 +75,17 @@ namespace Content.GraphQL.Middleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = 200;
             await context.Response.WriteAsync(JsonConvert.SerializeObject(asset));
+        }
+
+        private async Task saveFile(IFormFile file, string filePath)
+        {
+            // create directory if it doesn't already exist
+            (new FileInfo(filePath)).Directory.Create();
+
+            using (var targetStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(targetStream);
+            }
         }
     }
 }

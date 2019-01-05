@@ -17,7 +17,6 @@ namespace Content.GraphQL.Middleware
     {
         private readonly RequestDelegate next;
         private readonly PathString path;
-        private static readonly string DEFAULT_EXTENSION = ".png";
 
         public ViewAssetMiddleware(RequestDelegate next, PathString path) {
             this.next = next;
@@ -36,28 +35,29 @@ namespace Content.GraphQL.Middleware
 
             var asset = await dataContext.Assets.FindAsync(id);
 
-            if (asset == null) {
+            // find filename
+            if (asset == null || !asset.Data.TryGetValue("key", out var fileName)) {
                 context.Response.StatusCode = 404;
                 return;
             }
 
-            var fileName = id;
             if (context.Request.Query.TryGetValue("w", out var sizes))
             {
                 var size = sizes[0];
-                fileName += $"-{size}";
+                if (!asset.Data.TryGetValue("sizes", out var sizeKeyMap) || sizeKeyMap.Type != JTokenType.Object || !(sizeKeyMap as JObject).TryGetValue(size, out fileName)) {
+                    context.Response.StatusCode = 404;
+                    return;
+                }
             }
-            var extension = DEFAULT_EXTENSION;
-            fileName += extension;
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), appSettings.AssetDirectory, fileName);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), appSettings.AssetDirectory, fileName.ToString());
 
             if (!(new FileInfo(filePath)).Exists) {
                 context.Response.StatusCode = 404;
                 return;
             }
 
-            context.Response.ContentType = MimeTypes.MimeTypeMap.GetMimeType(extension);
+            context.Response.ContentType = asset.Type;
 
             await context.Response.SendFileAsync(filePath);
         }

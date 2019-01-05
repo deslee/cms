@@ -6,6 +6,7 @@ using Content.Data;
 using Content.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
 using SixLabors.ImageSharp;
@@ -44,6 +45,7 @@ namespace Content.Asset.Job
                         try
                         {
                             ProcessAsset(asset);
+                            dataContext.Update(asset);
                         }
                         catch (Exception ex)
                         {
@@ -63,28 +65,23 @@ namespace Content.Asset.Job
             using (LogContext.PushProperty("assetId", asset.Id))
             {
                 Log.Information("Processing asset " + asset.Id);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, asset.Id + asset.Data.GetValue("extension"));
+                var extension = asset.Data.GetValue("extension");
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, asset.Id + extension);
                 if (!new FileInfo(filePath).Exists)
                 {
                     throw new Exception("File does not exist for asset " + asset.Id);
                 }
-
 
                 using (var input = File.OpenRead(filePath))
                 {
                     using (var image = Image.Load(input))
                     {
                         Log.Information("Loaded asset " + asset.Id);
-
-                        var converted = image.Clone();
-                        var convertedFilePath = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, $"{asset.Id}.png");
-                        Log.Information($"writing {convertedFilePath}");
-                        converted.Save(convertedFilePath);
-                        Log.Information($"wrote {convertedFilePath}");
-
+                        var sizes = new JObject();
                         foreach (int width in Widths)
                         {
-                            var outputFilePath = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, $"{asset.Id}-{width}.png");
+                            var key = $"{asset.Id}-{width}{extension}";
+                            var outputFilePath = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, key);
                             Log.Information($"writing {outputFilePath}");
 
                             var widthHeightRatio = ((decimal)image.Height / image.Width);
@@ -93,7 +90,13 @@ namespace Content.Asset.Job
                             resizedImage.Mutate(c => c.Resize(width, (int) Math.Round(width * widthHeightRatio)));
                             resizedImage.Save(outputFilePath);
                             Log.Information($"wrote {outputFilePath}");
+                            sizes.Add(width.ToString(), key);
                         }
+
+                        // gotta do this so EF will track the change
+                        var data = asset.Data;
+                        data.Add("sizes", sizes);
+                        asset.Data = data;
                     }
                 }
                 asset.State = "RESIZED";
