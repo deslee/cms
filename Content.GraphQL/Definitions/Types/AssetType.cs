@@ -27,7 +27,7 @@ namespace Content.GraphQL.Definitions.Types
             Field<DateTimeGraphType>("lastUpdatedAt", resolve: context => context.Source.LastUpdatedAt);
             Field(t => t.LastUpdatedBy);
             Field<StringGraphType>("fileName", resolve: context => {
-                if (context.Source.Data.TryGetValue("fileName", out var value))
+                if (context.Source.Data.TryGetValue("originalFilename", out var value))
                 {
                     return value.ToString();
                 }
