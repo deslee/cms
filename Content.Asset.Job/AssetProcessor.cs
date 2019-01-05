@@ -78,8 +78,9 @@ namespace Content.Asset.Job
                     {
                         Log.Information("Loaded asset " + asset.Id);
                         var sizes = new JObject();
-                        foreach (int width in Widths)
+                        foreach (int w in Widths)
                         {
+                            var width = Math.Min(w, image.Width);
                             var key = $"{asset.Id}-{width}{extension}";
                             var outputFilePath = Path.Combine(Directory.GetCurrentDirectory(), assetDirectoryPath, key);
                             Log.Information($"writing {outputFilePath}");
@@ -95,7 +96,7 @@ namespace Content.Asset.Job
 
                         // gotta do this so EF will track the change
                         var data = asset.Data;
-                        data.Add("sizes", sizes);
+                        data["sizes"] = sizes;
                         asset.Data = data;
                     }
                 }
