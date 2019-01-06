@@ -17,14 +17,15 @@ const UserProfileFormDataSchema = Yup.object().shape({
 
 interface Props {
     initialValues: UserProfileFormData;
+    className?: any;
     handleEditUserProfile: (values: UserProfileFormData) => Promise<void>
 }
 
-const UserProfileForm = ({initialValues, handleEditUserProfile}: Props) => <Formik 
+const UserProfileForm = ({initialValues, handleEditUserProfile, ...rest}: Props) => <Formik 
     initialValues={initialValues}
     validationSchema={UserProfileFormDataSchema}
     onSubmit={(values, actions) => handleWithFormValues(handleEditUserProfile, values, actions)}
->{({isSubmitting, status, handleSubmit}) => <div>
+>{({isSubmitting, status, handleSubmit}) => <div {...rest}>
     <Dimmer active={isSubmitting}><Loader /></Dimmer>
     <Form onSubmit={handleSubmit} error={Boolean(status)}>
         <Field type="text" name="name" label="Name" component={FormComponent} />

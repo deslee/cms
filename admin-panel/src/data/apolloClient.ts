@@ -1,6 +1,3 @@
-
-import { config } from '../config';
-
 import ApolloClient from "apollo-boost";
 
 export function getClient(jwtToken: string) {
@@ -11,7 +8,7 @@ export function getClient(jwtToken: string) {
     }
 
     const client = new ApolloClient({
-        uri: `${config.backendUrl}/graphql`,
+        uri: `${process.env.REACT_APP_BACKEND_URL}/graphql`,
         headers: headers
     });
 

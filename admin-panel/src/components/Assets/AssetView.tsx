@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Asset } from '../../accessors/AssetAccessors';
 import { Image, Button, Confirm } from 'semantic-ui-react';
-import { config } from '../../config';
 
 interface Props {
     asset: Asset
@@ -22,7 +21,7 @@ class AssetView extends React.Component<Props, State> {
     render() {
         const { asset, onDelete } = this.props;
         return <div>
-            <Image src={`${config.backendUrl}/asset/${asset.id}`} />
+            <Image src={`${process.env.REACT_APP_BACKEND_URL}/asset/${asset.id}`} />
             <Button onClick={this.open} color="red">Delete</Button>
             <Confirm open={this.state.confirmOpen} onCancel={this.close} onConfirm={() => onDelete()} />
         </div>

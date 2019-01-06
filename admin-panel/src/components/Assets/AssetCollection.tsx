@@ -1,32 +1,45 @@
 import * as React from 'react'
 import { Asset } from '../../accessors/AssetAccessors';
-import { Card, Image, Grid } from 'semantic-ui-react';
-import { config } from '../../config';
+import { Card, Image, Grid, CardProps } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import classes from './AssetCollection.module.scss';
 
 interface Props {
-    assets: Asset[]
+    assets: Asset[];
+    onSelected?: (asset: Asset) => void;
 }
 
-const AssetCollection = ({ assets }: Props) => <div>
-    <Grid padded={true} columns={4}>
-        {assets.map(asset => <Grid.Column key={asset.id}>
-            <Card as={Link} to={`assets/${asset.id}`}>
-                {asset.state === "RESIZED" ? <Image src={`${config.backendUrl}/asset/${asset.id}`} /> : <div>processing</div>}
-                <Card.Content>
-                    <Card.Header className={classes.assetHeader}>
-                        {asset.fileName}
-                    </Card.Header>
-                    <Card.Meta>
-                        {asset.type}
-                    </Card.Meta>
-                </Card.Content>
+const AssetCollection = ({ assets, onSelected }: Props) => {
+    return <div>
+        <Grid padded={true} columns={4}>
+            {assets.map(asset => {
 
-            </Card>
+                // by default, have each asset take you to their page when you click on them
+                const cardProps: CardProps = onSelected ? {
+                    onClick: () => onSelected(asset)
+                } : {
+                    as: Link,
+                    to: `assets/${asset.id}`
+                }
 
-        </Grid.Column>)}
-    </Grid>
-</div>
+                return <Grid.Column key={asset.id}>
+                    <Card {...cardProps}>
+                        {asset.state === "RESIZED" ? <Image src={`${process.env.REACT_APP_BACKEND_URL}/asset/${asset.id}`} /> : <div>processing</div>}
+                        <Card.Content>
+                            <Card.Header className={classes.assetHeader}>
+                                {asset.fileName}
+                            </Card.Header>
+                            <Card.Meta>
+                                {asset.type}
+                            </Card.Meta>
+                        </Card.Content>
+
+                    </Card>
+
+                </Grid.Column>
+            })}
+        </Grid>
+    </div>
+}
 
 export default AssetCollection;

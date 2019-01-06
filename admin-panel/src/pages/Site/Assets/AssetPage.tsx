@@ -4,7 +4,6 @@ import { Button, Container, Dimmer, Loader, Modal, Progress } from 'semantic-ui-
 import classes from './AssetPage.module.scss';
 import FilePicker from '../../../components/FilePicker';
 import { withApollo, WithApolloClient, Query, Mutation } from 'react-apollo';
-import { config } from '../../../config';
 import { withAuth, WithAuthInjectedProps } from '../../../data/auth';
 import gql from 'graphql-tag';
 import AssetCollection from '../../../components/Assets/AssetCollection';
@@ -20,7 +19,7 @@ interface State {
     uploadProgress?: number;
 }
 
-const GET_ASSETS_FOR_SITE = gql`
+export const GET_ASSETS_FOR_SITE = gql`
     query getAssetsForSite($siteId: String!) {
         site(siteId: $siteId) {
             id
@@ -119,7 +118,7 @@ class AssetPage extends React.Component<Props & RouteComponentProps & WithApollo
             }
         })
 
-        xhr.open("POST", `${config.backendUrl}/uploadAsset`);
+        xhr.open("POST", `${process.env.REACT_APP_BACKEND_URL}/uploadAsset`);
         xhr.setRequestHeader('Authorization', `Bearer ${token}`)
 
         xhr.send(data);

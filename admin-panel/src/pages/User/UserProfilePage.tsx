@@ -7,6 +7,7 @@ import NavigationMenu from '../Site/NavigationMenu';
 import { getUserProfile } from '../../accessors/UserAccessors';
 import UserProfileForm from '../../components/UserProfile/UserProfileForm';
 import { mutateSafely } from '../../data/helpers';
+import classes from './UserProfilePage.module.scss';
 
 interface Props {
 
@@ -42,6 +43,7 @@ const UserProfilePage = ({ location: { search } }: Props & RouteComponentProps<a
         <NavigationMenu siteId={searchParams.get('site')} />
         <Mutation mutation={UPDATE_USER_PROFILE}>{updateUserProfile => 
             <UserProfileForm
+                className={classes.root}
                 initialValues={{
                     ...getUserProfile(data.me),
                     email: data.me.email

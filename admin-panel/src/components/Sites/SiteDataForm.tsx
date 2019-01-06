@@ -8,6 +8,7 @@ import handleWithFormValues from '../../utils/handleWithFormValues';
 import { forEachLimit } from 'async';
 import posed, { PoseGroup } from 'react-pose'
 import classes from './SiteDataForm.module.scss';
+import AssetPickerModal from '../Assets/AssetPickerModal';
 const Item = posed.div()
 
 interface ContactIconLink {
@@ -43,6 +44,7 @@ const SiteFormDataSchema = Yup.object().shape({
 })
 
 interface Props {
+    siteId: string;
     initialValues: SiteFormData
     handleEditSite: (values: SiteFormData) => Promise<void>;
 }
@@ -86,15 +88,20 @@ const SiteDataForm = (props: Props) => {
                     />
                     <Form.Field>
                         <label>Header Image</label>
-                        {/* on click: show asset picker popup */}
-                        <Segment placeholder>
-                            <Header icon>
-                                <Icon name="file image outline" />
-                                No header image
-                            </Header>
-                        </Segment>
-                    </Form.Field>
-                    <Field type="text" name="copyright" label="Copyright" component={FormComponent} />
+                            <AssetPickerModal
+                                trigger={
+                                    <Segment placeholder>
+                                        <Header icon>
+                                            <Icon name="file image outline" />
+                                            No header image
+                                    </Header>
+                                    </Segment>
+                                }
+                                siteId={props.siteId} 
+                                onSelected={asset => formik.setFieldValue("headerImage", asset.id)}
+                            />
+                        </Form.Field>
+                        <Field type="text" name="copyright" label="Copyright" component={FormComponent} />
                     <FieldArray
                         name="contactIcons"
                         render={arrayHelpers => <React.Fragment>
