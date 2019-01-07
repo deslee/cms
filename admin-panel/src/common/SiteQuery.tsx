@@ -4,6 +4,12 @@ import { Query, Mutation } from 'react-apollo';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import { mutateSafely } from '../data/helpers';
 
+export interface Site {
+    id: string;
+    name: string;
+    data: string;
+}
+
 const GET_SITE = gql`
     query getSite($siteId: String!) {
         site(siteId: $siteId) {
@@ -29,7 +35,7 @@ const UPSERT_SITE = gql`
 `
 
 export interface SiteQueryInjectedProps {
-    site: any // TODO: make type
+    site: Site
 }
 
 export interface SiteQueryProps {
@@ -42,31 +48,36 @@ export interface SiteQueryProps {
 const DefaultLoading = () => <Dimmer active={true}><Loader /></Dimmer>
 const DefaultError = () => <div>Error</div>
 
-export const SiteQuery = ({ siteId, component: Component, loading: Loading = DefaultLoading, error: Error = DefaultError }: SiteQueryProps) => <Query query={GET_SITE} variables={{ siteId: siteId }}>{({data, loading, error}) => {
-    if (loading){
+export const SiteQuery = ({ siteId, component: Component, loading: Loading = DefaultLoading, error: Error = DefaultError }: SiteQueryProps) => <Query query={GET_SITE} variables={{ siteId: siteId }}>{({ data, loading, error }) => {
+    if (loading) {
         return <Loading />
     }
-    if (error){
+    if (error) {
         return <Error />
     }
 
     return <Component site={data.site} />
 }}</Query>
 
-export interface UpsertSiteInjectedProps {
-    upsertSite: (site: any) => Promise<void> // TODO: make type
+export interface WithUpsertSiteInjectedProps {
+    upsertSite: (site: Site) => Promise<void> 
 }
 
-export interface UpsertSiteProps {
-    component: React.ComponentType<UpsertSiteInjectedProps>
-}
+export interface WithUpsertSiteProps { }
 
-export const UpsertSite = ({ component: Component }: UpsertSiteProps) => <Mutation mutation={UPSERT_SITE}>{(upsertSite) => <Component
-    upsertSite={async site => {
-        await mutateSafely(upsertSite, 'upsertSite', {
-            variables: {
-                site: site
-            }
-        })
-    }}
-/>}</Mutation>
+export const withUpsertSite = <P extends {}>(
+    Component: React.ComponentType<P & WithUpsertSiteInjectedProps>
+) => class WithUpsertSite extends React.Component<P & WithUpsertSiteProps> {
+        render() {
+            return <Mutation mutation={UPSERT_SITE}>{(upsertSite) => <Component
+                {...this.props}
+                upsertSite={async site => {
+                    await mutateSafely(upsertSite, 'upsertSite', {
+                        variables: {
+                            site: site
+                        }
+                    })
+                }}
+            />}</Mutation>
+        }
+    }

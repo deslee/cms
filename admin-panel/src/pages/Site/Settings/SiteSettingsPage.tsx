@@ -4,14 +4,14 @@ import { Container } from 'semantic-ui-react';
 import SiteDataForm from '../../../components/Sites/SiteDataForm';
 import { getSiteSettings } from '../../../accessors/SiteAccessors';
 import classes from './SiteSettingsPage.module.scss';
-import { SiteQuery, UpsertSite } from '../../../common/SiteQuery';
+import { SiteQuery, withUpsertSite, WithUpsertSiteInjectedProps } from '../../../common/SiteQuery';
 
 interface Props {
 
 }
 
 
-export default ({ match: { params: { siteId } } }: Props & RouteComponentProps<any>) =>
+const SiteSettingsPage = ({ match: { params: { siteId } }, upsertSite }: Props & RouteComponentProps<any> & WithUpsertSiteInjectedProps) =>
     <Container className={classes.root}>
         <SiteQuery
             siteId={siteId}
@@ -20,21 +20,19 @@ export default ({ match: { params: { siteId } } }: Props & RouteComponentProps<a
                     return <div>not found</div>
                 }
 
-                return <UpsertSite
-                    component={({ upsertSite }) =>
-                        <SiteDataForm
-                            siteId={siteId}
-                            initialValues={getSiteSettings(site)}
-                            handleEditSite={async (values) => {
-                                await upsertSite({
-                                    id: site.id,
-                                    name: site.name,
-                                    data: JSON.stringify(values)
-                                })
-                            }}
-                        />
-                    }
+                return <SiteDataForm
+                    siteId={siteId}
+                    initialValues={getSiteSettings(site)}
+                    handleEditSite={async (values) => {
+                        await upsertSite({
+                            id: site.id,
+                            name: site.name,
+                            data: JSON.stringify(values)
+                        })
+                    }}
                 />
             }}
         />
     </Container>
+
+export default withUpsertSite(SiteSettingsPage);

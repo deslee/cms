@@ -2,23 +2,13 @@ import * as React from 'react';
 import { Menu, Icon, Dropdown } from "semantic-ui-react";
 import { Link, withRouter, RouteComponentProps } from "react-router-dom";
 import { withAuth, WithAuthInjectedProps } from "../../data/auth";
-import gql from "graphql-tag";
-import { Query } from "react-apollo";
 import { getUserProfile } from '../../accessors/UserAccessors';
 import classes from './NavigationMenu.module.scss';
+import { UserQuery } from '../../common/UserQuery';
 
 interface Props {
     siteId: string;
 }
-
-const USER_PROFILE_QUERY = gql`
-    query currentUser {
-        me {
-            id
-            data
-        }
-    }
-`
 
 const NavigationMenu = ({ siteId, location: { pathname }, auth: { updateUser } }: Props & WithAuthInjectedProps & RouteComponentProps) =>
     <Menu fixed='top' size="large" fluid className={classes.menu}>
@@ -43,15 +33,14 @@ const NavigationMenu = ({ siteId, location: { pathname }, auth: { updateUser } }
             Settings
             </Menu.Item>
         <Menu.Menu position="right">
-            <Query query={USER_PROFILE_QUERY}>{({loading, data}) => loading? <div /> : 
-                <Dropdown item text={getUserProfile(data.me).name}>
+            <UserQuery 
+                component={({user}) => <Dropdown item text={getUserProfile(user).name}>
                     <Dropdown.Menu>
                         <Dropdown.Item as={Link} to={`/user/profile?site=${siteId}`} text="Profile"></Dropdown.Item>
                         <Dropdown.Item text="Sign out" onClick={() => updateUser()}></Dropdown.Item>
                     </Dropdown.Menu>
-                </Dropdown>
-            }</Query>
-
+                </Dropdown>}
+            />
         </Menu.Menu>
     </Menu>
 

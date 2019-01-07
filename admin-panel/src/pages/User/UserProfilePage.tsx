@@ -1,67 +1,37 @@
 import React from 'react';
 import { RouteComponentProps } from "react-router";
-import gql from 'graphql-tag';
-import { Dimmer, Loader, Container } from 'semantic-ui-react';
-import { Query, Mutation } from 'react-apollo';
+import { Container } from 'semantic-ui-react';
 import NavigationMenu from '../Site/NavigationMenu';
 import { getUserProfile } from '../../accessors/UserAccessors';
 import UserProfileForm from '../../components/UserProfile/UserProfileForm';
-import { mutateSafely } from '../../data/helpers';
 import classes from './UserProfilePage.module.scss';
+import { UserQuery, withUpdateUser, WithUpdateUserInjectedProps } from '../../common/UserQuery';
 
 interface Props {
 
 }
 
-const USER_PROFILE_QUERY = gql`
-    query currentUser {
-        me {
-            id
-            email
-            data
-        }
-    }
-`
-
-const UPDATE_USER_PROFILE = gql`
-    mutation updateUser($user: UserInput!) {
-        updateUser(user: $user) {
-            success,
-            errorMessage,
-            data {
-                id
-                email
-                data
-            }
-        }
-    }
-`
-
-const UserProfilePage = ({ location: { search } }: Props & RouteComponentProps<any>) => {
+const UserProfilePage = ({ location: { search }, updateUser }: Props & RouteComponentProps<any> & WithUpdateUserInjectedProps) => {
     const searchParams = new URLSearchParams(search)
-    return <Query query={USER_PROFILE_QUERY}>{({ data, loading }) => loading ? <Dimmer active={loading}><Loader /></Dimmer> : <Container>
-        <NavigationMenu siteId={searchParams.get('site')} />
-        <Mutation mutation={UPDATE_USER_PROFILE}>{updateUserProfile => 
+    return <UserQuery 
+        component={({user}) => <Container>
+            <NavigationMenu siteId={searchParams.get('site')} />
             <UserProfileForm
                 className={classes.root}
                 initialValues={{
-                    ...getUserProfile(data.me),
-                    email: data.me.email
+                    ...getUserProfile(user),
+                    email: user.email
                 }}
                 handleEditUserProfile={async ({ email, ...userProfile }) => {
-                    await mutateSafely(updateUserProfile, 'updateUser', {
-                        variables: {
-                            user: {
-                                id: data.me.id,
-                                email: email,
-                                data: JSON.stringify(userProfile)
-                            }
-                        }
+                    await updateUser({
+                        id: user.id,
+                        email: email,
+                        data: JSON.stringify(userProfile)
                     })
                 }}
             />
-        }</Mutation>
-    </Container>}</Query>
+        </Container>}
+    />
 }
 
-export default UserProfilePage
+export default withUpdateUser(UserProfilePage)

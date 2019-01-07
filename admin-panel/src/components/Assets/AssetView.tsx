@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { Asset } from '../../accessors/AssetAccessors';
 import { Image, Button, Confirm } from 'semantic-ui-react';
+import { Asset } from '../../common/AssetQuery';
 
 interface Props {
     asset: Asset

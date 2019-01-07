@@ -1,8 +1,8 @@
 import * as React from 'react'
-import { Asset } from '../../accessors/AssetAccessors';
 import { Card, Image, Grid, CardProps } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import classes from './AssetCollection.module.scss';
+import { Asset } from '../../common/AssetQuery';
 
 interface Props {
     assets: Asset[];

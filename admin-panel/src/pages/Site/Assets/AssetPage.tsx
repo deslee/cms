@@ -1,15 +1,13 @@
 import * as React from 'react'
 import { RouteComponentProps, Route, Switch } from 'react-router';
 import { Button, Container, Dimmer, Loader, Modal, Progress } from 'semantic-ui-react';
-import classes from './AssetPage.module.scss';
 import FilePicker from '../../../components/FilePicker';
-import { withApollo, WithApolloClient, Query, Mutation } from 'react-apollo';
+import { withApollo, WithApolloClient } from 'react-apollo';
 import { withAuth, WithAuthInjectedProps } from '../../../data/auth';
-import gql from 'graphql-tag';
 import AssetCollection from '../../../components/Assets/AssetCollection';
-import { getAsset, Asset } from '../../../accessors/AssetAccessors';
 import AssetView from '../../../components/Assets/AssetView';
 import { mutateSafely } from '../../../data/helpers';
+import { GetAssetsForSiteQuery, GetAssetQuery, withDeleteAsset, WithDeleteAssetInjectedProps, GET_ASSETS_FOR_SITE, GET_ASSET } from '../../../common/AssetQuery';
 
 interface Props {
     siteId: string;
@@ -19,44 +17,8 @@ interface State {
     uploadProgress?: number;
 }
 
-export const GET_ASSETS_FOR_SITE = gql`
-    query getAssetsForSite($siteId: String!) {
-        site(siteId: $siteId) {
-            id
-            assets {
-                id
-                state
-                type
-                fileName
-                extension
-            }
-        }
-    }
-`;
 
-const GET_ASSET = gql`
-    query getAsset($assetId: String!) {
-        asset(assetId: $assetId) {
-            id
-            state
-            type
-            fileName
-            extension
-        }
-    }
-`
-
-const DELETE_ASSET = gql`
-    mutation deleteAsset($assetId: String!) {
-        deleteAsset(assetId: $assetId) {
-            success
-            errorMessage
-        }
-    }
-`
-
-class AssetPage extends React.Component<Props & RouteComponentProps & WithApolloClient<Props> & WithAuthInjectedProps, State> {
-
+class AssetPage extends React.Component<Props & RouteComponentProps & WithApolloClient<Props> & WithAuthInjectedProps & WithDeleteAssetInjectedProps, State> {
     state = {
         uploadProgress: null
     }
@@ -125,36 +87,32 @@ class AssetPage extends React.Component<Props & RouteComponentProps & WithApollo
     }
 
     render() {
-        const { siteId, match: { path, url }, history } = this.props;
+        const { siteId, match: { path, url }, history, deleteAsset } = this.props;
         const { uploadProgress } = this.state;
 
         return <Switch>
-            <Route path={`${path}/:assetId`} component={({ match: { params: { assetId } } }) => <Query query={GET_ASSET} variables={{ assetId: assetId }}>{
-                ({ data, loading, error }) => {
-                    if (loading) {
-                        return <Dimmer active={loading}><Loader /></Dimmer>
-                    }
-                    return <Mutation mutation={DELETE_ASSET}>{deleteAsset => <AssetView asset={getAsset(data.asset)} onDelete={async () => {
-                        await mutateSafely(deleteAsset, 'deleteAsset', { variables: { assetId: assetId }, refetchQueries: () => [{ query: GET_ASSETS_FOR_SITE, variables: { siteId: siteId } }] })
+            <Route path={`${path}/:assetId`} component={({ match: { params: { assetId } } }) => <GetAssetQuery assetId={assetId} 
+                component={({ asset }) => 
+                    <AssetView asset={asset} onDelete={async () => {
+                        await deleteAsset(assetId, siteId);
                         history.replace(`${url}`);
-                    }} />}</Mutation>
-                    //
-                }
-            }</Query>} />
+                    }} />
+                }/>} />
+            />}/>
+            
             <Route component={() =>
-                <Query query={GET_ASSETS_FOR_SITE} pollInterval={1000} variables={{ siteId: siteId }}>{({ data, loading, error }) => {
-                    if (loading) {
-                        return <Dimmer active={loading}><Loader /></Dimmer>
-                    }
-                    return <div>
+                <GetAssetsForSiteQuery
+                    siteId={siteId}
+                    pollInterval={1000}
+                    component={({assets}) => <div>
                         <FilePicker handleFilePicked={this.handleFilePicked} />
                         {uploadProgress != null && <Progress percent={uploadProgress} indicating />}
-                        <AssetCollection assets={data.site.assets.map(getAsset)} />
-                    </div>
-                }}</Query>
+                        <AssetCollection assets={assets} />
+                    </div>}
+                />
             } />
         </Switch>
     }
 }
 
-export default withApollo<Props>(withAuth(AssetPage));
+export default withApollo<Props>(withAuth(withDeleteAsset(AssetPage)));

@@ -1,4 +1,5 @@
 import * as Yup from 'yup'
+import { Site } from '../common/SiteQuery';
 
 interface ContactIcon {
     type: string,
@@ -20,11 +21,7 @@ const SiteSettingsSchema = Yup.object().shape({
     googleAnalyticsId: Yup.string(),
 })
 
-export function getSiteSettings(site) {
-    if (site.__typename !== 'Site') {
-        throw new Error("Assert fail")
-    }
-
+export function getSiteSettings(site: Site) {
     const siteSettings = JSON.parse(site.data) as SiteSettings;
     SiteSettingsSchema.validateSync(siteSettings);
 
