@@ -10,7 +10,7 @@ export interface User {
     data: string;
 }
 
-const GET_USER = gql`
+export const GET_USER = gql`
     query currentUser {
         me {
             id
@@ -19,7 +19,7 @@ const GET_USER = gql`
         }
     }
 `
-const UPDATE_USER = gql`
+export const UPDATE_USER = gql`
     mutation updateUser($user: UserInput!) {
         updateUser(user: $user) {
             success,
@@ -32,6 +32,22 @@ const UPDATE_USER = gql`
         }
     }
 `
+
+export const LOGIN = gql`
+    mutation Login($login: LoginInput!) {
+        login(login: $login) {
+            success,
+            errorMessage,
+            data {
+                id
+                email
+                data
+            }
+            token
+        }
+    }
+`;
+
 
 export interface UserQueryInjectedProps {
     user: User
@@ -77,6 +93,25 @@ export const withUpdateUser = <P extends {}>(
                         user: user
                     }
                 })
+            }}
+        />}</Mutation>
+    }
+}
+
+export interface WithLoginProps {
+}
+export interface WithLoginInjectedProps {
+    login: (username: string, password: string) => Promise<string>
+}
+export const withLogin = <P extends {}>(
+    Component: React.ComponentType<P & WithLoginInjectedProps>
+) => class WithLogin extends React.Component<P & WithLoginProps> {
+    render() {
+        return <Mutation mutation={LOGIN}>{login => <Component 
+            {...this.props}
+            login={async (email, password) => {
+                var result = await mutateSafely(login, 'login', { variables: { login: { email: email, password: password } } });
+                return result.token
             }}
         />}</Mutation>
     }
