@@ -62,7 +62,7 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "itemId" }
                 ),
                 resolve: context => mutationExecutionHelper.ExecuteSafely(() => itemService.DeleteItem(context.GetArgument<string>("itemId"), (context.UserContext as UserContext)))
-            );
+            ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType>(
                 "deleteSite",
@@ -70,7 +70,7 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
                 resolve: context => mutationExecutionHelper.ExecuteSafely(() => siteService.DeleteSite(context.GetArgument<string>("siteId"), (context.UserContext as UserContext)))
-            );
+            ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType>(
                 "deleteAsset",
@@ -78,7 +78,7 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "assetId" }
                 ),
                 resolve: context => mutationExecutionHelper.ExecuteSafely(() => assetService.DeleteAsset(context.GetArgument<string>("assetId"), (context.UserContext as UserContext)))
-            );
+            ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType<User, UserType>>(
                 "register",
@@ -101,8 +101,8 @@ namespace Content.GraphQL.Definitions
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<UserInputType>> { Name = "user" }
                 ),
-                resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.UpdateUser(context.GetArgument<UserInput>("user")))
-            );
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.UpdateUser(context.GetArgument<UserInput>("user"), (context.UserContext as UserContext)))
+            ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
 
             Field<MutationResultType>(
                 "addUserToSite",
@@ -111,8 +111,8 @@ namespace Content.GraphQL.Definitions
                     new QueryArgument<StringGraphType> { Name = "userEmail", Description = "Email. Either email or user id must be present" },
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "siteId" }
                 ),
-                resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.AddUserToSite(userId: context.GetArgument<string>("userId"), userEmail: context.GetArgument<string>("userEmail"), siteId: context.GetArgument<string>("siteId")))
-            );
+                resolve: context => mutationExecutionHelper.ExecuteSafely(() => userService.AddUserToSite(userId: context.GetArgument<string>("userId"), userEmail: context.GetArgument<string>("userEmail"), siteId: context.GetArgument<string>("siteId"), userContext: (context.UserContext as UserContext)))
+            ).AuthorizeWith(Content.GraphQL.Constants.Policies.Authenticated);
         }
     }
 }

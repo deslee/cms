@@ -28,11 +28,11 @@ namespace Content.GraphQL.Services
         Task<User> GetUserByEmail(string email);
         Task<User> AddUserAsync(User user);
         Task<LoginResult> Login(LoginInput loginInput);
-        Task<MutationResult<User>> UpdateUser(UserInput userInput);
+        Task<MutationResult<User>> UpdateUser(UserInput userInput, UserContext userContext);
         Task<MutationResult<User>> RegisterUser(RegisterInput registerInput);
         Task<string> CreateJwtToken(User source, UserContext userContext);
         Task<IEnumerable<Claim>> GetClaimsForUser(User user);
-        Task<MutationResult> AddUserToSite(string userId, string userEmail, string siteId);
+        Task<MutationResult> AddUserToSite(string userId, string userEmail, string siteId, UserContext userContext);
     }
 
     public class UserService : IUserService
@@ -203,8 +203,14 @@ namespace Content.GraphQL.Services
             return Task.FromResult(claims.AsEnumerable());
         }
 
-        public async Task<MutationResult> AddUserToSite(string userId, string userEmail, string siteId)
+        public async Task<MutationResult> AddUserToSite(string userId, string userEmail, string siteId, UserContext userContext)
         {
+            // validate
+            var validated = await dataContext.SiteUsers.AnyAsync(su => su.SiteId == siteId && su.UserId == userContext.Id);
+            if (!validated) {
+                return new MutationResult { ErrorMessage = $"User does not belong to {siteId}." };
+            }
+
             if (string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(userEmail))
             {
                 return new MutationResult { ErrorMessage = "Both userId and userEmail cannot be null" };
@@ -247,8 +253,14 @@ namespace Content.GraphQL.Services
             return new MutationResult();
         }
 
-        public async Task<MutationResult<User>> UpdateUser(UserInput userInput)
+        public async Task<MutationResult<User>> UpdateUser(UserInput userInput, UserContext userContext)
         {
+            // validate
+            var validated = userInput.Id == userContext.Id || userContext.IsAdmin;
+            if (!validated) {
+                return new MutationResult<User> { ErrorMessage = $"Permission denied." };
+            }
+
             JObject data;
             try
             {
