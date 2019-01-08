@@ -54,24 +54,24 @@ export interface UserQueryInjectedProps {
 }
 
 export interface UserQueryProps {
-    component: React.ComponentType<UserQueryInjectedProps>
-    loading?: React.ComponentType<any>
-    error?: React.ComponentType<any>
+    component: (props: UserQueryInjectedProps) => React.ReactNode
+    loading?: () => React.ReactNode
+    error?: () => React.ReactNode
 }
 
 const DefaultLoading = () => <Dimmer active={true}><Loader /></Dimmer>
 const DefaultError = () => <div>Error</div>
 
-export const UserQuery =({component: Component, loading: Loading = DefaultLoading, error: Error = DefaultError}: UserQueryProps) => <Query query={GET_USER}>{({data, loading, error}) => {
-    if (loading) {
-        return <Loading />
+export const UserQuery =({component, loading = DefaultLoading, error = DefaultError}: UserQueryProps) => <Query query={GET_USER}>{({data, loading: isLoading, error: isError}) => {
+    if (isLoading) {
+        return loading()
     }
-    if (error) {
-        return <Error />
+    if (isError) {
+        return error()
     }
 
-    return <Component user={data.me} />
-}}</Query>
+    return component({user: data.me})
+}}</Query>;
 
 export interface WithUpdateUserProps {
 

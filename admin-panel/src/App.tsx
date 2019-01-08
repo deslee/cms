@@ -23,7 +23,7 @@ try {
       .required("Required")
   })
 
-  var parsed = JSON.parse(localStorage.getItem(AUTH_USER_KEY));
+  const parsed = JSON.parse(localStorage.getItem(AUTH_USER_KEY));
   if (parsed) {
     initialUser = authUserSchema.validateSync(parsed) as AuthUser;
   }

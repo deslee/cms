@@ -66,38 +66,38 @@ export interface GetAssetsForSiteQueryInjectedProps {
 export interface GetAssetsForSiteQueryProps {
     siteId: string
     pollInterval?: number;
-    component: React.ComponentType<GetAssetsForSiteQueryInjectedProps>
-    loading?: React.ComponentType<any>
-    error?: React.ComponentType<any>
+    component: (props: GetAssetsForSiteQueryInjectedProps) => React.ReactNode
+    loading?: () => React.ReactNode
+    error?: () => React.ReactNode
 }
-export const GetAssetsForSiteQuery = ({ siteId, pollInterval, component: Component, loading: Loading = DefaultLoading, error: Error = DefaultError }: GetAssetsForSiteQueryProps) => <Query query={GET_ASSETS_FOR_SITE} pollInterval={pollInterval} variables={{ siteId: siteId }}>{({ data, loading, error }) => {
-    if (loading) {
-        return <Loading />
+export const GetAssetsForSiteQuery = ({ siteId, pollInterval, component, loading = DefaultLoading, error = DefaultError }: GetAssetsForSiteQueryProps) => <Query query={GET_ASSETS_FOR_SITE} pollInterval={pollInterval} variables={{ siteId: siteId }}>{({ data, loading: isLoading, error: isError }) => {
+    if (isLoading) {
+        return loading()
     }
-    if (error) {
-        return <Error />
+    if (isError) {
+        return error()
     }
-    return <Component assets={data.site.assets.map(mapAsset)} />
-}}</Query>
+    return component({assets: data.site.assets.map(mapAsset)})
+}}</Query>;
 
 export interface GetAssetQueryInjectedProps {
     asset: Asset
 }
 export interface GetAssetQueryProps {
     assetId: string
-    component: React.ComponentType<GetAssetQueryInjectedProps>
-    loading?: React.ComponentType<any>
-    error?: React.ComponentType<any>
+    component: (props: GetAssetQueryInjectedProps) => React.ReactNode
+    loading?: () => React.ReactNode
+    error?: () => React.ReactNode
 }
-export const GetAssetQuery = ({ assetId, component: Component, loading: Loading = DefaultLoading, error: Error = DefaultError }: GetAssetQueryProps) => <Query query={GET_ASSET} variables={{assetId: assetId}}>{({data, loading, error}) => {
-    if (loading) {
-        return <Loading />
+export const GetAssetQuery = ({ assetId, component, loading = DefaultLoading, error = DefaultError }: GetAssetQueryProps) => <Query query={GET_ASSET} variables={{assetId: assetId}}>{({data, loading: isLoading, error: isError}) => {
+    if (isLoading) {
+        return loading()
     }
-    if (error) {
-        return <Error />
+    if (isError) {
+        return error()
     }
-    return <Component asset={mapAsset(data.asset)} />
-}}</Query>
+    return component({asset: mapAsset(data.asset)})
+}}</Query>;
 
 
 export interface WithDeleteAssetInjectedProps {

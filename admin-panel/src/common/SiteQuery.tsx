@@ -40,23 +40,23 @@ export interface SiteQueryInjectedProps {
 
 export interface SiteQueryProps {
     siteId: string;
-    component: React.ComponentType<SiteQueryInjectedProps>
-    loading?: React.ComponentType<any>
-    error?: React.ComponentType<any>
+    component: (data: SiteQueryInjectedProps) => React.ReactNode;
+    loading?: () => React.ReactNode;
+    error?: () => React.ReactNode;
 }
 
 const DefaultLoading = () => <Dimmer active={true}><Loader /></Dimmer>
 const DefaultError = () => <div>Error</div>
 
-export const SiteQuery = ({ siteId, component: Component, loading: Loading = DefaultLoading, error: Error = DefaultError }: SiteQueryProps) => <Query query={GET_SITE} variables={{ siteId: siteId }}>{({ data, loading, error }) => {
-    if (loading) {
-        return <Loading />
+export const SiteQuery = ({ siteId, component, loading = DefaultLoading, error = DefaultError }: SiteQueryProps) => <Query query={GET_SITE} variables={{ siteId: siteId }}>{({ data, loading: isLoading, error: isError }) => {
+    if (isLoading) {
+        return loading()
     }
-    if (error) {
-        return <Error />
+    if (isError) {
+        return error()
     }
 
-    return <Component site={data.site} />
+    return component({ site: data.site});
 }}</Query>
 
 export interface WithUpsertSiteInjectedProps {
