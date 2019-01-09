@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Menu, Icon, Dropdown } from "semantic-ui-react";
 import { Link, withRouter, RouteComponentProps } from "react-router-dom";
-import { withAuth, WithAuthInjectedProps } from "../../data/auth";
 import { getUserProfile } from '../../accessors/UserAccessors';
 import classes from './NavigationMenu.module.scss';
 import { UserQuery } from '../../common/UserQuery';
+import { WithAuthInjectedProps, withAuth } from '../../common/data/auth';
 
 interface Props {
     siteId: string;

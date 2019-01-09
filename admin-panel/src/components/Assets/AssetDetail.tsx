@@ -10,7 +10,7 @@ interface State {
     confirmOpen: boolean;
 }
 
-class AssetView extends React.Component<Props, State> {
+class AssetDetail extends React.Component<Props & React.HTMLAttributes<HTMLDivElement>, State> {
     state = {
         confirmOpen: false
     }
@@ -19,8 +19,8 @@ class AssetView extends React.Component<Props, State> {
     close = () => this.setState({ confirmOpen: false })
 
     render() {
-        const { asset, onDelete } = this.props;
-        return <div>
+        const { asset, onDelete, ...rest } = this.props;
+        return <div {...rest}>
             <Image src={`${process.env.REACT_APP_BACKEND_URL}/asset/${asset.id}`} />
             <Button onClick={this.open} color="red">Delete</Button>
             <Confirm open={this.state.confirmOpen} onCancel={this.close} onConfirm={() => onDelete()} />
@@ -28,4 +28,4 @@ class AssetView extends React.Component<Props, State> {
     }
 }
 
-export default AssetView;
+export default AssetDetail;

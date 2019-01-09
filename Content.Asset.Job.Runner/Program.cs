@@ -32,6 +32,7 @@ namespace Content.Asset.Job.Runner
 
             IAssetProcessor processor = new AssetProcessor(() => new DataContext(options, new SystemUserAccessor()), appSettings.GetValue<string>("AssetDirectory"));
 
+            Log.Logger.Information("Starting Content Asset Job Runner");
             while(true) {
                 processor.Run();
                 Thread.Sleep(1000);

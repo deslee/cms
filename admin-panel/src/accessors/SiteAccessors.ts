@@ -1,22 +1,24 @@
 import * as Yup from 'yup'
 import { Site } from '../common/SiteQuery';
 
-interface ContactIcon {
+export interface ContactIcon {
     type: string,
     value: string
 }
 
-interface SiteSettings {
+export interface SiteSettings {
     title: string
     subtitle: string
     copyright: string
+    headerImage: string
     googleAnalyticsId: string,
     contactIcons: ContactIcon[]
 }
 
-const SiteSettingsSchema = Yup.object().shape({
-    title: Yup.string().required(),
+export const SiteSettingsSchema = Yup.object().shape({
+    title: Yup.string(),
     subtitle: Yup.string(),
+    headerImage: Yup.string(),
     copyright: Yup.string(),
     googleAnalyticsId: Yup.string(),
 })

@@ -4,7 +4,7 @@ import {
     Redirect,
     RouteProps
 } from "react-router-dom";
-import { withAuth, WithAuthInjectedProps } from '../data/auth';
+import { withAuth, WithAuthInjectedProps } from '../common/data/auth';
 import { UserQuery } from '../common/UserQuery';
 
 interface Props extends RouteProps {

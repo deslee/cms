@@ -1,10 +1,10 @@
 import React from 'react';
 import LoginForm from '../../components/Login/LoginForm';
 import { RouteComponentProps } from 'react-router';
-import { withAuth, WithAuthInjectedProps, AuthUser } from '../../data/auth';
 import { Grid, Header, Message, Segment } from 'semantic-ui-react';
 import classes from './LoginPage.module.scss';
 import { withLogin, WithLoginInjectedProps } from '../../common/UserQuery';
+import { WithAuthInjectedProps, AuthUser, withAuth } from '../../common/data/auth';
 
 interface Props {
 

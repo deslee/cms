@@ -2,7 +2,7 @@ import * as React from 'react';
 import gql from 'graphql-tag';
 import { Query, Mutation } from 'react-apollo';
 import { Dimmer, Loader } from 'semantic-ui-react';
-import { mutateSafely } from '../data/helpers';
+import { mutateSafely } from './data/helpers';
 
 export interface Site {
     id: string;

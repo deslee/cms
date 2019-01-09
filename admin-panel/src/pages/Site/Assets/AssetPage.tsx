@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { RouteComponentProps, Route, Switch } from 'react-router';
-import { Button, Container, Dimmer, Loader, Modal, Progress } from 'semantic-ui-react';
+import { Button, Container, Dimmer, Loader, Modal, Progress, Divider } from 'semantic-ui-react';
 import FilePicker from '../../../components/FilePicker';
 import { withApollo, WithApolloClient } from 'react-apollo';
-import { withAuth, WithAuthInjectedProps } from '../../../data/auth';
 import AssetCollection from '../../../components/Assets/AssetCollection';
-import AssetView from '../../../components/Assets/AssetView';
-import { mutateSafely } from '../../../data/helpers';
+import AssetDetail from '../../../components/Assets/AssetDetail';
 import { GetAssetsForSiteQuery, GetAssetQuery, withDeleteAsset, WithDeleteAssetInjectedProps, GET_ASSETS_FOR_SITE, GET_ASSET } from '../../../common/AssetQuery';
+import { WithAuthInjectedProps, withAuth } from '../../../common/data/auth';
+import classes from './AssetPage.module.scss';
 
 interface Props {
     siteId: string;
@@ -93,7 +93,7 @@ class AssetPage extends React.Component<Props & RouteComponentProps & WithApollo
         return <Switch>
             <Route path={`${path}/:assetId`} component={({ match: { params: { assetId } } }) => <GetAssetQuery assetId={assetId} 
                 component={({ asset }) => 
-                    <AssetView asset={asset} onDelete={async () => {
+                    <AssetDetail className={classes.assetDetail} asset={asset} onDelete={async () => {
                         await deleteAsset(assetId, siteId);
                         history.replace(`${url}`);
                     }} />
@@ -104,8 +104,9 @@ class AssetPage extends React.Component<Props & RouteComponentProps & WithApollo
                 <GetAssetsForSiteQuery
                     siteId={siteId}
                     pollInterval={1000}
-                    component={({assets}) => <div>
+                    component={({assets}) => <div className={classes.assetCollection}>
                         <FilePicker handleFilePicked={this.handleFilePicked} />
+                        <Divider />
                         {uploadProgress != null && <Progress percent={uploadProgress} indicating />}
                         <AssetCollection assets={assets} />
                     </div>}

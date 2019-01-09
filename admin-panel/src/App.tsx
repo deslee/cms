@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { AuthUserProvider, AuthUserContext, UpdateAuthUser, AuthUser } from './data/auth';
+import { AuthUserProvider, AuthUserContext, UpdateAuthUser, AuthUser } from './common/data/auth';
 import { ApolloProvider } from 'react-apollo';
 import * as Yup from 'yup';
-import { getClient } from './data/apolloClient';
+import { getClient } from './common/data/apolloClient';
 import { BrowserRouter as Router, Route, Link, Redirect, Switch } from "react-router-dom";
 import 'semantic-ui-css/semantic.min.css'
 import LoginPage from './pages/Login/LoginPage';
