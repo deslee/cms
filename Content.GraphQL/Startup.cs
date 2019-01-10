@@ -59,6 +59,12 @@ namespace Content.GraphQL
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {XCorrelationID} {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
+            // TODO: move validate app settings to a separate location
+            if (string.IsNullOrEmpty(appSettings.Secret)) {
+                Log.Logger.Fatal("Failed to start: Missing Secret!");
+                throw new Exception("Failed to start: Missing secret!");
+            }
+
             services.Configure<FormOptions>(options => {
                 options.ValueLengthLimit = int.MaxValue;
                 options.MultipartBodyLengthLimit = long.MaxValue;

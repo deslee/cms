@@ -30,7 +30,11 @@ namespace Content.Asset.Job.Runner
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {assetId} {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
-            IAssetProcessor processor = new AssetProcessor(() => new DataContext(options, new SystemUserAccessor()), appSettings.GetValue<string>("AssetDirectory"));
+            Func<DataContext> dataContextFactory = () => new DataContext(options, new SystemUserAccessor());
+
+            dataContextFactory().Database.Migrate();
+
+            IAssetProcessor processor = new AssetProcessor(dataContextFactory, appSettings.GetValue<string>("AssetDirectory"));
 
             Log.Logger.Information("Starting Content Asset Job Runner");
             while(true) {
