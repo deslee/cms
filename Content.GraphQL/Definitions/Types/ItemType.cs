@@ -21,6 +21,7 @@ namespace Content.GraphQL.Definitions.Types
             Name = "Item";
             Field(t => t.Id).Description("The id of the Item");
             Field<DateTimeGraphType>("createdAt", resolve: context => context.Source.CreatedAt);
+            Field(t => t.Type);
             Field(t => t.CreatedBy);
             Field<DateTimeGraphType>("lastUpdatedAt", resolve: context => context.Source.LastUpdatedAt);
             Field(t => t.LastUpdatedBy);
