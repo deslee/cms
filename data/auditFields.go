@@ -8,10 +8,10 @@ import (
 
 func CreateAuditFields(ctx context.Context) AuditFields {
 	var (
-		createdAt     string
-		lastUpdatedAt string
 		createdBy     string
 		lastUpdatedBy string
+		createdAt     string
+		lastUpdatedAt string
 		modifier      string
 		now           = time.Now().UTC().Format(time.RFC3339)
 	)

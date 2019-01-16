@@ -39,7 +39,14 @@ func main() {
 	data.CreateTablesAndIndicesIfNotExist(db)
 	withCors := cors.AllowAll().Handler
 
-	http.Handle("/", handler.Playground("GraphQL playground", "/graphql"))
+	staticHandler := http.FileServer(http.Dir("./static"))
+
+	http.Handle(
+		"/",
+		staticHandler,
+	)
+
+	http.Handle("/ui/playground", handler.Playground("GraphQL playground", "/graphql"))
 	http.Handle(
 		"/graphql",
 		withCors(

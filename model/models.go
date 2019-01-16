@@ -85,10 +85,10 @@ func (asset Asset) Extension() string {
 }
 
 type AuditFields struct {
-	CreatedAt     string `dbGen:"column:CreatedAt" db:"CreatedAt"`
 	CreatedBy     string `dbGen:"column:CreatedBy" db:"CreatedBy"`
-	LastUpdatedAt string `dbGen:"column:LastUpdatedAt" db:"LastUpdatedAt"`
 	LastUpdatedBy string `dbGen:"column:LastUpdatedBy" db:"LastUpdatedBy"`
+	CreatedAt     string `dbGen:"column:CreatedAt" db:"CreatedAt"`
+	LastUpdatedAt string `dbGen:"column:LastUpdatedAt" db:"LastUpdatedAt"`
 }
 
 type Group struct {
