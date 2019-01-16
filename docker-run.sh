@@ -1,2 +1,0 @@
-docker run -d -v /root/elizabethdelrosario.com/data:/app/data -e 'LETSENCRYPT_HOST=admin.elizabethdelrosario.com' -e 'LETSENCRYPT_EMAIL=desmondclee@gmail.com' -e VIRTUAL_HOST=admin.elizabethdelrosario.com -e ASPNETCORE_ENVIRONMENT=Production -e 'ASPNETCORE_AppSettings__Secret=too_short' -e ASPNETCORE_URLS=http://0.0.0.0:80 -p 80 --name admin.elizabethdelrosario.com deslee/content.graphql
-docker run -d -v /root/elizabethdelrosario.com/data:/app/data -e ASPNETCORE_ENVIRONMENT=Production --name elizabethdelrosario-asset deslee/content.asset.job.runner
