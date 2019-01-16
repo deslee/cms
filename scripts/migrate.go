@@ -1,13 +1,13 @@
 package main
 
 import (
-	"database/sql"
 	"github.com/deslee/cms/data"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/jmoiron/sqlx"
 )
 
 func main() {
-	db, err := sql.Open("sqlite3", "database.sqlite?_loc=auto")
+	db, err := sqlx.Open("sqlite3", "./db/database.sqlite?_loc=auto")
 	if err != nil {
 		panic(err)
 	}

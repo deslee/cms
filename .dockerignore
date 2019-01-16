@@ -4,3 +4,6 @@ database.db
 *.sqlite
 .idea/
 *.exe
+db/database.sqlite
+Dockerfile
+.dockerignore

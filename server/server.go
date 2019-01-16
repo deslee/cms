@@ -31,7 +31,7 @@ func main() {
 	}
 
 	var err error
-	db, err = sqlx.Open("sqlite3", "database.sqlite?_loc=auto")
+	db, err = sqlx.Open("sqlite3", "./db/database.sqlite?_loc=auto")
 	if err != nil {
 		panic(err)
 	}
