@@ -3,17 +3,27 @@ image: docker:stable
 services:
   - docker:dind
 
+variables:
+  CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+
 stages:
   - build
   - publish
 
 before_script:
-  - docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
+  - docker info
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
 
 build:
   stage: build
-  script: docker build --target admin-http --tag deslee/cms-admin-http:$CI_COMMIT_REF_SLUG .
+  script:
+    - docker pull $CONTAINER_IMAGE:latest || true
+    - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE:latest --target admin-http  .
 
 publish:
   stage: publish
-  script: docker publish deslee/cms-admin-http:$CI_COMMIT_REF_SLUG
+  script:
+    - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
+    - docker push $CONTAINER_IMAGE:latest
