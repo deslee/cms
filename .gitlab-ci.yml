@@ -1,0 +1,11 @@
+stages:
+  - build
+  - publish
+
+build:
+  stage: build
+  script: docker build --target admin-http --tag deslee/cms-admin-http:$CI_COMMIT_REF_SLUG .
+
+publish:
+  stage: publish
+  script: docker publish deslee/cms-admin-http:$CI_COMMIT_REF_SLUG
