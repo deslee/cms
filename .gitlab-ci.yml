@@ -28,11 +28,8 @@ deploy_stage_job:
   image: ubuntu
   stage: deploy_stage
   script:
-    # install ssh-agent
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    # run ssh-agent
     - eval $(ssh-agent -s)
-    # add keys
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
