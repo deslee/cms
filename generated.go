@@ -73,6 +73,7 @@ type ComplexityRoot struct {
 		Id            func(childComplexity int) int
 		Data          func(childComplexity int) int
 		Groups        func(childComplexity int) int
+		Type          func(childComplexity int) int
 		CreatedAt     func(childComplexity int) int
 		CreatedBy     func(childComplexity int) int
 		LastUpdatedAt func(childComplexity int) int
@@ -572,6 +573,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Item.Groups(childComplexity), true
+
+	case "Item.type":
+		if e.complexity.Item.Type == nil {
+			break
+		}
+
+		return e.complexity.Item.Type(childComplexity), true
 
 	case "Item.createdAt":
 		if e.complexity.Item.CreatedAt == nil {
@@ -1637,6 +1645,11 @@ func (ec *executionContext) _Item(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				wg.Done()
 			}(i, field)
+		case "type":
+			out.Values[i] = ec._Item_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "createdAt":
 			out.Values[i] = ec._Item_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -1780,6 +1793,33 @@ func (ec *executionContext) _Item_groups(ctx context.Context, field graphql.Coll
 	}
 	wg.Wait()
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Item_type(ctx context.Context, field graphql.CollectedField, obj *model.Item) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Item",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -5503,6 +5543,7 @@ type Item  {
     id: ID!
     data: StringifiedJsonObject!
     groups: [Group!]!
+    type: String!
     createdAt: String!
     createdBy: String!
     lastUpdatedAt: String!

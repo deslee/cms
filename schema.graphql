@@ -35,6 +35,7 @@ type Item  {
     id: ID!
     data: StringifiedJsonObject!
     groups: [Group!]!
+    type: String!
     createdAt: String!
     createdBy: String!
     lastUpdatedAt: String!
