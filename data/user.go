@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const SigningKey = "abcdefgjasiojdaoidjabcdefgjasiojdaoidjabcdefsgjasiojdaoidj" // TODO: configure!!
+var SigningKey string
 const UnauthenticatedMsg = "Not Authenticated"
 
 type UserContextKey string

@@ -24,11 +24,15 @@ const defaultPort = "3000"
 var db *sqlx.DB
 
 func main() {
-
 	port := os.Getenv("PORT")
+	signingKey := os.Getenv("SIGNING_KEY")
 	if port == "" {
 		port = defaultPort
 	}
+	if signingKey == "" {
+		panic("SIGNING_KEY unset!")
+	}
+	data.SigningKey = signingKey
 
 	var err error
 	db, err = sqlx.Open("sqlite3", "./db/database.sqlite?_loc=auto")
