@@ -14,7 +14,6 @@ build_go:
   stage: build
   script:
     - docker info
-    - # login to container registry
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - docker pull CONTAINER_IMAGE_BASE/http:latest || true
     - docker build --cache-from CONTAINER_IMAGE_BASE/http:latest --tag CONTAINER_IMAGE_BASE/http:$CI_COMMIT_SHA --tag CONTAINER_IMAGE_BASE/http:latest --target admin-http  .
