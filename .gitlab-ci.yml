@@ -24,9 +24,10 @@ build_go:
     - docker push $CONTAINER_IMAGE_BASE/jobs:latest
 
 deploy_stage_job:
-  image: deslee/ubuntu-with-ssh
+  image: deslee/ubuntu-with-ssh:latest
   stage: deploy_stage
   script:
+    - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
