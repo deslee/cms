@@ -33,11 +33,11 @@ deploy_stage_job:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker stop stage.cms.le3.io-http
-    - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker rm stage.cms.le3.io-http
+    - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker stop stage.cms.le3.io-http || true
+    - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker rm stage.cms.le3.io-http || true
     - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker run --name stage.cms.le3.io-http -e 'LETSENCRYPT_HOST=stage.cms.le3.io' -e 'VIRTUAL_HOST=stage.cms.le3.io' -e 'PORT=80' $CONTAINER_IMAGE_BASE/http:$CI_COMMIT_SHA
-    - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker stop stage.cms.le3.io-jobs
-    - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker rm stage.cms.le3.io-jobs
+    - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker stop stage.cms.le3.io-jobs || true
+    - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker rm stage.cms.le3.io-jobs || true
     - ssh -o StrictHostKeyChecking=no root@$SERVER_HOST sudo docker run --name stage.cms.le3.io-jobs $CONTAINER_IMAGE_BASE/jobs:$CI_COMMIT_SHA
 
 deploy_prod_job:
