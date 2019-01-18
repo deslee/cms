@@ -1,24 +1,53 @@
-image: docker:stable
-
-services:
-  - docker:dind
-
 variables:
-  CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+  CONTAINER_IMAGE_BASE: registry.gitlab.com/$CI_PROJECT_PATH
   DOCKER_HOST: tcp://docker:2375
 
 stages:
   - build
-  - publish
+  - deploy_stage
+  - deploy_prod
 
-before_script:
-  - docker info
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-
-build:
+build_go:
+  image: docker:stable
+  services:
+    - docker:dind
   stage: build
   script:
-    - docker pull $CONTAINER_IMAGE:latest || true
-    - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE:latest --target admin-http  .
-    - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
-    - docker push $CONTAINER_IMAGE:latest
+    - docker info
+    - # login to container registry
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - docker pull CONTAINER_IMAGE_BASE/http:latest || true
+    - docker build --cache-from CONTAINER_IMAGE_BASE/http:latest --tag CONTAINER_IMAGE_BASE/http:$CI_COMMIT_SHA --tag CONTAINER_IMAGE_BASE/http:latest --target admin-http  .
+    - docker build --cache-from CONTAINER_IMAGE_BASE/jobs:latest --tag CONTAINER_IMAGE_BASE/jobs:$CI_COMMIT_SHA --tag CONTAINER_IMAGE_BASE/jobs:latest --target admin-jobs  .
+    - docker push $CONTAINER_IMAGE/http:$CI_COMMIT_SHA
+    - docker push $CONTAINER_IMAGE/http:latest
+    - docker push $CONTAINER_IMAGE/jobs:$CI_COMMIT_SHA
+    - docker push $CONTAINER_IMAGE/jobs:latest
+
+deploy_stage_job:
+  image: ubuntu
+  stage: deploy_stage
+  script:
+    # install ssh-agent
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    # run ssh-agent
+    - eval $(ssh-agent -s)
+    # add keys
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh root@$SERVER_HOST sudo docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - ssh root@$SERVER_HOST sudo docker stop stage.cms.le3.io-http
+    - ssh root@$SERVER_HOST sudo docker rm stage.cms.le3.io-http
+    - ssh root@$SERVER_HOST sudo docker run --name stage.cms.le3.io-http -e 'LETSENCRYPT_HOST=stage.cms.le3.io' -e 'VIRTUAL_HOST=stage.cms.le3.io' -e 'PORT=80' $CONTAINER_IMAGE/http:$CI_COMMIT_SHA
+    - ssh root@$SERVER_HOST sudo docker stop stage.cms.le3.io-jobs
+    - ssh root@$SERVER_HOST sudo docker rm stage.cms.le3.io-jobs
+    - ssh root@$SERVER_HOST sudo docker run --name stage.cms.le3.io-jobs $CONTAINER_IMAGE/jobs:$CI_COMMIT_SHA
+
+deploy_prod_job:
+  image: ubuntu
+  stage: deploy_prod
+  script:
+    - ssh root@$SERVER_HOST sudo docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - ssh root@$SERVER_HOST sudo docker stop
+  when: manual
