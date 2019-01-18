@@ -4,15 +4,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func die(err error) {
+func GenerateId() string {
+	newUuid, err := uuid.NewRandom()
 	if err != nil {
 		panic(err)
 	}
-}
-
-func GenerateId() string {
-	newUuid, err := uuid.NewRandom()
-	die(err)
 
 	return newUuid.String()
 }

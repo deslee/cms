@@ -12,6 +12,7 @@ import (
 )
 
 var SigningKey string
+
 const UnauthenticatedMsg = "Not Authenticated"
 
 type UserContextKey string
@@ -159,7 +160,10 @@ func Login(ctx context.Context, db *sqlx.DB, login LoginInput) (LoginResult, err
 	}
 
 	// generate a token and respond
-	token := generateToken(*user)
+	token, err := generateToken(*user)
+	if err != nil {
+		return UnexpectedErrorLoginResult(err), nil
+	}
 
 	return LoginResult{
 		GenericResult: GenericSuccess(),
@@ -199,7 +203,7 @@ func ParseTokenToContext(ctx context.Context, tokenString string) (context.Conte
 /**
 Creates a JWT given a user
 */
-func generateToken(user User) string {
+func generateToken(user User) (string, error) {
 	const hoursExpire = 7 * 24
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
 		"exp": time.Hour * hoursExpire, // expires at
@@ -207,9 +211,7 @@ func generateToken(user User) string {
 		"iat": time.Now().Unix(),       // issued at
 	})
 
-	tokenString, err := token.SignedString([]byte(SigningKey))
-	die(err)
-	return tokenString
+	return token.SignedString([]byte(SigningKey))
 }
 
 /**

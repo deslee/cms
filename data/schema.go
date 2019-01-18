@@ -14,7 +14,9 @@ func CreateTablesAndIndicesIfNotExist(db *sqlx.DB) {
 
 	// begin the transaction
 	tx, err := db.BeginTx(ctx, nil)
-	die(err)
+	if err != nil {
+		panic(err)
+	}
 	defer tx.Rollback()
 	executeSql(tx, `
 		CREATE TABLE IF NOT EXISTS "Users" (
@@ -143,16 +145,22 @@ func CreateTablesAndIndicesIfNotExist(db *sqlx.DB) {
 
 	// commit the transaction
 	err = tx.Commit()
-	die(err)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func executeSql(tx *sql.Tx, sql string, args ...interface{}) {
 	// prepare a statement
 	stmt, err := tx.Prepare(sql)
-	die(err)
+	if err != nil {
+		panic(err)
+	}
 	defer stmt.Close()
 
 	// execute statement
 	_, err = stmt.Exec(args...)
-	die(err)
+	if err != nil {
+		panic(err)
+	}
 }
