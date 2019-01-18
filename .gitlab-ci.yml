@@ -24,7 +24,7 @@ build_go:
     - docker push $CONTAINER_IMAGE_BASE/jobs:latest
 
 deploy_stage_job:
-  image: ubuntu
+  image: deslee/ubuntu-with-ssh
   stage: deploy_stage
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
