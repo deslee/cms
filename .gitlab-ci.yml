@@ -15,13 +15,13 @@ build_go:
   script:
     - docker info
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    - docker pull CONTAINER_IMAGE_BASE/http:latest || true
-    - docker build --cache-from CONTAINER_IMAGE_BASE/http:latest --tag CONTAINER_IMAGE_BASE/http:$CI_COMMIT_SHA --tag CONTAINER_IMAGE_BASE/http:latest --target admin-http  .
-    - docker build --cache-from CONTAINER_IMAGE_BASE/jobs:latest --tag CONTAINER_IMAGE_BASE/jobs:$CI_COMMIT_SHA --tag CONTAINER_IMAGE_BASE/jobs:latest --target admin-jobs  .
-    - docker push $CONTAINER_IMAGE/http:$CI_COMMIT_SHA
-    - docker push $CONTAINER_IMAGE/http:latest
-    - docker push $CONTAINER_IMAGE/jobs:$CI_COMMIT_SHA
-    - docker push $CONTAINER_IMAGE/jobs:latest
+    - docker pull $CONTAINER_IMAGE_BASE/http:latest || true
+    - docker build --cache-from $CONTAINER_IMAGE_BASE/http:latest --tag $CONTAINER_IMAGE_BASE/http:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE_BASE/http:latest --target admin-http  .
+    - docker build --cache-from $CONTAINER_IMAGE_BASE/jobs:latest --tag $CONTAINER_IMAGE_BASE/jobs:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE_BASE/jobs:latest --target admin-jobs  .
+    - docker push $CONTAINER_IMAGE_BASE/http:$CI_COMMIT_SHA
+    - docker push $CONTAINER_IMAGE_BASE/http:latest
+    - docker push $CONTAINER_IMAGE_BASE/jobs:$CI_COMMIT_SHA
+    - docker push $CONTAINER_IMAGE_BASE/jobs:latest
 
 deploy_stage_job:
   image: ubuntu
@@ -35,10 +35,10 @@ deploy_stage_job:
     - ssh root@$SERVER_HOST sudo docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - ssh root@$SERVER_HOST sudo docker stop stage.cms.le3.io-http
     - ssh root@$SERVER_HOST sudo docker rm stage.cms.le3.io-http
-    - ssh root@$SERVER_HOST sudo docker run --name stage.cms.le3.io-http -e 'LETSENCRYPT_HOST=stage.cms.le3.io' -e 'VIRTUAL_HOST=stage.cms.le3.io' -e 'PORT=80' $CONTAINER_IMAGE/http:$CI_COMMIT_SHA
+    - ssh root@$SERVER_HOST sudo docker run --name stage.cms.le3.io-http -e 'LETSENCRYPT_HOST=stage.cms.le3.io' -e 'VIRTUAL_HOST=stage.cms.le3.io' -e 'PORT=80' $CONTAINER_IMAGE_BASE/http:$CI_COMMIT_SHA
     - ssh root@$SERVER_HOST sudo docker stop stage.cms.le3.io-jobs
     - ssh root@$SERVER_HOST sudo docker rm stage.cms.le3.io-jobs
-    - ssh root@$SERVER_HOST sudo docker run --name stage.cms.le3.io-jobs $CONTAINER_IMAGE/jobs:$CI_COMMIT_SHA
+    - ssh root@$SERVER_HOST sudo docker run --name stage.cms.le3.io-jobs $CONTAINER_IMAGE_BASE/jobs:$CI_COMMIT_SHA
 
 deploy_prod_job:
   image: ubuntu
